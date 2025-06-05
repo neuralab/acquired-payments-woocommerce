@@ -1,0 +1,77 @@
+name: Deploy Plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: environment
+
+concurrency:
+  group: deployment-${{ inputs.environment }}
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          cat > ~/.ssh/wordpress_rsa <<EOF
+          ${{ secrets.SSH_KEY }}
+          EOF
+          chmod 600 ~/.ssh/wordpress_rsa
+
+          cat >>~/.ssh/config <<EOF
+          Host wordpress
+            HostName ${{ vars.SSH_HOST }}
+            User ${{ vars.SSH_USER }}
+            IdentityFile ~/.ssh/wordpress_rsa
+          EOF
+          chmod 600 ~/.ssh/config
+
+          ssh-keyscan -t rsa ${{ vars.SSH_HOST }} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Create Deploy Destination Path
+        id: create_deploy_dest
+        run: |
+          temp_deploy_dest="tmp/deploy-${{ github.run_id }}-${{ github.run_attempt }}"
+          echo "TEMP_DEPLOY_DEST=$temp_deploy_dest" >> $GITHUB_ENV
+
+      - name: Create Remote Destination
+        id: create_remote_dest
+        run: |
+            ssh wordpress 'mkdir -p ~/${{ env.TEMP_DEPLOY_DEST }}'
+
+      - name: Copy Files
+        run: scp -r ./* wordpress:~/${{ env.TEMP_DEPLOY_DEST }}
+
+      - name: Install Dependencies
+        run: ssh wordpress 'cd ~/${{ env.TEMP_DEPLOY_DEST }} && composer install --no-dev'
+
+      - name: Enable Maintenance Mode
+        run: ssh wordpress 'cd public_html && /usr/local/bin/wp maintenance-mode activate'
+
+      - name: Deploy Plugin
+        run: |
+          ssh -T wordpress <<EOF
+          cd public_html
+          mkdir -p wp-content/plugins/acquired-com-for-woocommerce
+          rm -rf wp-content/plugins/acquired-com-for-woocommerce/*
+          rm -rf ~/${{ env.TEMP_DEPLOY_DEST }}/.github
+          cp -rf ~/${{ env.TEMP_DEPLOY_DEST }}/* wp-content/plugins/acquired-com-for-woocommerce/
+          rm -rf ~/${{ env.TEMP_DEPLOY_DEST }}
+          EOF
+
+      - name: Disable Maintenance Mode
+        run: ssh wordpress 'cd public_html && /usr/local/bin/wp maintenance-mode deactivate'

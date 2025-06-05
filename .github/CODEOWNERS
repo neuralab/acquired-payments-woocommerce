@@ -1,0 +1,5 @@
+# Default codeowner is the Acquired.com tech team
+* @acquiredcom/tech
+
+# Tech Admins are required to approve changes to CODEOWNERS
+/.github/CODEOWNERS @acquiredcom/tech-admins
