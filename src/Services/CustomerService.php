@@ -80,13 +80,9 @@ class CustomerService {
 	 *     postcode: string,
 	 *     country_code: string,
 	 *     state?: string
-	 * }|null
+	 * }
 	 */
-	private function format_address_data( array $address_data ) : ?array {
-		if ( empty( $address_data ) ) {
-			return null;
-		}
-
+	private function format_address_data( array $address_data ) : array {
 		$formatted_address = [
 			'line_1'       => $address_data['address_1'] ?? '',
 			'line_2'       => $address_data['address_2'] ?? '',
@@ -99,7 +95,7 @@ class CustomerService {
 			$formatted_address['state'] = strtolower( $address_data['state'] );
 		}
 
-		return $formatted_address ?: null;
+		return $formatted_address;
 	}
 
 	/**
@@ -167,13 +163,9 @@ class CustomerService {
 
 		$billing_address = $this->format_address_data( $billing_address );
 
-		if ( $billing_address ) {
-			$customer_data['billing']['address'] = $billing_address;
-			if ( $add_email_to_address ) {
-				$customer_data['billing']['email'] = $customer_data['email'];
-			}
-		} else {
-			throw new Exception( 'Customer billing address is not valid.' );
+		$customer_data['billing']['address'] = $billing_address;
+		if ( $add_email_to_address ) {
+			$customer_data['billing']['email'] = $customer_data['email'];
 		}
 
 		$customer_data['shipping']['address_match'] = true;
@@ -181,13 +173,11 @@ class CustomerService {
 		if ( $shipping_address ) {
 			$shipping_address = $this->format_address_data( $shipping_address );
 
-			if ( $shipping_address ) {
-				if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
-					$customer_data['shipping']['address']       = $shipping_address;
-					$customer_data['shipping']['address_match'] = false;
-					if ( $add_email_to_address ) {
-						$customer_data['shipping']['email'] = $customer_data['email'];
-					}
+			if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
+				$customer_data['shipping']['address']       = $shipping_address;
+				$customer_data['shipping']['address_match'] = false;
+				if ( $add_email_to_address ) {
+					$customer_data['shipping']['email'] = $customer_data['email'];
 				}
 			}
 		}
