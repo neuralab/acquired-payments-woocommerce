@@ -227,21 +227,11 @@ class CustomerService {
 	 * @throws Exception
 	 */
 	private function get_customer_address_data( WC_Customer $customer ) : array {
-		$billing_address    = $customer->get_billing();
-		$basic_address_data = $this->format_basic_address_data( $billing_address );
-
-		if ( $basic_address_data ) {
-			return $this->get_address_data_formatted(
-				$billing_address,
-				$customer->has_shipping_address() ? $customer->get_shipping() : [],
-				true
-			);
-		} else {
-			$customer_data['billing']['email']          = $customer->get_email();
-			$customer_data['shipping']['address_match'] = true;
-
-			return $customer_data;
-		}
+		return $this->get_address_data_formatted(
+			$customer->get_billing(),
+			$customer->has_shipping_address() ? $customer->get_shipping() : [],
+			true
+		);
 	}
 
 	/**
@@ -382,11 +372,10 @@ class CustomerService {
 	public function update_customer_in_my_account( WC_Customer $customer ) : void {
 		try {
 			$customer_data = $this->get_customer_address_data( $customer );
+			$this->update_customer( $customer, $customer_data );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Updating customer data in my account failed. User ID: %s. Error: "%s".', $customer->get_id(), $exception->getMessage() ), 'error' );
 		}
-
-		$this->update_customer( $customer, $customer_data );
 	}
 
 	/**
