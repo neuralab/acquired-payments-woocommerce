@@ -328,7 +328,7 @@ class CustomerService {
 			$customer      = $this->create_customer_instance( $order->get_user_id() );
 			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: %s.', $order->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );
@@ -355,7 +355,7 @@ class CustomerService {
 			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
 			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout successful. Order ID: %s.', $order->get_id() ), 'debug' );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout failed. Order ID: %s. Error: %s', $order->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
 		}
 
 		return $customer_data;
@@ -391,7 +391,7 @@ class CustomerService {
 		try {
 			$customer_data = $this->get_customer_address_data( $customer );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Updating customer data in my account failed. User ID: %s. Error: %s.', $customer->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Updating customer data in my account failed. User ID: %s. Error: "%s".', $customer->get_id(), $exception->getMessage() ), 'error' );
 		}
 
 		$this->update_customer( $customer, $customer_data );
@@ -408,7 +408,7 @@ class CustomerService {
 			$customer      = $this->create_customer_instance( $user_id );
 			$customer_data = $this->get_customer_address_data( $customer );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: %s.', $user_id, $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: "%s".', $user_id, $exception->getMessage() ), 'error' );
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );
