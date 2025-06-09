@@ -248,14 +248,15 @@ class CustomerService {
 	 * Get customer address data from WC_Order.
 	 *
 	 * @param WC_Order $order
+	 * @param null|bool $include_email
 	 * @return array
 	 * @throws Exception
 	 */
-	private function get_customer_address_data_from_wc_order( WC_Order $order ) : array {
+	private function get_customer_address_data_from_wc_order( WC_Order $order, null|bool $include_email = null ) : array {
 		return $this->get_address_data_formatted(
 			$order->get_address( 'billing' ),
 			$order->has_shipping_address() ? $order->get_address( 'shipping' ) : [],
-			(bool) $order->get_user_id()
+			$include_email ?? (bool) $order->get_user_id()
 		);
 	}
 
@@ -343,7 +344,7 @@ class CustomerService {
 		$customer_data = [];
 
 		try {
-			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
+			$customer_data = $this->get_customer_address_data_from_wc_order( $order, false );
 			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout successful. Order ID: %s.', $order->get_id() ), 'debug' );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
