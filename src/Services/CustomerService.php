@@ -319,6 +319,7 @@ class CustomerService {
 			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
+			return null;
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );
@@ -399,6 +400,7 @@ class CustomerService {
 			$customer_data = $this->get_customer_address_data( $customer );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: "%s".', $user_id, $exception->getMessage() ), 'error' );
+			return null;
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );
