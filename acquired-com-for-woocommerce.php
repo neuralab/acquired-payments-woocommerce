@@ -9,8 +9,8 @@
  * Text Domain: acquired-com-for-woocommerce
  * Domain Path: /languages
  *
- * License:     GNU General Public License v3.0
- * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ * License:     MIT License
+ * License URI: https://opensource.org/license/mit
  *
  * Requires at least: 6.5
  * Requires PHP:      8.1
