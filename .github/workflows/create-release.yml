@@ -1,0 +1,59 @@
+name: Create release
+
+on:
+  release:
+    types:
+      - published
+      - prereleased
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.15.0'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          composer install --no-dev --optimize-autoloader
+
+      - name: Build assets
+        run: npx mix --production
+
+      - name: Create ZIP
+        run: |
+          zip -r acquired-com-for-woocommerce.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "node_modules/*" \
+            -x "tests/*" \
+            -x ".editorconfig" \
+            -x ".eslintrc.json" \
+            -x ".gitattributes" \
+            -x ".gitignore" \
+            -x "CHANGELOG.md" \
+            -x "composer.json" \
+            -x "composer.lock" \
+            -x "package.json" \
+            -x "package-lock.json" \
+            -x "patchwork.json" \
+            -x "phpcs.xml" \
+            -x "phpunit.xml" \
+            -x "README.md" \
+            -x "webpack.mix.js"
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: acquired-com-for-woocommerce.zip

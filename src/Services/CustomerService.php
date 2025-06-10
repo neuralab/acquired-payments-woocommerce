@@ -80,13 +80,9 @@ class CustomerService {
 	 *     postcode: string,
 	 *     country_code: string,
 	 *     state?: string
-	 * }|null
+	 * }
 	 */
-	private function format_address_data( array $address_data ) : ?array {
-		if ( empty( $address_data ) ) {
-			return null;
-		}
-
+	private function format_address_data( array $address_data ) : array {
 		$formatted_address = [
 			'line_1'       => $address_data['address_1'] ?? '',
 			'line_2'       => $address_data['address_2'] ?? '',
@@ -99,7 +95,7 @@ class CustomerService {
 			$formatted_address['state'] = strtolower( $address_data['state'] );
 		}
 
-		return $formatted_address ?: null;
+		return $formatted_address;
 	}
 
 	/**
@@ -167,13 +163,9 @@ class CustomerService {
 
 		$billing_address = $this->format_address_data( $billing_address );
 
-		if ( $billing_address ) {
-			$customer_data['billing']['address'] = $billing_address;
-			if ( $add_email_to_address ) {
-				$customer_data['billing']['email'] = $customer_data['email'];
-			}
-		} else {
-			throw new Exception( 'Customer billing address is not valid.' );
+		$customer_data['billing']['address'] = $billing_address;
+		if ( $add_email_to_address ) {
+			$customer_data['billing']['email'] = $customer_data['email'];
 		}
 
 		$customer_data['shipping']['address_match'] = true;
@@ -181,13 +173,11 @@ class CustomerService {
 		if ( $shipping_address ) {
 			$shipping_address = $this->format_address_data( $shipping_address );
 
-			if ( $shipping_address ) {
-				if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
-					$customer_data['shipping']['address']       = $shipping_address;
-					$customer_data['shipping']['address_match'] = false;
-					if ( $add_email_to_address ) {
-						$customer_data['shipping']['email'] = $customer_data['email'];
-					}
+			if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
+				$customer_data['shipping']['address']       = $shipping_address;
+				$customer_data['shipping']['address_match'] = false;
+				if ( $add_email_to_address ) {
+					$customer_data['shipping']['email'] = $customer_data['email'];
 				}
 			}
 		}
@@ -237,35 +227,26 @@ class CustomerService {
 	 * @throws Exception
 	 */
 	private function get_customer_address_data( WC_Customer $customer ) : array {
-		$billing_address    = $customer->get_billing();
-		$basic_address_data = $this->format_basic_address_data( $billing_address );
-
-		if ( $basic_address_data ) {
-			return $this->get_address_data_formatted(
-				$billing_address,
-				$customer->has_shipping_address() ? $customer->get_shipping() : [],
-				true
-			);
-		} else {
-			$customer_data['billing']['email']          = $customer->get_email();
-			$customer_data['shipping']['address_match'] = true;
-
-			return $customer_data;
-		}
+		return $this->get_address_data_formatted(
+			$customer->get_billing(),
+			$customer->has_shipping_address() ? $customer->get_shipping() : [],
+			true
+		);
 	}
 
 	/**
 	 * Get customer address data from WC_Order.
 	 *
 	 * @param WC_Order $order
+	 * @param null|bool $include_email
 	 * @return array
 	 * @throws Exception
 	 */
-	private function get_customer_address_data_from_wc_order( WC_Order $order ) : array {
+	private function get_customer_address_data_from_wc_order( WC_Order $order, null|bool $include_email = null ) : array {
 		return $this->get_address_data_formatted(
 			$order->get_address( 'billing' ),
 			$order->has_shipping_address() ? $order->get_address( 'shipping' ) : [],
-			(bool) $order->get_user_id()
+			$include_email ?? (bool) $order->get_user_id()
 		);
 	}
 
@@ -328,7 +309,8 @@ class CustomerService {
 			$customer      = $this->create_customer_instance( $order->get_user_id() );
 			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: %s.', $order->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
+			return null;
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );
@@ -352,10 +334,10 @@ class CustomerService {
 		$customer_data = [];
 
 		try {
-			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
+			$customer_data = $this->get_customer_address_data_from_wc_order( $order, false );
 			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout successful. Order ID: %s.', $order->get_id() ), 'debug' );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout failed. Order ID: %s. Error: %s', $order->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Creating customer data for guest checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
 		}
 
 		return $customer_data;
@@ -390,11 +372,10 @@ class CustomerService {
 	public function update_customer_in_my_account( WC_Customer $customer ) : void {
 		try {
 			$customer_data = $this->get_customer_address_data( $customer );
+			$this->update_customer( $customer, $customer_data );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Updating customer data in my account failed. User ID: %s. Error: %s.', $customer->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Updating customer data in my account failed. User ID: %s. Error: "%s".', $customer->get_id(), $exception->getMessage() ), 'error' );
 		}
-
-		$this->update_customer( $customer, $customer_data );
 	}
 
 	/**
@@ -408,7 +389,8 @@ class CustomerService {
 			$customer      = $this->create_customer_instance( $user_id );
 			$customer_data = $this->get_customer_address_data( $customer );
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: %s.', $user_id, $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: "%s".', $user_id, $exception->getMessage() ), 'error' );
+			return null;
 		}
 
 		$customer_id = $customer->get_meta( '_acfw_customer_id' );

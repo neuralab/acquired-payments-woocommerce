@@ -14,13 +14,20 @@
       "AcquiredComForWooCommerce\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "AcquiredComForWooCommerce\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": "^8.1",
     "php-di/php-di": "^7.0",
     "guzzlehttp/guzzle": "^7.9"
   },
   "require-dev": {
-    "neuralab/coding-standards": "^1.0"
+    "neuralab/coding-standards": "^1.0",
+    "brain/monkey": "2.*",
+    "phpunit/phpunit": "^10.5"
   },
   "config": {
     "optimize-autoloader": true,
@@ -30,6 +37,15 @@
   },
   "scripts": {
     "lint": "php ./vendor/bin/phpcs . --report=source",
+    "test": "php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
+    "test-coverage": [
+      "@putenv XDEBUG_MODE=coverage",
+      "php ./vendor/bin/phpunit --coverage-text"
+    ],
+    "test-coverage-report": [
+      "@putenv XDEBUG_MODE=coverage",
+      "php ./vendor/bin/phpunit --coverage-html coverage-report"
+    ],
     "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce"
   }
 }

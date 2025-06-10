@@ -522,7 +522,7 @@ class OrderService {
 			$this->process_order( $data );
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
-			$this->logger_service->log( sprintf( 'Error processing order from scheduled webhook data. Error: %s', $error ), 'error', $data->get_log_data() );
+			$this->logger_service->log( sprintf( 'Error processing order from scheduled webhook data. Error: "%s".', $error ), 'error', $data->get_log_data() );
 			throw new Exception( $error );
 		}
 	}
