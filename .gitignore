@@ -19,3 +19,8 @@ node_modules/
 # `act` local development tool
 .secrets
 .vars
+
+# Testing
+.phpunit.result.cache
+.phpunit.cache
+coverage-report/
