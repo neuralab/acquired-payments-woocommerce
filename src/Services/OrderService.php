@@ -760,6 +760,11 @@ class OrderService {
 				break;
 		}
 
+		if ( $error ) {
+			$this->logger_service->log( sprintf( 'Payment refund failed. Order ID: %s. %s', $order->get_id(), $log_error ), 'debug' );
+			throw new Exception( $error );
+		}
+
 		if ( $amount < floatval( $order->get_total() ) ) {
 			$date = 'authorised' === $order->get_meta( '_acfw_order_state' ) ? $order->get_meta( '_acfw_order_time_updated' ) : $order->get_meta( '_acfw_order_time_completed' );
 
@@ -768,11 +773,6 @@ class OrderService {
 
 				throw new Exception( __( 'Partial refunds are only available on the next day.', 'acquired-com-for-woocommerce' ) );
 			}
-		}
-
-		if ( $error ) {
-			$this->logger_service->log( sprintf( 'Payment refund failed. Order ID: %s. %s', $order->get_id(), $log_error ), 'debug' );
-			throw new Exception( $error );
 		}
 
 		return true;
