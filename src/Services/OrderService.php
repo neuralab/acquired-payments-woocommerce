@@ -431,6 +431,7 @@ class OrderService {
 			$order->set_transaction_id( $transaction->get_transaction_id() );
 			$order->update_meta_data( '_acfw_transaction_status', $transaction->get_status() );
 			$order->update_meta_data( '_acfw_order_time_updated', $transaction->get_created_timestamp() );
+			$order->update_meta_data( '_acfw_version', $this->settings_service->config['version'] );
 			$order->save();
 
 			switch ( $order->get_meta( '_acfw_transaction_status' ) ) {
