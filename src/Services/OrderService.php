@@ -764,6 +764,8 @@ class OrderService {
 			$date = 'authorised' === $order->get_meta( '_acfw_order_state' ) ? $order->get_meta( '_acfw_order_time_updated' ) : $order->get_meta( '_acfw_order_time_completed' );
 
 			if ( ! $this->is_day_older( (int) $date ) ) {
+				$this->logger_service->log( sprintf( 'Payment refund failed. Partial refunds are only available on the next day. Order ID: %s.', $order->get_id() ), 'debug' );
+
 				throw new Exception( __( 'Partial refunds are only available on the next day.', 'acquired-com-for-woocommerce' ) );
 			}
 		}
