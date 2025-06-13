@@ -14,13 +14,20 @@
   <!-- Disable class name rule so we can use PSR 4 auto loading.-->
   <rule ref="WordPress.Files.FileName.InvalidClassFileName">
     <exclude-pattern>src/*</exclude-pattern>
+    <exclude-pattern>tests/*</exclude-pattern>
   </rule>
 
   <!-- Disable file name rule so we can use PSR 4 auto loading.-->
   <rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
     <exclude-pattern>src/*</exclude-pattern>
+    <exclude-pattern>tests/*</exclude-pattern>
   </rule>
 
   <!-- Enable Yoda conditions rule. -->
   <rule ref="WordPress.PHP.YodaConditions" />
+
+  <!-- Allow json_encode in tests since WordPress functions aren't available. -->
+  <rule ref="WordPress.WP.AlternativeFunctions.json_encode_json_encode">
+    <exclude-pattern>/tests/*</exclude-pattern>
+  </rule>
 </ruleset>

@@ -1,0 +1,88 @@
+name: Lint and test
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  pull_request:
+    branches:
+      - main
+      - staging
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for dependency changes
+        uses: dorny/paths-filter@v2
+        id: dependency-changes
+        with:
+          filters: |
+            node-js:
+              - 'package-lock.json'
+            php:
+              - 'composer.lock'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.15.0'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Cache Node.js node_modules directory
+        if: ${{ steps.dependency-changes.outputs.node-js != 'true' }}
+        uses: actions/cache@v4
+        id: cache-node-js-node_modules-dir
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-js-node_modules-dir-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Node.js dependencies
+        if: ${{ steps.dependency-changes.outputs.node-js == 'true' || steps.cache-node-js-node_modules-dir.outputs.cache-hit != 'true' }}
+        run: npm ci
+
+      - name: Cache Composer vendor directory
+        if: ${{ steps.dependency-changes.outputs.php != 'true' }}
+        uses: actions/cache@v4
+        id: cache-composer-vendor-dir
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-vendor-dir-${{ hashFiles('composer.lock') }}
+
+      - name: Get Composer cache directory path
+        if: ${{ steps.dependency-changes.outputs.php == 'true' || steps.cache-composer-vendor-dir.outputs.cache-hit != 'true' }}
+        id: get-composer-cache-dir-path
+        run: |
+          echo "path=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer cache directory
+        if: ${{ steps.dependency-changes.outputs.php == 'true' || steps.cache-composer-vendor-dir.outputs.cache-hit != 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.get-composer-cache-dir-path.outputs.path }}
+          key: ${{ runner.os }}-composer-cache-dir-${{ hashFiles('composer.lock') }}
+
+      - name: Install PHP dependencies
+        if: ${{ steps.dependency-changes.outputs.php == 'true' || steps.cache-composer-vendor-dir.outputs.cache-hit != 'true' }}
+        run: composer install
+
+      - name: Lint JavaScript
+        run: npm run lint:js
+
+      - name: Lint PHP
+        run: composer lint
+
+      - name: Test PHP
+        run: composer test

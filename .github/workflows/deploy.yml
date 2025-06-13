@@ -21,6 +21,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+
+      # Cloudways has permissions issues with `npm install`
+      # So we will build the frontend assets locally, then remove `node_modules`
+      # because we don't need them on the server.
+      - run: npm ci
+      - run: npx mix --production
+      - run: rm -fr node_modules
+
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
@@ -56,7 +65,7 @@ jobs:
       - name: Copy Files
         run: scp -r ./* wordpress:~/${{ env.TEMP_DEPLOY_DEST }}
 
-      - name: Install Dependencies
+      - name: Install Composer Dependencies
         run: ssh wordpress 'cd ~/${{ env.TEMP_DEPLOY_DEST }} && composer install --no-dev'
 
       - name: Enable Maintenance Mode
