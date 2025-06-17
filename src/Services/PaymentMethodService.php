@@ -500,7 +500,7 @@ class PaymentMethodService {
 	}
 
 	/**
-	 * Confirm order.
+	 * Confirm payment method.
 	 *
 	 * @param RedirectData $data
 	 * @return WC_Customer
