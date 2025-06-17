@@ -74,6 +74,7 @@ class CustomerServiceTest extends TestCase {
 				'last_name'  => 'Doe',
 				'email'      => 'john@example.com',
 				'address_1'  => '123 Main St',
+				'address_2'  => '2nd floor',
 				'city'       => 'London',
 				'state'      => '',
 				'postcode'   => '123456',
@@ -111,7 +112,7 @@ class CustomerServiceTest extends TestCase {
 			'billing'    => [
 				'address' => [
 					'line_1'       => '123 Main St',
-					'line_2'       => '',
+					'line_2'       => '2nd floor',
 					'city'         => 'London',
 					'postcode'     => '123456',
 					'country_code' => 'uk',
@@ -121,7 +122,6 @@ class CustomerServiceTest extends TestCase {
 				'address_match' => $address_match,
 				'address'       => [
 					'line_1'       => '456 Other St',
-					'line_2'       => '',
 					'city'         => 'Bristol',
 					'postcode'     => '789123',
 					'country_code' => 'uk',
@@ -254,7 +254,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_format_address_data_with_empty_address_fields() : void {
 		$address_data = [
-			'address_1' => '',
+			'address_1' => '123 Main St',
 			'address_2' => '',
 			'city'      => '',
 			'postcode'  => '',
@@ -263,11 +263,7 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$expected = [
-			'line_1'       => '',
-			'line_2'       => '',
-			'city'         => '',
-			'postcode'     => '',
-			'country_code' => '',
+			'line_1' => '123 Main St',
 		];
 
 		$result = $this->get_private_method_value( 'format_address_data', $address_data );
@@ -1349,6 +1345,10 @@ class CustomerServiceTest extends TestCase {
 			->once()
 			->andReturn( $this->test_user_id );
 
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
+
 		// Mock LoggerService.
 		$this->get_logger_service()->shouldReceive( 'log' )
 			->once()
@@ -1409,6 +1409,10 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'has_shipping_address' )
 			->once()
 			->andReturn( false );
+
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1584,6 +1588,10 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'has_shipping_address' )
 			->once()
 			->andReturn( false );
+
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
