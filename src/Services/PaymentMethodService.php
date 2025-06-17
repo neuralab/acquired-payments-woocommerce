@@ -361,7 +361,7 @@ class PaymentMethodService {
 			$this->save_payment_method_from_customer( $data );
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
-			$this->logger_service->log( sprintf( 'Error saving payment method from scheduled webhook data. %s', $error ), 'error', $data->get_log_data() );
+			$this->logger_service->log( sprintf( 'Error saving payment method from scheduled webhook data. Error: "%s".', $error ), 'error', $data->get_log_data() );
 			throw new Exception( $error );
 		}
 	}
@@ -398,7 +398,7 @@ class PaymentMethodService {
 
 			return $card->get_card_id();
 		} catch ( Exception $exception ) {
-			$this->logger_service->log( sprintf( 'Payment method retrieval for checkout failed. Order ID: %s. %s', $order->get_id(), $exception->getMessage() ), 'error' );
+			$this->logger_service->log( sprintf( 'Payment method retrieval for checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
 			return null;
 		}
 	}
@@ -520,7 +520,7 @@ class PaymentMethodService {
 			return $customer;
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
-			$this->logger_service->log( sprintf( 'Error saving payment method from incoming redirect data. %s', $error ), 'error', $data->get_log_data() );
+			$this->logger_service->log( sprintf( 'Error saving payment method from incoming redirect data. Error: "%s".', $error ), 'error', $data->get_log_data() );
 			throw new Exception( $error );
 		}
 	}
