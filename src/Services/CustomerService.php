@@ -37,8 +37,8 @@ class CustomerService {
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     first_name: string,
-	 *     last_name: string,
+	 *     first_name?: string,
+	 *     last_name?: string,
 	 *     email: string
 	 * }|null
 	 */
@@ -49,10 +49,9 @@ class CustomerService {
 			'email'      => $address_data['email'] ?? '',
 		];
 
-		$required_fields = array_keys( $customer_data );
-		$customer_data   = array_filter( $customer_data );
+		$customer_data = array_filter( $customer_data );
 
-		if ( ! empty( array_diff( $required_fields, array_keys( $customer_data ) ) ) ) {
+		if ( empty( $customer_data['email'] ) ) {
 			return null;
 		} else {
 			return $customer_data;
@@ -64,11 +63,11 @@ class CustomerService {
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     line_1: string,
-	 *     line_2: string,
-	 *     city: string,
-	 *     postcode: string,
-	 *     country_code: string,
+	 *     line_1?: string,
+	 *     line_2?: string,
+	 *     city?: string,
+	 *     postcode?: string,
+	 *     country_code?: string,
 	 *     state?: string
 	 * }
 	 */
@@ -85,7 +84,7 @@ class CustomerService {
 			$formatted_address['state'] = strtolower( $address_data['state'] );
 		}
 
-		return $formatted_address;
+		return array_filter( $formatted_address );
 	}
 
 	/**
@@ -111,28 +110,28 @@ class CustomerService {
 	 * @param array $shipping_address
 	 * @param bool $add_email_to_address
 	 * @return array{
-	 *     first_name: string,
-	 *     last_name: string,
+	 *     first_name?: string,
+	 *     last_name?: string,
 	 *     email: string,
 	 *     billing: array{
-	 *         address: array{
-	 *             line_1: string,
-	 *             line_2: string,
-	 *             city: string,
-	 *             postcode: string,
-	 *             country_code: string,
+	 *         address?: array{
+	 *             line_1?: string,
+	 *             line_2?: string,
+	 *             city?: string,
+	 *             postcode?: string,
+	 *             country_code?: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
 	 *     },
-	 *     shipping: array{
-	 *         address_match: bool,
+	 *     shipping?: array{
+	 *         address_match?: bool,
 	 *         address?: array{
-	 *             line_1: string,
-	 *             line_2: string,
-	 *             city: string,
-	 *             postcode: string,
-	 *             country_code: string,
+	 *             line_1?: string,
+	 *             line_2?: string,
+	 *             city?: string,
+	 *             postcode?: string,
+	 *             country_code?: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
@@ -153,6 +152,15 @@ class CustomerService {
 
 		$billing_address = $this->format_address_data( $billing_address );
 
+		// If we don't have any billing address data just return $customer_data.
+		if ( ! $billing_address ) {
+			if ( $add_email_to_address ) {
+				$customer_data['billing']['email'] = $customer_data['email'];
+			}
+
+			return $customer_data;
+		}
+
 		$customer_data['billing']['address'] = $billing_address;
 		if ( $add_email_to_address ) {
 			$customer_data['billing']['email'] = $customer_data['email'];
@@ -163,7 +171,7 @@ class CustomerService {
 		if ( $shipping_address ) {
 			$shipping_address = $this->format_address_data( $shipping_address );
 
-			if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
+			if ( $shipping_address && ! $this->addresses_match( $billing_address, $shipping_address ) ) {
 				$customer_data['shipping']['address']       = $shipping_address;
 				$customer_data['shipping']['address_match'] = false;
 				if ( $add_email_to_address ) {
@@ -217,9 +225,17 @@ class CustomerService {
 	 * @throws Exception
 	 */
 	private function get_customer_address_data( WC_Customer $customer ) : array {
+		$billing_address  = $customer->get_billing();
+		$shipping_address = $customer->has_shipping_address() ? $customer->get_shipping() : [];
+
+		// In some cases users can register with just their email and not set their billing address. For those cases add the user email to the billing address.
+		if ( empty( $billing_address['email'] ) && $customer->get_email() ) {
+			$billing_address['email'] = $customer->get_email();
+		}
+
 		return $this->get_address_data_formatted(
-			$customer->get_billing(),
-			$customer->has_shipping_address() ? $customer->get_shipping() : [],
+			$billing_address,
+			$shipping_address,
 			true
 		);
 	}
