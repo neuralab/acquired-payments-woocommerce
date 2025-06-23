@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace AcquiredComForWooCommerce\Services;
 
 use AcquiredComForWooCommerce\Api\ApiClient;
+use AcquiredComForWooCommerce\Factories\CustomerFactory;
 use Exception;
 use WC_Customer;
 use WC_Order;
@@ -23,32 +24,21 @@ class CustomerService {
 	 *
 	 * @param ApiClient $api_client
 	 * @param LoggerService $logger_service
-	 * @param string $customer_class
+	 * @param CustomerFactory $customer_factory
 	 */
 	public function __construct(
 		private ApiClient $api_client,
 		private LoggerService $logger_service,
-		private string $customer_class
+		private CustomerFactory $customer_factory
 	) {}
-
-	/**
-	 * Create customer instance.
-	 *
-	 * @param int $user_id
-	 * @return WC_Customer
-	 * @throws Exception
-	 */
-	private function create_customer_instance( int $user_id ) : WC_Customer {
-		return new ( $this->customer_class )( $user_id );
-	}
 
 	/**
 	 * Format address basic data.
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     first_name: string,
-	 *     last_name: string,
+	 *     first_name?: string,
+	 *     last_name?: string,
 	 *     email: string
 	 * }|null
 	 */
@@ -59,10 +49,9 @@ class CustomerService {
 			'email'      => $address_data['email'] ?? '',
 		];
 
-		$required_fields = array_keys( $customer_data );
-		$customer_data   = array_filter( $customer_data );
+		$customer_data = array_filter( $customer_data );
 
-		if ( ! empty( array_diff( $required_fields, array_keys( $customer_data ) ) ) ) {
+		if ( empty( $customer_data['email'] ) ) {
 			return null;
 		} else {
 			return $customer_data;
@@ -74,11 +63,11 @@ class CustomerService {
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     line_1: string,
-	 *     line_2: string,
-	 *     city: string,
-	 *     postcode: string,
-	 *     country_code: string,
+	 *     line_1?: string,
+	 *     line_2?: string,
+	 *     city?: string,
+	 *     postcode?: string,
+	 *     country_code?: string,
 	 *     state?: string
 	 * }
 	 */
@@ -95,7 +84,7 @@ class CustomerService {
 			$formatted_address['state'] = strtolower( $address_data['state'] );
 		}
 
-		return $formatted_address;
+		return array_filter( $formatted_address );
 	}
 
 	/**
@@ -121,28 +110,28 @@ class CustomerService {
 	 * @param array $shipping_address
 	 * @param bool $add_email_to_address
 	 * @return array{
-	 *     first_name: string,
-	 *     last_name: string,
+	 *     first_name?: string,
+	 *     last_name?: string,
 	 *     email: string,
 	 *     billing: array{
-	 *         address: array{
-	 *             line_1: string,
-	 *             line_2: string,
-	 *             city: string,
-	 *             postcode: string,
-	 *             country_code: string,
+	 *         address?: array{
+	 *             line_1?: string,
+	 *             line_2?: string,
+	 *             city?: string,
+	 *             postcode?: string,
+	 *             country_code?: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
 	 *     },
-	 *     shipping: array{
-	 *         address_match: bool,
+	 *     shipping?: array{
+	 *         address_match?: bool,
 	 *         address?: array{
-	 *             line_1: string,
-	 *             line_2: string,
-	 *             city: string,
-	 *             postcode: string,
-	 *             country_code: string,
+	 *             line_1?: string,
+	 *             line_2?: string,
+	 *             city?: string,
+	 *             postcode?: string,
+	 *             country_code?: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
@@ -163,6 +152,15 @@ class CustomerService {
 
 		$billing_address = $this->format_address_data( $billing_address );
 
+		// If we don't have any billing address data just return $customer_data.
+		if ( ! $billing_address ) {
+			if ( $add_email_to_address ) {
+				$customer_data['billing']['email'] = $customer_data['email'];
+			}
+
+			return $customer_data;
+		}
+
 		$customer_data['billing']['address'] = $billing_address;
 		if ( $add_email_to_address ) {
 			$customer_data['billing']['email'] = $customer_data['email'];
@@ -173,7 +171,7 @@ class CustomerService {
 		if ( $shipping_address ) {
 			$shipping_address = $this->format_address_data( $shipping_address );
 
-			if ( ! $this->addresses_match( $billing_address, $shipping_address ) ) {
+			if ( $shipping_address && ! $this->addresses_match( $billing_address, $shipping_address ) ) {
 				$customer_data['shipping']['address']       = $shipping_address;
 				$customer_data['shipping']['address_match'] = false;
 				if ( $add_email_to_address ) {
@@ -227,9 +225,17 @@ class CustomerService {
 	 * @throws Exception
 	 */
 	private function get_customer_address_data( WC_Customer $customer ) : array {
+		$billing_address  = $customer->get_billing();
+		$shipping_address = $customer->has_shipping_address() ? $customer->get_shipping() : [];
+
+		// In some cases users can register with just their email and not set their billing address. For those cases add the user email to the billing address.
+		if ( empty( $billing_address['email'] ) && $customer->get_email() ) {
+			$billing_address['email'] = $customer->get_email();
+		}
+
 		return $this->get_address_data_formatted(
-			$customer->get_billing(),
-			$customer->has_shipping_address() ? $customer->get_shipping() : [],
+			$billing_address,
+			$shipping_address,
 			true
 		);
 	}
@@ -306,7 +312,7 @@ class CustomerService {
 	 */
 	private function create_or_update_customer_for_checkout( WC_Order $order ) : ?WC_Customer {
 		try {
-			$customer      = $this->create_customer_instance( $order->get_user_id() );
+			$customer      = $this->customer_factory->get_wc_customer( $order->get_user_id() );
 			$customer_data = $this->get_customer_address_data_from_wc_order( $order );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Creating/updating customer data for checkout failed. Order ID: %s. Error: "%s".', $order->get_id(), $exception->getMessage() ), 'error' );
@@ -386,7 +392,7 @@ class CustomerService {
 	 */
 	private function get_or_create_customer_for_new_payment_method( int $user_id ) : ?WC_Customer {
 		try {
-			$customer      = $this->create_customer_instance( $user_id );
+			$customer      = $this->customer_factory->get_wc_customer( $user_id );
 			$customer_data = $this->get_customer_address_data( $customer );
 		} catch ( Exception $exception ) {
 			$this->logger_service->log( sprintf( 'Getting customer for new payment method failed. User ID: %s. Error: "%s".', $user_id, $exception->getMessage() ), 'error' );
@@ -435,6 +441,6 @@ class CustomerService {
 			throw new Exception( 'User not found.' );
 		}
 
-		return $this->create_customer_instance( (int) $user_data[0] );
+		return $this->customer_factory->get_wc_customer( (int) $user_data[0] );
 	}
 }
