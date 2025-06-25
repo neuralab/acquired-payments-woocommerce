@@ -11,10 +11,10 @@ use AcquiredComForWooCommerce\Tests\Framework\TestCase;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\ApiClientMock;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\LoggerServiceMock;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\Reflection;
-use AcquiredComForWooCommerce\Tests\Framework\Traits\CustomerConstructorMock;
 use AcquiredComForWooCommerce\Services\CustomerService;
 use AcquiredComForWooCommerce\Api\Response\Response;
 use AcquiredComForWooCommerce\Api\Response\CustomerCreate;
+use AcquiredComForWooCommerce\Tests\Framework\Traits\CustomerFactoryMock;
 use Mockery;
 use Brain\Monkey\Functions;
 use Exception;
@@ -22,8 +22,6 @@ use Exception;
 /**
  * CustomerServiceTest class.
  *
- * @runTestsInSeparateProcesses
- * @bootstrap tests/bootstrap.php
  * @covers \AcquiredComForWooCommerce\Services\CustomerService
  */
 class CustomerServiceTest extends TestCase {
@@ -33,7 +31,7 @@ class CustomerServiceTest extends TestCase {
 	use Reflection;
 	use ApiClientMock;
 	use LoggerServiceMock;
-	use CustomerConstructorMock;
+	use CustomerFactoryMock;
 
 	/**
 	 * Test user ID.
@@ -76,6 +74,7 @@ class CustomerServiceTest extends TestCase {
 				'last_name'  => 'Doe',
 				'email'      => 'john@example.com',
 				'address_1'  => '123 Main St',
+				'address_2'  => '2nd floor',
 				'city'       => 'London',
 				'state'      => '',
 				'postcode'   => '123456',
@@ -113,7 +112,7 @@ class CustomerServiceTest extends TestCase {
 			'billing'    => [
 				'address' => [
 					'line_1'       => '123 Main St',
-					'line_2'       => '',
+					'line_2'       => '2nd floor',
 					'city'         => 'London',
 					'postcode'     => '123456',
 					'country_code' => 'uk',
@@ -123,7 +122,6 @@ class CustomerServiceTest extends TestCase {
 				'address_match' => $address_match,
 				'address'       => [
 					'line_1'       => '456 Other St',
-					'line_2'       => '',
 					'city'         => 'Bristol',
 					'postcode'     => '789123',
 					'country_code' => 'uk',
@@ -154,11 +152,12 @@ class CustomerServiceTest extends TestCase {
 
 		$this->mock_api_client();
 		$this->mock_logger_service();
+		$this->mock_customer_factory();
 
 		$this->service = new CustomerService(
 			$this->get_api_client(),
 			$this->get_logger_service(),
-			'WC_Customer'
+			$this->get_customer_factory(),
 		);
 
 		$this->initialize_reflection( $this->service );
@@ -173,32 +172,7 @@ class CustomerServiceTest extends TestCase {
 	public function test_constructor() : void {
 		$this->assertSame( $this->get_api_client(), $this->get_private_property_value( 'api_client' ) );
 		$this->assertSame( $this->get_logger_service(), $this->get_private_property_value( 'logger_service' ) );
-		$this->assertEquals( 'WC_Customer', $this->get_private_property_value( 'customer_class' ) );
-	}
-
-	/**
-	 * Test create_customer_instance success.
-	 *
-	 * @covers AcquiredComForWooCommerce\Services\CustomerService::create_customer_instance
-	 * @return void
-	 */
-	public function test_create_customer_instance_success() : void {
-		$this->mock_wc_customer_constructor( $this->test_user_id );
-		$result = $this->get_private_method_value( 'create_customer_instance', $this->test_user_id );
-		$this->assertInstanceOf( 'WC_Customer', $result );
-	}
-
-	/**
-	 * Test create_customer_instance failure.
-	 *
-	 * @covers AcquiredComForWooCommerce\Services\CustomerService::create_customer_instance
-	 * @return void
-	 */
-	public function test_create_customer_instance_failure() : void {
-		$this->mock_wc_customer_constructor( $this->test_user_id, 'Failed to create customer' );
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Failed to create customer' );
-		$this->get_private_method_value( 'create_customer_instance', $this->test_user_id );
+		$this->assertSame( $this->get_customer_factory(), $this->get_private_property_value( 'customer_factory' ) );
 	}
 
 	/**
@@ -280,7 +254,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_format_address_data_with_empty_address_fields() : void {
 		$address_data = [
-			'address_1' => '',
+			'address_1' => '123 Main St',
 			'address_2' => '',
 			'city'      => '',
 			'postcode'  => '',
@@ -289,11 +263,7 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$expected = [
-			'line_1'       => '',
-			'line_2'       => '',
-			'city'         => '',
-			'postcode'     => '',
-			'country_code' => '',
+			'line_1' => '123 Main St',
 		];
 
 		$result = $this->get_private_method_value( 'format_address_data', $address_data );
@@ -856,13 +826,17 @@ class CustomerServiceTest extends TestCase {
 			->once()
 			->andReturn( $this->test_order_id );
 
-		// Mock WC_Customer.
-		$this->mock_wc_customer_constructor( $this->test_user_id, 'Failed to create customer' );
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( 123 )
+			->andThrow( new Exception( 'Failed to create customer.' ) );
 
 		// Mock LoggerService.
 		$this->get_logger_service()->shouldReceive( 'log' )
 			->once()
-			->with( 'Creating/updating customer data for checkout failed. Order ID: 456. Error: "Failed to create customer".', 'error' );
+			->with( 'Creating/updating customer data for checkout failed. Order ID: 456. Error: "Failed to create customer.".', 'error' );
 
 		// Test the method.
 		$this->assertNull( $this->get_private_method_value( 'create_or_update_customer_for_checkout', $order ) );
@@ -896,8 +870,7 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( false );
 
 		// Mock WC_Customer.
-
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_meta' )
 			->once()
@@ -912,6 +885,13 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'save' )
 			->once()
 			->andReturn( true );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock CustomerCreate response.
 
@@ -973,12 +953,19 @@ class CustomerServiceTest extends TestCase {
 
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_meta' )
 			->twice()
 			->with( '_acfw_customer_id' )
 			->andReturn( $this->test_customer_id );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock Response.
 
@@ -1147,12 +1134,19 @@ class CustomerServiceTest extends TestCase {
 
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_meta' )
 			->times( 3 )
 			->with( '_acfw_customer_id' )
 			->andReturn( $this->test_customer_id );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock Response.
 
@@ -1222,12 +1216,19 @@ class CustomerServiceTest extends TestCase {
 
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_meta' )
 			->once()
 			->with( '_acfw_customer_id' )
 			->andReturn( '' );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock CustomerCreate response for failed create.
 
@@ -1344,6 +1345,10 @@ class CustomerServiceTest extends TestCase {
 			->once()
 			->andReturn( $this->test_user_id );
 
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
+
 		// Mock LoggerService.
 		$this->get_logger_service()->shouldReceive( 'log' )
 			->once()
@@ -1395,7 +1400,7 @@ class CustomerServiceTest extends TestCase {
 	public function test_get_or_create_customer_for_new_payment_method_failure() : void {
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_billing' )
 			->once()
@@ -1404,6 +1409,17 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'has_shipping_address' )
 			->once()
 			->andReturn( false );
+
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock LoggerService.
 		$this->get_logger_service()->shouldReceive( 'log' )
@@ -1423,7 +1439,7 @@ class CustomerServiceTest extends TestCase {
 	public function test_get_or_create_customer_for_new_payment_method_existing_customer() : void {
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_billing' )
 			->once()
@@ -1438,6 +1454,13 @@ class CustomerServiceTest extends TestCase {
 			->with( '_acfw_customer_id' )
 			->andReturn( $this->test_customer_id );
 
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
+
 		// Test the method.
 		$this->assertInstanceOf( 'WC_Customer', $this->get_private_method_value( 'get_or_create_customer_for_new_payment_method', $this->test_user_id ) );
 	}
@@ -1451,7 +1474,7 @@ class CustomerServiceTest extends TestCase {
 	public function test_get_or_create_customer_for_new_payment_method_new_customer() : void {
 		// Mock WC_Customer.
 
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_billing' )
 			->once()
@@ -1473,6 +1496,13 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'save' )
 			->once()
 			->andReturn( true );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock CustomerCreate.
 
@@ -1512,7 +1542,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_data_for_new_payment_method_returns_customer_id() : void {
 		// Mock WC_Customer.
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_billing' )
 			->once()
@@ -1526,6 +1556,13 @@ class CustomerServiceTest extends TestCase {
 			->twice()
 			->with( '_acfw_customer_id' )
 			->andReturn( $this->test_customer_id );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Test the method.
 		$this->assertEquals(
@@ -1542,7 +1579,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_data_for_new_payment_method_returns_empty_array() : void {
 		// Mock WC_Customer.
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
 
 		$customer->shouldReceive( 'get_billing' )
 			->once()
@@ -1551,6 +1588,17 @@ class CustomerServiceTest extends TestCase {
 		$customer->shouldReceive( 'has_shipping_address' )
 			->once()
 			->andReturn( false );
+
+		$customer->shouldReceive( 'get_email' )
+			->once()
+			->andReturn( '' );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Mock LoggerService.
 		$this->get_logger_service()->shouldReceive( 'log' )
@@ -1585,7 +1633,14 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( [ $this->test_user_id ] );
 
 		// Mock WC_Customer.
-		$customer = $this->mock_wc_customer_constructor( $this->test_user_id );
+		$customer = Mockery::mock( 'WC_Customer' );
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->once()
+			->with( $this->test_user_id )
+			->andReturn( $customer );
 
 		// Test the method
 		$result = $this->service->get_customer_from_customer_id( $this->test_customer_id );
