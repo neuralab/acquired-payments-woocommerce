@@ -74,7 +74,6 @@ class CustomerServiceTest extends TestCase {
 				'last_name'  => 'Doe',
 				'email'      => 'john@example.com',
 				'address_1'  => '123 Main St',
-				'address_2'  => '2nd floor',
 				'city'       => 'London',
 				'state'      => '',
 				'postcode'   => '123456',
@@ -112,7 +111,7 @@ class CustomerServiceTest extends TestCase {
 			'billing'    => [
 				'address' => [
 					'line_1'       => '123 Main St',
-					'line_2'       => '2nd floor',
+					'line_2'       => '',
 					'city'         => 'London',
 					'postcode'     => '123456',
 					'country_code' => 'uk',
@@ -122,6 +121,7 @@ class CustomerServiceTest extends TestCase {
 				'address_match' => $address_match,
 				'address'       => [
 					'line_1'       => '456 Other St',
+					'line_2'       => '',
 					'city'         => 'Bristol',
 					'postcode'     => '789123',
 					'country_code' => 'uk',
@@ -176,6 +176,62 @@ class CustomerServiceTest extends TestCase {
 	}
 
 	/**
+	 * Test truncate_to_length.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::truncate_to_length
+	 * @return void
+	 */
+	public function test_truncate_to_length() : void {
+		$input    = 'This is a long string that exceeds the limit.';
+		$expected = 'This is a ';
+
+		$result = $this->get_private_method_value( 'truncate_to_length', $input, 10 );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * Test validate_email.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_email
+	 * @return void
+	 */
+	public function test_validate_email() : void {
+		$valid_email   = 'john@example.com';
+		$invalid_email = 'invalid-email';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_email', $valid_email ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_email', $invalid_email ) );
+	}
+
+	/**
+	 * Test validate_name.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_name
+	 * @return void
+	 */
+	public function test_validate_name() : void {
+		$valid_name   = 'John Doe';
+		$invalid_name = 'John123';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_name', $valid_name ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_name', $invalid_name ) );
+	}
+
+	/**
+	 * Test validate_address.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_address
+	 * @return void
+	 */
+	public function test_validate_address() : void {
+		$valid_address   = '123 Main St, London, UK';
+		$invalid_address = '#Invalid Address';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_address', $valid_address ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_address', $invalid_address ) );
+	}
+
+	/**
 	 * Test format_basic_address_data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
@@ -202,12 +258,12 @@ class CustomerServiceTest extends TestCase {
 	}
 
 	/**
-	 * Test format_basic_address_data with valid data.
+	 * Test format_basic_address_data with invalid email.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
 	 * @return void
 	 */
-	public function test_format_basic_address_data_with_invalid_data() : void {
+	public function test_format_basic_address_data_with_invalid_email() : void {
 		$address_data = [
 			'first_name'  => 'John',
 			'last_name'   => 'Doe',
@@ -216,6 +272,31 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$this->assertNull( $this->get_private_method_value( 'format_basic_address_data', $address_data ) );
+	}
+
+	/**
+	 * Test format_basic_address_data with invalid data.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
+	 * @return void
+	 */
+	public function test_format_basic_address_data_with_invalid_data() : void {
+		$address_data = [
+			'first_name' => '1John',
+			'last_name'  => '#Doe',
+			'email'      => 'john@example.com',
+		];
+
+		$expected = [
+			'first_name' => '',
+			'last_name'  => '',
+			'email'      => 'john@example.com',
+		];
+
+		$this->assertEquals(
+			$expected,
+			$this->get_private_method_value( 'format_basic_address_data', $address_data )
+		);
 	}
 
 	/**
@@ -254,7 +335,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_format_address_data_with_empty_address_fields() : void {
 		$address_data = [
-			'address_1' => '123 Main St',
+			'address_1' => '',
 			'address_2' => '',
 			'city'      => '',
 			'postcode'  => '',
@@ -263,7 +344,11 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$expected = [
-			'line_1' => '123 Main St',
+			'line_1'       => '',
+			'line_2'       => '',
+			'city'         => '',
+			'postcode'     => '',
+			'country_code' => '',
 		];
 
 		$result = $this->get_private_method_value( 'format_address_data', $address_data );
@@ -414,6 +499,52 @@ class CustomerServiceTest extends TestCase {
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( true, true ), $this->get_private_method_value( 'get_customer_address_data', $customer ) );
+	}
+
+	/**
+	 * Test get_customer_address_data without a billing address.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::get_customer_address_data
+	 * @return void
+	 */
+	public function test_get_customer_address_data_without_billing_address() : void {
+		$expected_address_data = [
+			'first_name' => '',
+			'last_name'  => '',
+			'email'      => 'john@example.com',
+			'billing'    => [
+				'address' => [
+					'line_1'       => '',
+					'line_2'       => '',
+					'city'         => '',
+					'postcode'     => '',
+					'country_code' => '',
+				],
+				'email'   => 'john@example.com',
+			],
+			'shipping'   => [
+				'address_match' => true,
+			],
+		];
+
+		// Mock WC_Customer.
+
+		$customer = Mockery::mock( 'WC_Customer' );
+
+		$customer->shouldReceive( 'get_billing' )
+			->once()
+			->andReturn( [] );
+
+		$customer->shouldReceive( 'has_shipping_address' )
+			->once()
+			->andReturn( false );
+
+		$customer->shouldReceive( 'get_email' )
+			->twice()
+			->andReturn( 'john@example.com' );
+
+		// Test the method.
+		$this->assertEquals( $expected_address_data, $this->get_private_method_value( 'get_customer_address_data', $customer ) );
 	}
 
 	/**
