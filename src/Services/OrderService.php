@@ -104,10 +104,6 @@ class OrderService {
 		$current_date = new DateTime( 'now', $time_zone );
 		$order_date   = DateTime::createFromFormat( 'U', (string) $order_timestamp, $time_zone );
 
-		if ( ! $order_date || ! $current_date ) {
-			return false;
-		}
-
 		return $current_date->format( 'Ymd' ) > $order_date->format( 'Ymd' );
 	}
 
