@@ -2,7 +2,7 @@
   "name": "acquired-com/acquired-com-for-woocommerce",
   "type": "wordpress-plugin",
   "description": "Securely accept Cards, Apple Pay & Google Pay on your store using Acquired.com",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "authors": [
     {
       "name": "Acquired",

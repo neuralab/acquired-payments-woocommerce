@@ -13,7 +13,6 @@ use AcquiredComForWooCommerce\Services\LoggerService;
 use AcquiredComForWooCommerce\Services\OrderService;
 use AcquiredComForWooCommerce\Services\SettingsService;
 use AcquiredComForWooCommerce\Services\PaymentMethodService;
-use DateTime;
 use Exception;
 use WC_Order;
 use WC_Payment_Gateway;

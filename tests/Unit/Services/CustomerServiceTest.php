@@ -74,7 +74,6 @@ class CustomerServiceTest extends TestCase {
 				'last_name'  => 'Doe',
 				'email'      => 'john@example.com',
 				'address_1'  => '123 Main St',
-				'address_2'  => '2nd floor',
 				'city'       => 'London',
 				'state'      => '',
 				'postcode'   => '123456',
@@ -112,7 +111,7 @@ class CustomerServiceTest extends TestCase {
 			'billing'    => [
 				'address' => [
 					'line_1'       => '123 Main St',
-					'line_2'       => '2nd floor',
+					'line_2'       => '',
 					'city'         => 'London',
 					'postcode'     => '123456',
 					'country_code' => 'uk',
@@ -122,6 +121,7 @@ class CustomerServiceTest extends TestCase {
 				'address_match' => $address_match,
 				'address'       => [
 					'line_1'       => '456 Other St',
+					'line_2'       => '',
 					'city'         => 'Bristol',
 					'postcode'     => '789123',
 					'country_code' => 'uk',
@@ -176,6 +176,62 @@ class CustomerServiceTest extends TestCase {
 	}
 
 	/**
+	 * Test truncate_to_length.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::truncate_to_length
+	 * @return void
+	 */
+	public function test_truncate_to_length() : void {
+		$input    = 'This is a long string that exceeds the limit.';
+		$expected = 'This is a ';
+
+		$result = $this->get_private_method_value( 'truncate_to_length', $input, 10 );
+		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * Test validate_email.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_email
+	 * @return void
+	 */
+	public function test_validate_email() : void {
+		$valid_email   = 'john@example.com';
+		$invalid_email = 'invalid-email';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_email', $valid_email ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_email', $invalid_email ) );
+	}
+
+	/**
+	 * Test validate_name.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_name
+	 * @return void
+	 */
+	public function test_validate_name() : void {
+		$valid_name   = 'John Doe';
+		$invalid_name = 'John123';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_name', $valid_name ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_name', $invalid_name ) );
+	}
+
+	/**
+	 * Test validate_address.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::validate_address
+	 * @return void
+	 */
+	public function test_validate_address() : void {
+		$valid_address   = '123 Main St, London, UK';
+		$invalid_address = '#Invalid Address';
+
+		$this->assertTrue( $this->get_private_method_value( 'validate_address', $valid_address ) );
+		$this->assertFalse( $this->get_private_method_value( 'validate_address', $invalid_address ) );
+	}
+
+	/**
 	 * Test format_basic_address_data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
@@ -202,12 +258,12 @@ class CustomerServiceTest extends TestCase {
 	}
 
 	/**
-	 * Test format_basic_address_data with valid data.
+	 * Test format_basic_address_data with invalid email.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
 	 * @return void
 	 */
-	public function test_format_basic_address_data_with_invalid_data() : void {
+	public function test_format_basic_address_data_with_invalid_email() : void {
 		$address_data = [
 			'first_name'  => 'John',
 			'last_name'   => 'Doe',
@@ -216,6 +272,31 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$this->assertNull( $this->get_private_method_value( 'format_basic_address_data', $address_data ) );
+	}
+
+	/**
+	 * Test format_basic_address_data with invalid data.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::format_basic_address_data
+	 * @return void
+	 */
+	public function test_format_basic_address_data_with_invalid_data() : void {
+		$address_data = [
+			'first_name' => '1John',
+			'last_name'  => '#Doe',
+			'email'      => 'john@example.com',
+		];
+
+		$expected = [
+			'first_name' => '',
+			'last_name'  => '',
+			'email'      => 'john@example.com',
+		];
+
+		$this->assertEquals(
+			$expected,
+			$this->get_private_method_value( 'format_basic_address_data', $address_data )
+		);
 	}
 
 	/**
@@ -254,7 +335,7 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_format_address_data_with_empty_address_fields() : void {
 		$address_data = [
-			'address_1' => '123 Main St',
+			'address_1' => '',
 			'address_2' => '',
 			'city'      => '',
 			'postcode'  => '',
@@ -263,7 +344,11 @@ class CustomerServiceTest extends TestCase {
 		];
 
 		$expected = [
-			'line_1' => '123 Main St',
+			'line_1'       => '',
+			'line_2'       => '',
+			'city'         => '',
+			'postcode'     => '',
+			'country_code' => '',
 		];
 
 		$result = $this->get_private_method_value( 'format_address_data', $address_data );
@@ -401,19 +486,48 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( true, true ), $this->get_private_method_value( 'get_customer_address_data', $customer ) );
+	}
+
+	/**
+	 * Test get_customer_address_data without a billing address.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\CustomerService::get_customer_address_data
+	 * @return void
+	 */
+	public function test_get_customer_address_data_without_billing_address() : void {
+		$expected_address_data = [
+			'first_name' => '',
+			'last_name'  => '',
+			'email'      => 'john@example.com',
+			'billing'    => [
+				'address' => [
+					'line_1'       => '',
+					'line_2'       => '',
+					'city'         => '',
+					'postcode'     => '',
+					'country_code' => '',
+				],
+				'email'   => 'john@example.com',
+			],
+			'shipping'   => [
+				'address_match' => true,
+			],
+		];
+
+		// Mock WC_Customer.
+		$customer = Mockery::mock( 'WC_Customer' );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( [] );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_email' )->twice()->andReturn( 'john@example.com' );
+
+		// Test the method.
+		$this->assertEquals( $expected_address_data, $this->get_private_method_value( 'get_customer_address_data', $customer ) );
 	}
 
 	/**
@@ -428,16 +542,9 @@ class CustomerServiceTest extends TestCase {
 		unset( $billing_address['email'] ); // Remove email to simulate invalid data.
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $billing_address );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $billing_address );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
 
 		// Test the method.
 		$this->expectException( Exception::class );
@@ -452,20 +559,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data_with_different_shipping_address() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( true );
-
-		$customer->shouldReceive( 'get_shipping' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'shipping' ) );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( true );
+		$customer->shouldReceive( 'get_shipping' )->once()->andReturn( $this->get_test_address_data( 'shipping' ) );
 
 		// Test the method.
 		$result = $this->get_private_method_value( 'get_customer_address_data', $customer );
@@ -483,20 +580,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data_with_same_billing_and_shipping_address() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( true );
-
-		$customer->shouldReceive( 'get_shipping' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( true );
+		$customer->shouldReceive( 'get_shipping' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( true, true ), $this->get_private_method_value( 'get_customer_address_data', $customer ) );
@@ -510,21 +597,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data_from_wc_order_with_user() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_user_id' )
-			->once()
-			->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$order->shouldReceive( 'get_user_id' )->once()->andReturn( $this->test_user_id );
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( true, true ), $this->get_private_method_value( 'get_customer_address_data_from_wc_order', $order ) );
@@ -538,26 +614,11 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data_from_wc_order_with_user_and_different_shipping_address() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( true );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'shipping' )
-			->andReturn( $this->get_test_address_data( 'shipping' ) );
-
-		$order->shouldReceive( 'get_user_id' )
-			->once()
-			->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( true );
+		$order->shouldReceive( 'get_address' )->once()->with( 'shipping' )->andReturn( $this->get_test_address_data( 'shipping' ) );
+		$order->shouldReceive( 'get_user_id' )->once()->andReturn( $this->test_user_id );
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( true, false ), $this->get_private_method_value( 'get_customer_address_data_from_wc_order', $order ) );
@@ -571,21 +632,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_address_data_from_wc_order_with_no_user() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_user_id' )
-			->once()
-			->andReturn( 0 );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$order->shouldReceive( 'get_user_id' )->once()->andReturn( 0 );
 
 		// Test the method.
 		$this->assertEquals( $this->get_expected_address_data( false, true ), $this->get_private_method_value( 'get_customer_address_data_from_wc_order', $order ) );
@@ -602,45 +652,28 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, false );
 
 		// Mock CustomerCreate.
-
 		$response = Mockery::mock( CustomerCreate::class );
-
-		$response->shouldReceive( 'is_created' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( $this->test_customer_id );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'is_created' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_customer_id' )->once()->andReturn( $this->test_customer_id );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-
-		$this->get_api_client()->shouldReceive( 'create_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'create_customer' )
 			->once()
 			->with( $customer_data )
 			->andReturn( $response );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
+		$customer->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_customer_id', $this->test_customer_id )->andReturn( true );
+		$customer->shouldReceive( 'save' )->once()->andReturn( true );
 
-		$customer->shouldReceive( 'update_meta_data' )
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
-			->with( '_acfw_customer_id', $this->test_customer_id )
-			->andReturn( true );
-
-		$customer->shouldReceive( 'save' )
-			->once()
-			->andReturn( true );
-
-		// Mock logger service.
-		$this->get_logger_service()->shouldReceive( 'log' )
-			->once()
-			->with( 'Customer creation successful.', 'debug', Mockery::any() );
+			->with( 'Customer creation successful.', 'debug', [] );
 
 		// Test the method.
 		$this->assertSame( $customer, $this->get_private_method_value( 'create_customer', $customer, $customer_data ) );
@@ -657,31 +690,25 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, false );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
 
 		// Mock CustomerCreate response.
-
 		$response = Mockery::mock( CustomerCreate::class );
-
-		$response->shouldReceive( 'is_created' )
-			->once()
-			->andReturn( false );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'is_created' )->once()->andReturn( false );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'create_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'create_customer' )
 			->once()
 			->with( $customer_data )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
-			->with( 'Customer creation failed.', 'error', Mockery::any() );
+			->with( 'Customer creation failed.', 'error', [] );
 
 		// Test the method.
 		$this->assertNull( $this->get_private_method_value( 'create_customer', $customer, $customer_data ) );
@@ -698,16 +725,12 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, true );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( '' );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer ID not found.', 'error' );
 
@@ -726,34 +749,24 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, true );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock Response.
-
 		$response = Mockery::mock( Response::class );
-
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Set API client expectations.
-		$this->get_api_client()->shouldReceive( 'update_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'update_customer' )
 			->once()
 			->with( $this->test_customer_id, $customer_data )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer update successful.', 'debug', [] );
 
@@ -772,36 +785,26 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, true );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock Response.
-
 		$response = Mockery::mock( Response::class );
-
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( false );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( false );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'update_customer' )
+		$this->get_api_client()
+		->shouldReceive( 'update_customer' )
 			->once()
 			->with( $this->test_customer_id, $customer_data )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
-			->with( 'Customer update failed.', 'error', Mockery::any() );
+			->with( 'Customer update failed.', 'error', [] );
 
 		// Test the method.
 		$this->assertNull( $this->get_private_method_value( 'update_customer', $customer, $customer_data ) );
@@ -815,16 +818,9 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_create_or_update_customer_for_checkout_failure() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_user_id' )
-			->once()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_order_id );
+		$order->shouldReceive( 'get_user_id' )->once()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_id' )->once()->andReturn( $this->test_order_id );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -834,7 +830,8 @@ class CustomerServiceTest extends TestCase {
 			->andThrow( new Exception( 'Failed to create customer.' ) );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Creating/updating customer data for checkout failed. Order ID: 456. Error: "Failed to create customer.".', 'error' );
 
@@ -853,38 +850,16 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, true );
 
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_user_id' )
-			->twice()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
+		$order->shouldReceive( 'get_user_id' )->twice()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
 
 		// Mock WC_Customer.
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( '' );
-
-		$customer->shouldReceive( 'update_meta_data' )
-			->once()
-			->with( '_acfw_customer_id', $this->test_customer_id )
-			->andReturn( true );
-
-		$customer->shouldReceive( 'save' )
-			->once()
-			->andReturn( true );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( '' );
+		$customer->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_customer_id', $this->test_customer_id )->andReturn( true );
+		$customer->shouldReceive( 'save' )->once()->andReturn( true );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -894,29 +869,21 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock CustomerCreate response.
-
 		$response = Mockery::mock( CustomerCreate::class );
-
-		$response->shouldReceive( 'is_created' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( $this->test_customer_id );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'is_created' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_customer_id' )->once()->andReturn( $this->test_customer_id );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'create_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'create_customer' )
 			->once()
 			->with( $customer_data )
 			->andReturn( $response );
 
-		// Set logger expectations.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer creation successful.', 'debug', [] );
 
@@ -935,30 +902,14 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( true, true );
 
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_user_id' )
-			->twice()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
+		$order->shouldReceive( 'get_user_id' )->twice()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->twice()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_meta' )->twice()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -968,25 +919,20 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock Response.
-
 		$response = Mockery::mock( Response::class );
-
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'update_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'update_customer' )
 			->once()
 			->with( $this->test_customer_id, $customer_data )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer update successful.', 'debug', [] );
 
@@ -1005,24 +951,14 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( false, true );
 
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_order_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$order->shouldReceive( 'get_id' )->once()->andReturn( $this->test_order_id );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Creating customer data for guest checkout successful. Order ID: 456.', 'debug' );
 
@@ -1038,24 +974,14 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_data_for_guest_checkout_failure() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( [] );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$order->shouldReceive( 'get_id' )->once()->andReturn( $this->test_order_id );
 
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( [] );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_order_id );
-
-		// Set logger expectations.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		// Mock LoggerService.
+		$this->get_logger_service()
+		->shouldReceive( 'log' )
 			->once()
 			->with( 'Creating customer data for guest checkout failed. Order ID: 456. Error: "Billing address is empty.".', 'error' );
 
@@ -1074,28 +1000,15 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( false, true );
 
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( 0 );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_order_id );
+		$order->shouldReceive( 'get_customer_id' )->once()->andReturn( 0 );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$order->shouldReceive( 'get_id' )->once()->andReturn( $this->test_order_id );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Creating customer data for guest checkout successful. Order ID: 456.', 'debug' );
 
@@ -1112,34 +1025,18 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_customer_data_for_checkout_returns_customer_id_success() : void {
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_user_id' )
-			->twice()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_address' )
-			->once()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'get_customer_id' )->once()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_user_id' )->twice()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->once()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
 
 		$order->shouldReceive( 'has_shipping_address' )
 			->once()
 			->andReturn( false );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->times( 3 )
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_meta' )->times( 3 )->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1149,25 +1046,20 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock Response.
-
 		$response = Mockery::mock( Response::class );
-
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'update_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'update_customer' )
 			->once()
 			->with( $this->test_customer_id, Mockery::any() )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer update successful.', 'debug', [] );
 
@@ -1190,38 +1082,16 @@ class CustomerServiceTest extends TestCase {
 		$customer_data = $this->get_expected_address_data( false, true );
 
 		// Mock WC_Order.
-
 		$order = Mockery::mock( 'WC_Order' );
-
-		$order->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_user_id' )
-			->twice()
-			->andReturn( $this->test_user_id );
-
-		$order->shouldReceive( 'get_address' )
-			->twice()
-			->with( 'billing' )
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$order->shouldReceive( 'has_shipping_address' )
-			->twice()
-			->andReturn( false );
-
-		$order->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_order_id );
+		$order->shouldReceive( 'get_customer_id' )->once()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_user_id' )->twice()->andReturn( $this->test_user_id );
+		$order->shouldReceive( 'get_address' )->twice()->with( 'billing' )->andReturn( $this->get_test_address_data( 'billing' ) );
+		$order->shouldReceive( 'has_shipping_address' )->twice()->andReturn( false );
+		$order->shouldReceive( 'get_id' )->once()->andReturn( $this->test_order_id );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( '' );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1230,31 +1100,27 @@ class CustomerServiceTest extends TestCase {
 			->with( $this->test_user_id )
 			->andReturn( $customer );
 
-		// Mock CustomerCreate response for failed create.
-
+		// Mock CustomerCreate.
 		$response = Mockery::mock( CustomerCreate::class );
-
-		$response->shouldReceive( 'is_created' )
-			->once()
-			->andReturn( false );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'is_created' )->once()->andReturn( false );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'create_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'create_customer' )
 			->once()
 			->with( Mockery::any() )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
-			->with( 'Customer creation failed.', 'error', Mockery::any() );
+			->with( 'Customer creation failed.', 'error', [] );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Creating customer data for guest checkout successful. Order ID: 456.', 'debug' );
 
@@ -1273,42 +1139,26 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_update_customer_in_my_account_success() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock Response.
-
 		$response = Mockery::mock( Response::class );
-
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'update_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'update_customer' )
 			->once()
 			->with( $this->test_customer_id, Mockery::any() )
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer update successful.', 'debug', [] );
 
@@ -1328,29 +1178,15 @@ class CustomerServiceTest extends TestCase {
 		unset( $billing_address['email'] );
 
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-		->once()
-		->andReturn(
-			$billing_address
-		);
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_id' )
-			->once()
-			->andReturn( $this->test_user_id );
-
-		$customer->shouldReceive( 'get_email' )
-			->once()
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $billing_address );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_id' )->once()->andReturn( $this->test_user_id );
+		$customer->shouldReceive( 'get_email' )->once()->andReturn( '' );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Updating customer data in my account failed. User ID: 123. Error: "Customer data is not valid.".', 'error' );
 
@@ -1367,24 +1203,14 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_update_customer_in_my_account_update_failure() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( '' );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer ID not found.', 'error' );
 
@@ -1399,20 +1225,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_or_create_customer_for_new_payment_method_failure() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( [] );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_email' )
-			->once()
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( [] );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_email' )->once()->andReturn( '' );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1422,7 +1238,8 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Getting customer for new payment method failed. User ID: 123. Error: "Billing address is empty.".', 'error' );
 
@@ -1438,21 +1255,10 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_or_create_customer_for_new_payment_method_existing_customer() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1473,29 +1279,12 @@ class CustomerServiceTest extends TestCase {
 	 */
 	public function test_get_or_create_customer_for_new_payment_method_new_customer() : void {
 		// Mock WC_Customer.
-
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_meta' )
-			->once()
-			->with( '_acfw_customer_id' )
-			->andReturn( '' );
-
-		$customer->shouldReceive( 'update_meta_data' )
-			->once()
-			->with( '_acfw_customer_id', $this->test_customer_id );
-
-		$customer->shouldReceive( 'save' )
-			->once()
-			->andReturn( true );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_meta' )->once()->with( '_acfw_customer_id' )->andReturn( '' );
+		$customer->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_customer_id', $this->test_customer_id );
+		$customer->shouldReceive( 'save' )->once()->andReturn( true );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1505,28 +1294,20 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock CustomerCreate.
-
 		$response = Mockery::mock( CustomerCreate::class );
-
-		$response->shouldReceive( 'is_created' )
-			->once()
-			->andReturn( true );
-
-		$response->shouldReceive( 'get_customer_id' )
-			->once()
-			->andReturn( $this->test_customer_id );
-
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'is_created' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_customer_id' )->once()->andReturn( $this->test_customer_id );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
-		$this->get_api_client()->shouldReceive( 'create_customer' )
+		$this->get_api_client()
+			->shouldReceive( 'create_customer' )
 			->once()
 			->andReturn( $response );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Customer creation successful.', 'debug', [] );
 
@@ -1543,19 +1324,9 @@ class CustomerServiceTest extends TestCase {
 	public function test_get_customer_data_for_new_payment_method_returns_customer_id() : void {
 		// Mock WC_Customer.
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( $this->get_test_address_data( 'billing' ) );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_meta' )
-			->twice()
-			->with( '_acfw_customer_id' )
-			->andReturn( $this->test_customer_id );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $this->get_test_address_data( 'billing' ) );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_meta' )->twice()->with( '_acfw_customer_id' )->andReturn( $this->test_customer_id );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1580,18 +1351,9 @@ class CustomerServiceTest extends TestCase {
 	public function test_get_customer_data_for_new_payment_method_returns_empty_array() : void {
 		// Mock WC_Customer.
 		$customer = Mockery::mock( 'WC_Customer' );
-
-		$customer->shouldReceive( 'get_billing' )
-			->once()
-			->andReturn( [] );
-
-		$customer->shouldReceive( 'has_shipping_address' )
-			->once()
-			->andReturn( false );
-
-		$customer->shouldReceive( 'get_email' )
-			->once()
-			->andReturn( '' );
+		$customer->shouldReceive( 'get_billing' )->once()->andReturn( [] );
+		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_email' )->once()->andReturn( '' );
 
 		// Mock CustomerFactory.
 		$this->get_customer_factory()
@@ -1601,7 +1363,8 @@ class CustomerServiceTest extends TestCase {
 			->andReturn( $customer );
 
 		// Mock LoggerService.
-		$this->get_logger_service()->shouldReceive( 'log' )
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
 			->once()
 			->with( 'Getting customer for new payment method failed. User ID: 123. Error: "Billing address is empty.".', 'error' );
 

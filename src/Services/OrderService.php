@@ -104,10 +104,6 @@ class OrderService {
 		$current_date = new DateTime( 'now', $time_zone );
 		$order_date   = DateTime::createFromFormat( 'U', (string) $order_timestamp, $time_zone );
 
-		if ( ! $order_date || ! $current_date ) {
-			return false;
-		}
-
 		return $current_date->format( 'Ymd' ) > $order_date->format( 'Ymd' );
 	}
 
@@ -274,7 +270,7 @@ class OrderService {
 
 		if ( ! $order ) {
 			$this->logger_service->log(
-				sprintf( sprintf( 'Failed to find order. Order ID: %s.', $order_id ) ),
+				sprintf( 'Failed to find order. Order ID: %s.', $order_id ),
 				'error',
 			);
 			throw new Exception( sprintf( __( 'Failed to find order.', 'acquired-com-for-woocommerce' ), $order_id ) );
@@ -582,11 +578,12 @@ class OrderService {
 		$log_level = 'debug';
 
 		if ( $captured ) {
-			$order->payment_complete( $response->get_transaction_id() );
+			$time_updated = $this->get_transaction_time_updated( $response->get_transaction_id() );
 
+			$order->payment_complete( $response->get_transaction_id() );
 			$order->update_meta_data( '_acfw_order_state', 'completed' );
-			$order->update_meta_data( '_acfw_order_time_completed', $this->get_transaction_time_updated( $response->get_transaction_id() ) );
-			$order->update_meta_data( '_acfw_order_time_updated', $this->get_transaction_time_updated( $response->get_transaction_id() ) );
+			$order->update_meta_data( '_acfw_order_time_completed', $time_updated );
+			$order->update_meta_data( '_acfw_order_time_updated', $time_updated );
 			$order->save();
 
 			$order_note = sprintf(
@@ -665,7 +662,7 @@ class OrderService {
 		if ( 'authorisation' === $order->get_meta( '_acfw_transaction_type' ) && 'completed' === $order->get_meta( '_acfw_order_state' ) && ! $this->is_day_older( (int) $order->get_meta( '_acfw_order_time_completed' ) ) ) {
 			$order->add_order_note( __( 'Order cancellation failed. Captured orders can be canceled the next day.', 'acquired-com-for-woocommerce' ) );
 
-			$this->logger_service->log( sprintf( 'Order cancellation failed. Captured orders can be canceled the next day. Order ID: %s', $order->get_id() ), 'debug' );
+			$this->logger_service->log( sprintf( 'Order cancellation failed. Captured orders can be canceled the next day. Order ID: %s.', $order->get_id() ), 'debug' );
 			return 'invalid';
 		}
 
