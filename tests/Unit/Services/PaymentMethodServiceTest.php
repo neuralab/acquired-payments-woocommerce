@@ -200,9 +200,7 @@ class PaymentMethodServiceTest extends TestCase {
 		// Mock WC_Payment_Token_CC.
 
 		$token = Mockery::mock( 'WC_Payment_Token_CC' );
-
-		$token->shouldReceive( 'set_card_type' )
-			->once();
+		$token->shouldReceive( 'set_card_type' )->once();
 
 		$token->shouldReceive( 'set_last4' )
 			->once()
@@ -386,9 +384,7 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_success() : void {
 		// Mock Card.
 		$card = Mockery::mock( Card::class );
-		$card->shouldReceive( 'is_active' )
-			->once()
-			->andReturn( true );
+		$card->shouldReceive( 'is_active' )->once()->andReturn( true );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -410,12 +406,8 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_throws_exception_when_request_fails() : void {
 		// Mock Card.
 		$card = Mockery::mock( Card::class );
-		$card->shouldReceive( 'is_active' )
-			->once()
-			->andReturn( false );
-		$card->shouldReceive( 'request_is_error' )
-			->once()
-			->andReturn( true );
+		$card->shouldReceive( 'is_active' )->once()->andReturn( false );
+		$card->shouldReceive( 'request_is_error' )->once()->andReturn( true );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -439,12 +431,8 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_throws_exception_when_card_not_active() : void {
 		// Mock Card.
 		$card = Mockery::mock( Card::class );
-		$card->shouldReceive( 'is_active' )
-			->once()
-			->andReturn( false );
-		$card->shouldReceive( 'request_is_error' )
-			->once()
-			->andReturn( false );
+		$card->shouldReceive( 'is_active' )->once()->andReturn( false );
+		$card->shouldReceive( 'request_is_error' )->once()->andReturn( false );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -468,12 +456,8 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_id_from_transaction_success() : void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
-		$transaction->shouldReceive( 'request_is_error' )
-			->once()
-			->andReturn( false );
-		$transaction->shouldReceive( 'get_card_id' )
-			->twice()
-			->andReturn( 'token_123' );
+		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( false );
+		$transaction->shouldReceive( 'get_card_id' )->twice()->andReturn( 'token_123' );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -495,9 +479,7 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_id_from_transaction_throws_exception_when_request_fails() : void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
-		$transaction->shouldReceive( 'request_is_error' )
-			->once()
-			->andReturn( true );
+		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( true );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -521,12 +503,8 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_get_card_id_from_transaction_throws_exception_when_card_id_not_found() : void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
-		$transaction->shouldReceive( 'request_is_error' )
-			->once()
-			->andReturn( false );
-		$transaction->shouldReceive( 'get_card_id' )
-			->once()
-			->andReturn( null );
+		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( false );
+		$transaction->shouldReceive( 'get_card_id' )->once()->andReturn( null );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -550,18 +528,12 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_deactivate_card_success() : void {
 		// Mock WC_Payment_Token_CC.
 		$token = Mockery::mock( 'WC_Payment_Token_CC' );
-		$token->shouldReceive( 'get_token' )
-			->once()
-			->andReturn( 'token_123' );
+		$token->shouldReceive( 'get_token' )->once()->andReturn( 'token_123' );
 
 		// Mock Card.
 		$response = Mockery::mock( Card::class );
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( true );
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( true );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -589,18 +561,12 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_deactivate_card_failure() : void {
 		// Mock WC_Payment_Token_CC.
 		$token = Mockery::mock( 'WC_Payment_Token_CC' );
-			$token->shouldReceive( 'get_token' )
-			->once()
-			->andReturn( 'token_123' );
+		$token->shouldReceive( 'get_token' )->once()->andReturn( 'token_123' );
 
 		// Mock Card.
 		$response = Mockery::mock( Card::class );
-		$response->shouldReceive( 'request_is_success' )
-			->once()
-			->andReturn( false );
-		$response->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$response->shouldReceive( 'request_is_success' )->once()->andReturn( false );
+		$response->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock ApiClient.
 		$this->get_api_client()
@@ -630,10 +596,8 @@ class PaymentMethodServiceTest extends TestCase {
 		$this->mock_tokenization_setting( true );
 
 		// Mock WebhookData.
-		$data = Mockery::mock( WebhookData::class );
-		$data->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$webhook = Mockery::mock( WebhookData::class );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
@@ -645,10 +609,10 @@ class PaymentMethodServiceTest extends TestCase {
 		$this->get_private_method_value(
 			'process_payment_method',
 			'saving',
-			function( $data, $log ) {
+			function( $webhook, $log ) {
 				$log( 'Test success message' );
 			},
-			$data
+			$webhook
 		);
 	}
 
@@ -663,10 +627,8 @@ class PaymentMethodServiceTest extends TestCase {
 		$this->mock_tokenization_setting( false );
 
 		// Mock WebhookData.
-		$data = Mockery::mock( WebhookData::class );
-		$data->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$webhook = Mockery::mock( WebhookData::class );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
@@ -681,7 +643,7 @@ class PaymentMethodServiceTest extends TestCase {
 			'process_payment_method',
 			'saving',
 			function() {},
-			$data
+			$webhook
 		);
 	}
 
@@ -696,10 +658,8 @@ class PaymentMethodServiceTest extends TestCase {
 		$this->mock_tokenization_setting( true );
 
 		// Mock WebhookData.
-		$data = Mockery::mock( WebhookData::class );
-		$data->shouldReceive( 'get_log_data' )
-			->once()
-			->andReturn( [] );
+		$webhook = Mockery::mock( WebhookData::class );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
@@ -716,7 +676,7 @@ class PaymentMethodServiceTest extends TestCase {
 			function() {
 				throw new Exception( 'Test error message.' );
 			},
-			$data
+			$webhook
 		);
 	}
 
@@ -862,7 +822,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 3 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -871,7 +831,7 @@ class PaymentMethodServiceTest extends TestCase {
 							'Payment method saved successfully from incoming webhook data. User ID: 456.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 
@@ -942,7 +902,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 3 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -951,7 +911,7 @@ class PaymentMethodServiceTest extends TestCase {
 							'Payment method saved successfully from incoming webhook data. Order ID: 789.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 
@@ -1047,7 +1007,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 3 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -1056,7 +1016,7 @@ class PaymentMethodServiceTest extends TestCase {
 							'Payment method updated successfully. User ID: 456.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 
@@ -1111,21 +1071,30 @@ class PaymentMethodServiceTest extends TestCase {
 			->andThrow( new Exception( 'Token not found.' ) );
 
 		// Mock LoggerService.
+
 		$this->get_logger_service()
 			->shouldReceive( 'log' )
-			->times( 3 )
+			->twice()
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
 							'Payment method found successfully from incoming webhook data.',
 							'User found successfully from incoming webhook data. User ID: 456.',
-							'Payment method updating failed. Token not found.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
+			);
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with(
+				'Payment method updating failed. Token not found.',
+				'error',
+				[]
 			);
 
 		// Test the method.
@@ -1205,7 +1174,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 4 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -1215,11 +1184,11 @@ class PaymentMethodServiceTest extends TestCase {
 							'Payment method saved successfully from incoming webhook data. User ID: 456.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 
-		// Execute the method
+		// Test the method.
 		$this->service->process_scheduled_save_payment_method( $webhook );
 	}
 
@@ -1259,7 +1228,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 2 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -1267,11 +1236,11 @@ class PaymentMethodServiceTest extends TestCase {
 							'Skipping payment method saving. Payment method already saved from redirect data. User ID: 456.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 
-		// Execute the method
+		// Test the method.
 		$this->service->process_scheduled_save_payment_method( $webhook );
 	}
 
@@ -1495,19 +1464,21 @@ class PaymentMethodServiceTest extends TestCase {
 			->with( 13, false )
 			->andReturn( 'random123abcdef' );
 
-		// Mock SettingsService
-
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		// Mock SettingsService.
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'redirect-new-payment-method' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-payment-method' );
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'webhook' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook' );
 
-		$this->get_settings_service()->shouldReceive( 'get_payment_link_expiration_time' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_payment_link_expiration_time' )
 			->once()
 			->andReturn( 3600 );
 
@@ -1555,6 +1526,7 @@ class PaymentMethodServiceTest extends TestCase {
 		$customer->shouldReceive( 'get_id' )->twice()->andReturn( 456 );
 
 		// Mock ApiClient.
+
 		$this->get_api_client()
 			->shouldReceive( 'get_payment_link_default_body' )
 			->once()
@@ -1576,19 +1548,22 @@ class PaymentMethodServiceTest extends TestCase {
 			->with( 13, false )
 			->andReturn( 'random123abcdef' );
 
-		// Mock SettingsService
+		// Mock SettingsService.
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'redirect-new-payment-method' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-payment-method' );
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'webhook' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook' );
 
-		$this->get_settings_service()->shouldReceive( 'get_payment_link_expiration_time' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_payment_link_expiration_time' )
 			->once()
 			->andReturn( 3600 );
 
@@ -1649,21 +1624,25 @@ class PaymentMethodServiceTest extends TestCase {
 
 		// Mock SettingsService.
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'redirect-new-payment-method' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-payment-method' );
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'webhook' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook' );
 
-		$this->get_settings_service()->shouldReceive( 'get_payment_link_expiration_time' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_payment_link_expiration_time' )
 			->once()
 			->andReturn( 3600 );
 
-		$this->get_settings_service()->shouldReceive( 'get_pay_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_pay_url' )
 			->once()
 			->andReturn( 'https://pay.acquired.com/v1/' );
 
@@ -1804,17 +1783,20 @@ class PaymentMethodServiceTest extends TestCase {
 
 		// Mock SettingsService.
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'redirect-new-payment-method' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-payment-method' );
 
-		$this->get_settings_service()->shouldReceive( 'get_wc_api_url' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_wc_api_url' )
 			->once()
 			->with( 'webhook' )
 			->andReturn( 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook' );
 
-		$this->get_settings_service()->shouldReceive( 'get_payment_link_expiration_time' )
+		$this->get_settings_service()
+			->shouldReceive( 'get_payment_link_expiration_time' )
 			->once()
 			->andReturn( 3600 );
 
@@ -1971,7 +1953,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->times( 3 )
 			->withArgs(
-				function( $message ) {
+				function( $message, $level ) {
 					return in_array(
 						$message,
 						[
@@ -1980,7 +1962,7 @@ class PaymentMethodServiceTest extends TestCase {
 							'Payment method saved successfully from incoming redirect data. User ID: 456.',
 						],
 						true
-					);
+					) && 'debug' === $level;
 				}
 			);
 

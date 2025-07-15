@@ -33,12 +33,53 @@ class CustomerService {
 	) {}
 
 	/**
+	 * Truncate string to specified length.
+	 *
+	 * @param string $value
+	 * @param int $max_length
+	 * @return string
+	 */
+	private function truncate_to_length( string $value, int $max_length ) : string {
+		return strlen( $value ) > $max_length ? substr( $value, 0, $max_length ) : $value;
+	}
+
+	/**
+	 * Validate email.
+	 *
+	 * @param string $value
+	 * @return bool
+	 */
+	private function validate_email( string $value ) : bool {
+		return (bool) filter_var( $value, FILTER_VALIDATE_EMAIL );
+	}
+
+	/**
+	 * Validate name.
+	 *
+	 * @param string $value
+	 * @return bool
+	 */
+	private function validate_name( string $value ) : bool {
+		return (bool) preg_match( '/^[\p{L}\.\- `\']++$/u', $value );
+	}
+
+	/**
+	 * Validate address.
+	 *
+	 * @param string $value
+	 * @return bool
+	 */
+	private function validate_address( string $value ) : bool {
+		return (bool) preg_match( '/^[\p{L}\p{N}\.,\/\-\& ]++$/u', $value );
+	}
+
+	/**
 	 * Format address basic data.
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     first_name?: string,
-	 *     last_name?: string,
+	 *     first_name: string,
+	 *     last_name: string,
 	 *     email: string
 	 * }|null
 	 */
@@ -49,13 +90,32 @@ class CustomerService {
 			'email'      => $address_data['email'] ?? '',
 		];
 
-		$customer_data = array_filter( $customer_data );
+		foreach ( $customer_data as $field => $value ) :
+			$is_valid = false;
+
+			switch ( $field ) {
+				case 'first_name':
+				case 'last_name':
+					$is_valid = $this->validate_name( $value );
+					if ( $is_valid ) {
+						$customer_data[ $field ] = $this->truncate_to_length( $value, 22 );
+					}
+					break;
+				case 'email':
+					$is_valid = $this->validate_email( $value );
+					break;
+			}
+
+			if ( ! $is_valid ) {
+				$customer_data[ $field ] = '';
+			}
+		endforeach;
 
 		if ( empty( $customer_data['email'] ) ) {
 			return null;
-		} else {
-			return $customer_data;
 		}
+
+		return $customer_data;
 	}
 
 	/**
@@ -63,11 +123,11 @@ class CustomerService {
 	 *
 	 * @param array $address_data
 	 * @return array{
-	 *     line_1?: string,
-	 *     line_2?: string,
-	 *     city?: string,
-	 *     postcode?: string,
-	 *     country_code?: string,
+	 *     line_1: string,
+	 *     line_2: string,
+	 *     city: string,
+	 *     postcode: string,
+	 *     country_code: string,
 	 *     state?: string
 	 * }
 	 */
@@ -84,7 +144,34 @@ class CustomerService {
 			$formatted_address['state'] = strtolower( $address_data['state'] );
 		}
 
-		return array_filter( $formatted_address );
+		foreach ( $formatted_address as $field => $value ) :
+			$is_valid = false;
+
+			switch ( $field ) {
+				case 'line_1':
+				case 'line_2':
+				case 'city':
+					$is_valid = $this->validate_address( $value );
+					if ( $is_valid ) {
+						$formatted_address[ $field ] = $this->truncate_to_length( $value, 'city' === $field ? 40 : 50 );
+					}
+					break;
+				case 'postcode':
+				case 'country_code':
+				case 'state':
+					$is_valid = true;
+					if ( 'postcode' === $field ) {
+						$formatted_address[ $field ] = $this->truncate_to_length( $value, 40 );
+					}
+					break;
+			}
+
+			if ( ! $is_valid ) {
+				$formatted_address[ $field ] = '';
+			}
+		endforeach;
+
+		return $formatted_address;
 	}
 
 	/**
@@ -115,11 +202,11 @@ class CustomerService {
 	 *     email: string,
 	 *     billing: array{
 	 *         address?: array{
-	 *             line_1?: string,
-	 *             line_2?: string,
-	 *             city?: string,
-	 *             postcode?: string,
-	 *             country_code?: string,
+	 *             line_1: string,
+	 *             line_2: string,
+	 *             city: string,
+	 *             postcode: string,
+	 *             country_code: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
@@ -127,11 +214,11 @@ class CustomerService {
 	 *     shipping?: array{
 	 *         address_match?: bool,
 	 *         address?: array{
-	 *             line_1?: string,
-	 *             line_2?: string,
-	 *             city?: string,
-	 *             postcode?: string,
-	 *             country_code?: string,
+	 *             line_1: string,
+	 *             line_2: string,
+	 *             city: string,
+	 *             postcode: string,
+	 *             country_code: string,
 	 *             state?: string
 	 *         },
 	 *         email?: string
@@ -151,15 +238,6 @@ class CustomerService {
 		}
 
 		$billing_address = $this->format_address_data( $billing_address );
-
-		// If we don't have any billing address data just return $customer_data.
-		if ( ! $billing_address ) {
-			if ( $add_email_to_address ) {
-				$customer_data['billing']['email'] = $customer_data['email'];
-			}
-
-			return $customer_data;
-		}
 
 		$customer_data['billing']['address'] = $billing_address;
 		if ( $add_email_to_address ) {

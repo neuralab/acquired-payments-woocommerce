@@ -1,6 +1,6 @@
 {
   "name": "acquired-com-for-woocommerce",
-  "version": "2.0.0-beta.4",
+  "version": "2.0.0-beta.5",
   "description": "Securely accept Cards, Apple Pay & Google Pay on your store using Acquired.com",
   "scripts": {
     "lint": "npm run lint:js",
@@ -15,7 +15,7 @@
     "plugin"
   ],
   "author": "Acquired",
-  "license": "GPL-3.0-only",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Neuralab/acquired-com-for-woocommerce/issues"
   },
