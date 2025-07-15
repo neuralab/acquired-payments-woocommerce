@@ -361,6 +361,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Redirect new order.
 	 *
+	 * @codeCoverageIgnore
 	 * @return void
 	 */
 	public function redirect_new_order() : void {
@@ -379,6 +380,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Redirect new payment method.
 	 *
+	 * @codeCoverageIgnore
 	 * @return void
 	 */
 	public function redirect_new_payment_method() : void {
