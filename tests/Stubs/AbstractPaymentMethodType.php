@@ -3,14 +3,12 @@
  * AbstractPaymentMethodType stub class.
  */
 
-declare(strict_types=1);
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 /**
  * AbstractPaymentMethodType class.
- *
- * @since 2.6.0
  */
 abstract class AbstractPaymentMethodType {
 	/**
