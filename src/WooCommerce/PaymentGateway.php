@@ -273,23 +273,31 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Process capture payment.
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order|null $order
 	 * @return void
 	 */
 	public function process_capture( WC_Order|null $order ) : void {
-		$captured = $order ? $this->order_service->capture_order( $order ) : 'error';
-		$this->admin_service->add_order_notice( $order->get_id(), 'capture_transaction', $captured );
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger_service->log( 'Order not found for capture payment action.' );
+			return;
+		}
+
+		$this->admin_service->add_order_notice( $order->get_id(), 'capture_transaction', $this->order_service->capture_order( $order ) );
 	}
 
 	/**
 	 * Process cancel order.
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order|null $order
 	 * @return void
 	 */
 	public function process_cancellation( WC_Order|null $order ) : void {
-		$cancelled = $order ? $this->order_service->cancel_order( $order ) : 'error';
-		$this->admin_service->add_order_notice( $order->get_id(), 'cancel_order', $cancelled );
+		if ( ! $order instanceof WC_Order ) {
+			$this->logger_service->log( 'Order not found for cancel order action.' );
+			return;
+		}
+
+		$this->admin_service->add_order_notice( $order->get_id(), 'cancel_order', $this->order_service->cancel_order( $order ) );
 	}
 
 	/**
