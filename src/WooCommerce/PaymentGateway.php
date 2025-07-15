@@ -430,8 +430,8 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Validate URL field.
 	 *
-	 * @param [type] $key
-	 * @param [type] $value
+	 * @param string $key
+	 * @param string $value
 	 * @return void
 	 * @throws Exception
 	 */
