@@ -9,6 +9,7 @@
   <source>
     <include>
       <directory suffix=".php">src</directory>
+      <file>acquired-com-for-woocommerce.php</file>
     </include>
   </source>
 </phpunit>

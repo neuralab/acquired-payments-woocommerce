@@ -30,6 +30,8 @@ use DI\ContainerBuilder;
 use function DI\autowire;
 use \Automattic\WooCommerce\Utilities\LoggingUtil;
 
+// @codeCoverageIgnoreStart
+
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /**
@@ -99,3 +101,5 @@ $builder->addDefinitions(
 );
 
 return $builder->build();
+
+// @codeCoverageIgnoreEnd

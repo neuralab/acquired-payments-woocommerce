@@ -24,6 +24,8 @@ declare( strict_types = 1 );
 
 namespace AcquiredComForWooCommerce;
 
+// @codeCoverageIgnoreStart
+
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /**
@@ -177,3 +179,5 @@ if ( ! defined( 'ACFW_WC_VERSION' ) ) {
 		}
 	);
 } )();
+
+// @codeCoverageIgnoreEnd
