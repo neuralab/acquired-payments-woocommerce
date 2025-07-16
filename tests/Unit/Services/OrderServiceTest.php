@@ -107,12 +107,12 @@ class OrderServiceTest extends TestCase {
 		$this->get_settings_service()
 			->shouldReceive( 'get_wc_hold_stock_time' )
 			->once()
-			->andReturn( 120 );
+			->andReturn( 300 );
 
 		$this->get_settings_service()
 			->shouldReceive( 'get_payment_link_max_expiration_time' )
 			->once()
-			->andReturn( 3600 );
+			->andReturn( 2678400 );
 	}
 
 	/**
@@ -593,9 +593,6 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_expiration_time_with_disabled_hold_stock() : void {
-		// Mock WC_Order
-		$order = Mockery::mock( 'WC_Order' );
-
 		// Mock SettingsService.
 
 		$this->get_settings_service()
@@ -606,10 +603,10 @@ class OrderServiceTest extends TestCase {
 		$this->get_settings_service()
 			->shouldReceive( 'get_payment_link_expiration_time' )
 			->once()
-			->andReturn( 3600 );
+			->andReturn( 300 ); // 5 minutes.
 
 		// Test the method.
-		$this->assertEquals( 3600, $this->get_private_method_value( 'get_payment_link_expiration_time', $order ) );
+		$this->assertEquals( 300, $this->get_private_method_value( 'get_payment_link_expiration_time' ) );
 	}
 
 	/**
@@ -619,28 +616,19 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_expiration_time_with_enabled_hold_stock() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
-		// Mock WC_Order.
-		$order = Mockery::mock( 'WC_Order' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
-
 		// Mock SettingsService.
 		$this->get_settings_service()
 			->shouldReceive( 'get_wc_hold_stock_time' )
 			->once()
-			->andReturn( 60 ); // 60 minutes.
+			->andReturn( 600 ); // 10 minutes.
 
 		$this->get_settings_service()
 			->shouldReceive( 'get_payment_link_max_expiration_time' )
 			->once()
-			->andReturn( 7200 ); // 2 hours.
+			->andReturn( 2678400 ); // 31 days (maximum time allowed by the API).
 
-		// Should be close to 55 minutes (60 minutes - 5 minutes elapsed).
-		$this->assertEqualsWithDelta( 3300, $this->get_private_method_value( 'get_payment_link_expiration_time', $order ), 5 );
+		// Test the method.
+		$this->assertEquals( 600, $this->get_private_method_value( 'get_payment_link_expiration_time' ) );
 	}
 
 	/**
@@ -650,29 +638,20 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_expiration_time_with_max_limit() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
-		// Mock WC_Order.
-		$order = Mockery::mock( 'WC_Order' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
-
 		// Mock SettingsService.
 
 		$this->get_settings_service()
 			->shouldReceive( 'get_wc_hold_stock_time' )
 			->once()
-			->andReturn( 120 ); // 120 minutes.
+			->andReturn( 2678401 ); // Exceeds the maximum time by 1 second.
 
 		$this->get_settings_service()
 			->shouldReceive( 'get_payment_link_max_expiration_time' )
 			->once()
-			->andReturn( 3600 ); // 1 hour.
+			->andReturn( 2678400 ); // 31 days (maximum time allowed by the API).
 
 		// Test the method.
-		$this->assertEquals( 3600, $this->get_private_method_value( 'get_payment_link_expiration_time', $order ) );
+		$this->assertEquals( 2678400, $this->get_private_method_value( 'get_payment_link_expiration_time' ) );
 	}
 
 	/**
@@ -682,18 +661,12 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_body() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
 		$order->shouldReceive( 'get_currency' )->once()->andReturn( 'GBP' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
 		$order->shouldReceive( 'get_order_key' )->once()->andReturn( 'wc_order_key' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
 
 		// Mock link body creation.
 		$this->mock_get_payment_link_default_body_creation();
@@ -728,7 +701,7 @@ class OrderServiceTest extends TestCase {
 			'redirect_url' => 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-order',
 			'webhook_url'  => 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook',
 			'submit_type'  => 'pay',
-			'expires_in'   => 3600,
+			'expires_in'   => 300,
 		];
 
 		$this->assertEquals( $expected, $this->get_private_method_value( 'get_payment_link_body', $order ) );
@@ -741,18 +714,12 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_body_with_customer_data() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
 		$order->shouldReceive( 'get_currency' )->once()->andReturn( 'GBP' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
 		$order->shouldReceive( 'get_order_key' )->once()->andReturn( 'wc_order_key' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
 
 		// Mock link body creation.
 		$this->mock_get_payment_link_default_body_creation();
@@ -787,7 +754,7 @@ class OrderServiceTest extends TestCase {
 			'redirect_url' => 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-order',
 			'webhook_url'  => 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook',
 			'submit_type'  => 'pay',
-			'expires_in'   => 3600,
+			'expires_in'   => 300,
 			'customer'     => [ 'customer_id' => '789' ],
 		];
 
@@ -801,18 +768,12 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_body_with_payment_method_data() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
 		$order->shouldReceive( 'get_currency' )->once()->andReturn( 'GBP' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
 		$order->shouldReceive( 'get_order_key' )->once()->andReturn( 'wc_order_key' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
 
 		// Mock link body creation.
 		$this->mock_get_payment_link_default_body_creation();
@@ -848,7 +809,7 @@ class OrderServiceTest extends TestCase {
 			'redirect_url' => 'https://example.com/wc-api/acquired-com-for-woocommerce-redirect-new-order',
 			'webhook_url'  => 'https://example.com/wc-api/acquired-com-for-woocommerce-webhook',
 			'submit_type'  => 'pay',
-			'expires_in'   => 3600,
+			'expires_in'   => 300,
 			'customer'     => [ 'customer_id' => '789' ],
 		];
 
@@ -925,11 +886,6 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_with_successful_response() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
 		// Mock WC_Order
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->twice()->andReturn( 123 );
@@ -937,7 +893,6 @@ class OrderServiceTest extends TestCase {
 		$order->shouldReceive( 'get_currency' )->once()->andReturn( 'GBP' );
 		$order->shouldReceive( 'get_meta' )->once()->with( '_acfw_order_state' )->andReturn( '' );
 		$order->shouldReceive( 'get_order_key' )->once()->andReturn( 'wc_order_key' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
 		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_transaction_type', 'capture' );
 		$order->shouldReceive( 'save' )->once();
 
@@ -1010,11 +965,6 @@ class OrderServiceTest extends TestCase {
 	 * @return void
 	 */
 	public function test_get_payment_link_with_error_response() : void {
-		// Mock WC_DateTime.
-		$modified_time = time() - 300; // 5 minutes ago.
-		$date_modified = Mockery::mock( 'WC_DateTime' );
-		$date_modified->shouldReceive( 'getTimestamp' )->once()->andReturn( $modified_time );
-
 		// Mock WC_Order
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->twice()->andReturn( 123 );
@@ -1022,7 +972,6 @@ class OrderServiceTest extends TestCase {
 		$order->shouldReceive( 'get_currency' )->once()->andReturn( 'GBP' );
 		$order->shouldReceive( 'get_meta' )->once()->with( '_acfw_order_state' )->andReturn( '' );
 		$order->shouldReceive( 'get_order_key' )->once()->andReturn( 'wc_order_key' );
-		$order->shouldReceive( 'get_date_modified' )->once()->andReturn( $date_modified );
 		$order->shouldReceive( 'add_order_note' )->once()->with( 'Payment link creation failed. Error message' );
 
 		// Mock wc_get_order.
