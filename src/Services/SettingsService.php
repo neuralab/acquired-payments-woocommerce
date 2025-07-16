@@ -303,7 +303,7 @@ class SettingsService {
 	}
 
 	/**
-	 * Get payment link expiration time.
+	 * Get payment link expiration time in seconds.
 	 *
 	 * @return int
 	 */
@@ -312,7 +312,7 @@ class SettingsService {
 	}
 
 	/**
-	 * Get payment link max expiration time.
+	 * Get payment link max expiration time in seconds.
 	 *
 	 * @return int
 	 */
@@ -330,7 +330,7 @@ class SettingsService {
 	}
 
 	/**
-	 * Get WooCommerce hold stock time.
+	 * Get WooCommerce hold stock time in seconds.
 	 *
 	 * @return int
 	 */
@@ -338,7 +338,11 @@ class SettingsService {
 		$duration     = (int) get_option( 'woocommerce_hold_stock_minutes' );
 		$manage_stock = 'yes' === get_option( 'woocommerce_manage_stock' );
 
-		return $manage_stock && $duration > 1 ? $duration : 0;
+		if ( $manage_stock && $duration > 1 ) {
+			return ( $duration * 60 ); // Convert minutes to seconds.
+		} else {
+			return 0;
+		}
 	}
 
 	/**

@@ -154,20 +154,14 @@ class OrderService {
 	 *
 	 * @return int
 	 */
-	private function get_payment_link_expiration_time( WC_Order $order ) : int {
+	private function get_payment_link_expiration_time() : int {
 		$hold_stock = $this->settings_service->get_wc_hold_stock_time();
 
 		if ( $hold_stock <= 0 ) {
 			return $this->settings_service->get_payment_link_expiration_time();
 		}
 
-		$hold_stock_seconds = ( $hold_stock * 60 );
-		$elapsed_time       = time() - $order->get_date_modified()->getTimestamp();
-		$remaining_time     = $hold_stock_seconds - $elapsed_time;
-
-		$expiration_time = min( $hold_stock_seconds, $remaining_time );
-
-		return min( $expiration_time, $this->settings_service->get_payment_link_max_expiration_time() );
+		return min( $hold_stock, $this->settings_service->get_payment_link_max_expiration_time() );
 	}
 
 	/**
@@ -243,7 +237,7 @@ class OrderService {
 		$body['redirect_url'] = $this->settings_service->get_wc_api_url( 'redirect-new-order' );
 		$body['webhook_url']  = $this->settings_service->get_wc_api_url( 'webhook' );
 		$body['submit_type']  = $this->settings_service->get_option( 'submit_type', 'pay' );
-		$body['expires_in']   = $this->get_payment_link_expiration_time( $order );
+		$body['expires_in']   = $this->get_payment_link_expiration_time();
 
 		$customer_data = $this->customer_service->get_customer_data_for_checkout( $order );
 		if ( $customer_data ) {
