@@ -1,3 +1,3 @@
 {
-  "redefinable-internals": ["class_exists", "file_exists", "json_decode", "time"]
+  "redefinable-internals": ["class_exists", "dirname", "file_exists", "file_get_contents", "json_decode", "time"]
 }

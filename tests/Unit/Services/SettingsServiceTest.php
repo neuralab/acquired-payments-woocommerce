@@ -517,14 +517,14 @@ class SettingsServiceTest extends TestCase {
 		Functions\expect( 'get_option' )
 			->once()
 			->with( 'woocommerce_hold_stock_minutes' )
-			->andReturn( '60' );
+			->andReturn( '60' ); // 3600 seconds.
 
 		Functions\expect( 'get_option' )
 			->once()
 			->with( 'woocommerce_manage_stock' )
 			->andReturn( 'yes' );
 
-		$this->assertEquals( 60, $this->service->get_wc_hold_stock_time() );
+		$this->assertEquals( 3600, $this->service->get_wc_hold_stock_time() );
 
 		// Test WooCommerce hold stock time when hold stock minutes is missing.
 
@@ -545,7 +545,7 @@ class SettingsServiceTest extends TestCase {
 		Functions\expect( 'get_option' )
 			->once()
 			->with( 'woocommerce_hold_stock_minutes' )
-			->andReturn( '60' );
+			->andReturn( '60' ); // 3600 seconds.
 
 		Functions\expect( 'get_option' )
 			->once()
