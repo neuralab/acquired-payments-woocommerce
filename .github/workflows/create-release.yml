@@ -41,6 +41,7 @@ jobs:
             -x ".github/*" \
             -x "node_modules/*" \
             -x "tests/*" \
+            -x ".wordpress-org/*" \
             -x ".editorconfig" \
             -x ".eslintrc.json" \
             -x ".gitattributes" \
