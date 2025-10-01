@@ -43,6 +43,7 @@ jobs:
             -x "tests/*" \
             -x ".wordpress-org/*" \
             -x ".editorconfig" \
+            -x ".distignore" \
             -x ".eslintrc.json" \
             -x ".gitattributes" \
             -x ".gitignore" \
