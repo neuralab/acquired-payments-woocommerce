@@ -59,6 +59,6 @@ jobs:
             -x "webpack.mix.js"
 
       - name: Upload release asset
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: acquired-com-for-woocommerce.zip
