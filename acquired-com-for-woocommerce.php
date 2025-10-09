@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Acquired.com for WooCommerce
  * Description: Securely accept Cards, Apple Pay & Google Pay on your store using Acquired.com.
- * Version: 2.0.0-beta.6
+ * Version: 2.0.0-beta.7
  * Author: Acquired
  * Author URI: https://acquired.com
  *
@@ -17,7 +17,7 @@
  * Requires Plugins:  woocommerce
  *
  * WC requires at least: 8.1
- * WC tested up to:      9.9.3
+ * WC tested up to:      10.2.2
  */
 
 declare( strict_types = 1 );
@@ -44,7 +44,7 @@ if ( ! defined( 'ACFW_PLUGIN_BASENAME' ) ) {
 	define( 'ACFW_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 }
 if ( ! defined( 'ACFW_VERSION' ) ) {
-	define( 'ACFW_VERSION', '2.0.0-beta.6' );
+	define( 'ACFW_VERSION', '2.0.0-beta.7' );
 }
 if ( ! defined( 'ACFW_PHP_VERSION' ) ) {
 	define( 'ACFW_PHP_VERSION', '8.1' );
