@@ -43,6 +43,9 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
           SLUG: acquired-payments-gateway-for-woocommerce
 
+      - name: List current directory
+        run: ls -al
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
