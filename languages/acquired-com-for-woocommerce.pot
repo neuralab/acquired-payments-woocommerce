@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-10-01T15:15:10+00:00\n"
+"POT-Creation-Date: 2025-10-20T15:21:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: acquired-com-for-woocommerce\n"
@@ -604,12 +604,10 @@ msgstr ""
 msgid "Invalid format for \"%s\" field."
 msgstr ""
 
-#: assets/dist/js/acfw-admin-order.js:1
 #: assets/src/js/acfw-admin-order.js:12
 msgid "Are you sure you want to capture this payment? This action can't be undone."
 msgstr ""
 
-#: assets/dist/js/acfw-admin-order.js:1
 #: assets/src/js/acfw-admin-order.js:13
 msgid "Are you sure you want to cancel this order? This action can't be undone."
 msgstr ""
