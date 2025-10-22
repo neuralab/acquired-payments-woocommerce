@@ -8,45 +8,60 @@ Stable tag: 2.0.0
 License: MIT License
 License URI: https://opensource.org/license/mit
 
+Accept Cards, Apple Pay, Google Pay, and Pay by Bank with Acquired.com — a secure, high-performance payment gateway for WooCommerce.
+
 == Description ==
 
-# Accept payments with Acquired.com
+Take your checkout experience to the next level with Acquired.com for WooCommerce — a modern, high-performance payments extension built for growing businesses.
 
-The Acquired.com for WooCommerce extension enables your business to securely accept payments by Card, Apple Pay & Google Pay to help you generate more sales.
+Accept Cards, Apple Pay, Google Pay, and Pay by Bank through Acquired.com’s secure and scalable platform. Designed for flexibility and reliability, this plugin helps merchants offer more ways to pay while keeping setup and compliance simple.
 
-== Features ==
+== Key Features ==
+- **Card Payments** - Securely accept Visa, Mastercard, and American Express with EMV 3-D Secure (v2.2), providing enhanced security and frictionless authentication.
+- **Apple Pay & Google Pay** - Enable Apple Pay and Google Pay through Acquired.com’s Hosted Checkout, giving customers a simple, one-tap payment experience on supported devices — no additional setup required.
+- **Smart Card Management** - Keep your customers’ card details up to date — even when cards expire or are replaced. Acquired.com’s Network Tokenization and Account Updater services ensure stored cards remain valid, allowing repeat payments to continue seamlessly without customer action.
+- **Pay by Bank (Open Banking)** - Let customers pay directly from their bank account in real time — no cards required. Pay by Bank offers instant authorisation, lower fees, and reduced fraud risk, making it an ideal alternative payment option.
+- **Customisable Checkout** - Match your brand with a fully configurable checkout experience. Adjust styling, layout, and colours to blend seamlessly into your store.
+- **Payment Management** - Manage and update payment statuses directly within WooCommerce — view transaction history and process refunds from your store dashboard.
+- **PCI DSS Simplified** - Stay fully compliant with minimal effort using Acquired.com’s SAQ-A hosted solution, keeping sensitive data off your servers.
 
-- **Pay by Card:** Securely accept Visa, Mastercard & American Express using EMV 3-D Secure (version 2.2)
-- **Digital Wallets:** Add Apple Pay & Google Pay to the Product, Cart or Checkout pages of your store to deliver a seamless checkout experience
-- **Customisable Checkout:** Match your brand with full control to style the payment form to meet your requirements
-- **Saved Cards:** Enable faster checkout for returning customers by letting them reuse previously stored cards
-- **Manage your payments:** Update the payment statuses from within WooCommerce
-- **Always available:** Excellent customer service and reliability (99.999% uptime) at our core
-- **PCI DSS:** Remain fully compliant with the lowest amount of effort (SAQ-A) using our hosted solution
+== Why choose Acquired.com? ==
+Acquired.com powers payments for leading UK eCommerce and Financial Services businesses.
 
-== Quick & Easy Setup ==
+Our platform supports multiple payment methods, real-time bank payments, and secure card processing, all through one unified system.
 
-Please [contact us](https://acquired.com/contact) to get a test account so you can try out the extension.
+With a UK-based support team and enterprise-grade infrastructure, Acquired.com is built to help merchants grow confidently and securely.
 
-1. Access your WordPress dashboard.
-2. Select **Plugins** from the left navigation menu followed by **Add New**
-3. Search for **Acquired.com** using the top right-hand corner search box
-4. Select **Install Now**
-5. Once Installed you can enable and configure all things payments in the WooCommerce settings
-6. Configure a few basic details and you are up and running
+== Installation ==
+1. [Contact us](https://www.acquired.com/contact/) to request a test account.
+2. In your WordPress dashboard, go to Plugins → Add New.
+3. Search for Acquired.com and click Install Now.
+4. Activate the plugin and navigate to WooCommerce → Settings → Payments.
+5. Enter your Acquired.com credentials and enable your preferred payment methods — Cards, Apple Pay, Google Pay, or Pay by Bank.
 
-Read our documentation [here](https://docs.acquired.com/docs/woocommerce-1) and our support teams are on hand to help with any questions you might have so please [contact us](https://acquired.com/contact).
+You’re now ready to start accepting payments with Acquired.com.
 
-== Screenshots ==
+For detailed setup instructions, visit our [WooCommerce integration guide](https://docs.acquired.com/docs/woocommerce-v2).
 
-1. Configuration
-2. Card Payment
-3. Apple Pay
-4. Google Pay
+== Frequently Asked Questions ==
+= Do I need an Acquired.com account to use this plugin? =
+Yes. You’ll need an Acquired.com merchant account to process payments. Contact us to get started.
+
+= Is Acquired.com PCI DSS compliant? =
+Yes. Acquired.com is PCI DSS Level 1 compliant. Using this plugin via Hosted Checkout keeps you within SAQ-A scope.
+
+= Can I use Apple Pay or Google Pay with this plugin? =
+Yes. Both Apple Pay and Google Pay are available via the Hosted Checkout integration.
+
+= Does this plugin support recurring payments or WooCommerce Subscriptions? =
+Not at this time. The plugin currently supports one-off and stored card payments only.
+
+= Where can I get support? =
+Our UK-based support team is available to help you. [Contact support](https://www.acquired.com/contact/) or visit our [Developer Documentation](https://docs.acquired.com/docs/woocommerce-v2).
 
 == Changelog ==
 
-= 2.0.0 =
+= 2.0.0 - 2025/10/22 =
 * Release version 2.0.0
 
 = 1.3.3 - 2024/08/09 =
