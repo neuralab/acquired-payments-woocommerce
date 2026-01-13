@@ -14,7 +14,7 @@
       "AcquiredComForWooCommerce\\": "src/"
     },
     "files": [
-      "src/Dependencies/DI/functions.php"
+      "src/mozart-functions-bootstrap.php"
     ]
   },
   "autoload-dev": {
@@ -52,13 +52,13 @@
     ],
     "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce",
     "post-install-cmd": [
-      "\"vendor/bin/mozart\" compose",
-      "php -r \"$content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content);\"",
+      "php -r \"if (file_exists('vendor/bin/mozart')) { system('\\\"vendor/bin/mozart\\\" compose'); }\"",
+      "php -r \"if (file_exists('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php')) { $content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content); }\"",
       "composer dump-autoload"
     ],
     "post-update-cmd": [
-      "\"vendor/bin/mozart\" compose",
-      "php -r \"$content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content);\"",
+      "php -r \"if (file_exists('vendor/bin/mozart')) { system('\\\"vendor/bin/mozart\\\" compose'); }\"",
+      "php -r \"if (file_exists('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php')) { $content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content); }\"",
       "composer dump-autoload"
     ]
   },
