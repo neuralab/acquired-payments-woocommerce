@@ -9,6 +9,7 @@ node_modules/
 
 # Composer
 /vendor
+/src/Dependencies
 
 # Compiled assets
 /assets/dist

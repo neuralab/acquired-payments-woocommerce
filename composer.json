@@ -12,7 +12,10 @@
   "autoload": {
     "psr-4": {
       "AcquiredComForWooCommerce\\": "src/"
-    }
+    },
+    "files": [
+      "src/Dependencies/DI/functions.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
@@ -27,7 +30,8 @@
   "require-dev": {
     "neuralab/coding-standards": "^1.0",
     "brain/monkey": "2.*",
-    "phpunit/phpunit": "^10.5"
+    "phpunit/phpunit": "^10.5",
+    "coenjacobs/mozart": "^0.7.1"
   },
   "config": {
     "optimize-autoloader": true,
@@ -46,6 +50,28 @@
       "@putenv XDEBUG_MODE=coverage",
       "php ./vendor/bin/phpunit --coverage-html coverage-report"
     ],
-    "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce"
+    "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce",
+    "post-install-cmd": [
+      "\"vendor/bin/mozart\" compose",
+      "php -r \"$content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content);\"",
+      "composer dump-autoload"
+    ],
+    "post-update-cmd": [
+      "\"vendor/bin/mozart\" compose",
+      "php -r \"$content = file_get_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php'); $content = str_replace('private ?AcquiredComForWooCommerce\\\\Dependencies\\\\Invoker $invoker', 'private ?Invoker $invoker', $content); file_put_contents('src/Dependencies/DI/Definition/Resolver/FactoryResolver.php', $content);\"",
+      "composer dump-autoload"
+    ]
+  },
+  "extra": {
+    "mozart": {
+      "dep_namespace": "AcquiredComForWooCommerce\\Dependencies\\",
+      "dep_directory": "/src/Dependencies/",
+      "classmap_directory": "/classes/dependencies/",
+      "classmap_prefix": "AcquiredComForWooCommerce_",
+      "packages": [
+        "php-di/php-di",
+        "guzzlehttp/guzzle"
+      ]
+    }
   }
 }

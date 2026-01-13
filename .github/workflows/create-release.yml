@@ -29,6 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+          composer install
           composer install --no-dev
 
       - name: Build assets

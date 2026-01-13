@@ -10,7 +10,7 @@ namespace AcquiredComForWooCommerce\Tests\Framework\Traits;
 use AcquiredComForWooCommerce\Api\ApiClient;
 use AcquiredComForWooCommerce\Services\LoggerService;
 use AcquiredComForWooCommerce\Services\SettingsService;
-use GuzzleHttp\Client;
+use AcquiredComForWooCommerce\Dependencies\GuzzleHttp\Client;
 use Mockery;
 use Mockery\MockInterface;
 

@@ -23,7 +23,7 @@ use AcquiredComForWooCommerce\Tests\Framework\Traits\LoggerServiceMock;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\SettingsServiceMock;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\Reflection;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\ResponseMock;
-use GuzzleHttp\Client;
+use AcquiredComForWooCommerce\Dependencies\GuzzleHttp\Client;
 use Mockery;
 use Brain\Monkey\Functions;
 use Mockery\MockInterface;

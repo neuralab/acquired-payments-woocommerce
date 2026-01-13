@@ -8,10 +8,10 @@ declare( strict_types = 1 );
 namespace AcquiredComForWooCommerce\Tests\Framework\Traits;
 
 use Mockery;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
-use Psr\Http\Message\RequestInterface;
-use GuzzleHttp\Exception\RequestException;
+use AcquiredComForWooCommerce\Dependencies\Psr\Http\Message\ResponseInterface;
+use AcquiredComForWooCommerce\Dependencies\Psr\Http\Message\StreamInterface;
+use AcquiredComForWooCommerce\Dependencies\Psr\Http\Message\RequestInterface;
+use AcquiredComForWooCommerce\Dependencies\GuzzleHttp\Exception\RequestException;
 use stdClass;
 use RuntimeException;
 

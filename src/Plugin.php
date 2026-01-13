@@ -7,7 +7,7 @@ declare( strict_types = 1 );
 
 namespace AcquiredComForWooCommerce;
 
-use Psr\Container\ContainerInterface;
+use AcquiredComForWooCommerce\Dependencies\Psr\Container\ContainerInterface;
 use AcquiredComForWooCommerce\Services\ObserverService;
 use AcquiredComForWooCommerce\Services\SettingsService;
 use AcquiredComForWooCommerce\WooCommerce\PaymentGateway;
