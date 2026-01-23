@@ -80,7 +80,7 @@ if ( ! defined( 'ACFW_WC_VERSION' ) ) {
 	/**
 	 * Autoload.
 	 */
-	$autoload_path = __DIR__ . '/vendor/autoload.php';
+	$autoload_path = __DIR__ . '/vendor-build/autoload.php';
 	if ( file_exists( $autoload_path ) && ! class_exists( '\AcquiredComForWooCommerce\Plugin' ) ) {
 		require $autoload_path;
 	}

@@ -9,6 +9,8 @@ node_modules/
 
 # Composer
 /vendor
+/vendor-bin
+/vendor-build
 
 # Compiled assets
 /assets/dist

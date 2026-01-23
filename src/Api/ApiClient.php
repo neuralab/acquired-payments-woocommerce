@@ -19,8 +19,8 @@ use AcquiredComForWooCommerce\Api\Response\Transaction;
 use AcquiredComForWooCommerce\Api\Response\TransactionCapture;
 use AcquiredComForWooCommerce\Api\Response\TransactionRefund;
 use AcquiredComForWooCommerce\Api\Response\TransactionCancel;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use AcquiredComForWooCommerce\Dependency\GuzzleHttp\Client;
+use AcquiredComForWooCommerce\Dependency\GuzzleHttp\Exception\RequestException;
 use Exception;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.

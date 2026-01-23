@@ -10,8 +10,8 @@ namespace AcquiredComForWooCommerce\Api\Response;
 use Exception;
 use stdClass;
 use RuntimeException;
-use Psr\Http\Message\ResponseInterface;
-use GuzzleHttp\Exception\RequestException;
+use AcquiredComForWooCommerce\Dependency\Psr\Http\Message\ResponseInterface;
+use AcquiredComForWooCommerce\Dependency\GuzzleHttp\Exception\RequestException;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 

@@ -26,8 +26,8 @@ use AcquiredComForWooCommerce\Services\ScheduleService;
 use AcquiredComForWooCommerce\Services\TokenService;
 use AcquiredComForWooCommerce\WooCommerce\PaymentGateway;
 use AcquiredComForWooCommerce\WooCommerce\PaymentMethod;
-use DI\ContainerBuilder;
-use function DI\autowire;
+use AcquiredComForWooCommerce\Dependency\DI\ContainerBuilder;
+use function AcquiredComForWooCommerce\Dependency\DI\autowire;
 use \Automattic\WooCommerce\Utilities\LoggingUtil;
 
 // @codeCoverageIgnoreStart

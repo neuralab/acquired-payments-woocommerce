@@ -36,16 +36,28 @@
     }
   },
   "scripts": {
-    "lint": "php ./vendor/bin/phpcs . --report=source",
-    "test": "php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
+    "lint": "@php ./vendor-build/bin/phpcs . --report=source",
+    "test": "@php ./vendor-build/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
     "test-coverage": [
       "@putenv XDEBUG_MODE=coverage",
-      "php ./vendor/bin/phpunit --coverage-text"
+      "@php ./vendor-build/bin/phpunit --coverage-text"
     ],
     "test-coverage-report": [
       "@putenv XDEBUG_MODE=coverage",
-      "php ./vendor/bin/phpunit --coverage-html coverage-report"
+      "@php ./vendor-build/bin/phpunit --coverage-html coverage-report"
     ],
-    "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce"
+    "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce",
+    "scope": [
+      "rm -rf ./vendor-build",
+      "php-scoper add-prefix --force",
+      "@putenv COMPOSER_VENDOR_DIR=vendor-build",
+      "@composer dump-autoload"
+    ],
+    "post-install-cmd": [
+      "@scope"
+    ],
+    "post-update-cmd": [
+      "@scope"
+    ]
   }
 }

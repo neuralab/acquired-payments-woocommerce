@@ -24,7 +24,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          tools: composer:v2
+          tools: composer:v2, php-scoper
 
       - name: Install dependencies
         run: |
@@ -48,6 +48,7 @@ jobs:
             -x ".gitattributes" \
             -x ".gitignore" \
             -x "CHANGELOG.md" \
+            -x "vendor/*" \
             -x "composer.json" \
             -x "composer.lock" \
             -x "package.json" \

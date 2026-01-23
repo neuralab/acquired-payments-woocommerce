@@ -15,7 +15,7 @@ use AcquiredComForWooCommerce\Services\ObserverService;
 use AcquiredComForWooCommerce\Services\SettingsService;
 use AcquiredComForWooCommerce\WooCommerce\PaymentGateway;
 use AcquiredComForWooCommerce\WooCommerce\PaymentMethod;
-use Psr\Container\ContainerInterface;
+use AcquiredComForWooCommerce\Dependency\Psr\Container\ContainerInterface;
 use Mockery;
 use Mockery\MockInterface;
 use Brain\Monkey\Actions;

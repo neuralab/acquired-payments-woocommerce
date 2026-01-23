@@ -66,7 +66,9 @@ jobs:
         run: scp -r ./* wordpress:~/${{ env.TEMP_DEPLOY_DEST }}
 
       - name: Install Composer Dependencies
-        run: ssh wordpress 'cd ~/${{ env.TEMP_DEPLOY_DEST }} && composer install --no-dev'
+        run: |
+          ssh wordpress 'cd ~/${{ env.TEMP_DEPLOY_DEST }} && composer global require humbug/php-scoper'
+          ssh wordpress 'cd ~/${{ env.TEMP_DEPLOY_DEST }} && composer install --no-dev'
 
       - name: Enable Maintenance Mode
         run: ssh wordpress 'cd public_html && /usr/local/bin/wp maintenance-mode activate'
@@ -78,6 +80,7 @@ jobs:
           mkdir -p wp-content/plugins/acquired-com-for-woocommerce
           rm -rf wp-content/plugins/acquired-com-for-woocommerce/*
           rm -rf ~/${{ env.TEMP_DEPLOY_DEST }}/.github
+          rm -rf ~/${{ env.TEMP_DEPLOY_DEST }}/vendor
           cp -rf ~/${{ env.TEMP_DEPLOY_DEST }}/* wp-content/plugins/acquired-com-for-woocommerce/
           rm -rf ~/${{ env.TEMP_DEPLOY_DEST }}
           EOF
