@@ -156,12 +156,10 @@ class PaymentMethodService {
 
 		if ( $response->is_active() ) {
 			return $response;
+		} elseif ( $response->request_is_error() ) {
+			throw new Exception( 'Card retrieval failed.' );
 		} else {
-			if ( $response->request_is_error() ) {
-				throw new Exception( 'Card retrieval failed.' );
-			} else {
-				throw new Exception( 'Card is not active.' );
-			}
+			throw new Exception( 'Card is not active.' );
 		}
 	}
 
@@ -177,12 +175,10 @@ class PaymentMethodService {
 
 		if ( $response->request_is_error() ) {
 			throw new Exception( 'Card ID retrieval failed.' );
+		} elseif ( $response->get_card_id() ) {
+			return $response->get_card_id();
 		} else {
-			if ( $response->get_card_id() ) {
-				return $response->get_card_id();
-			} else {
-				throw new Exception( 'Card ID not found.' );
-			}
+			throw new Exception( 'Card ID not found.' );
 		}
 	}
 

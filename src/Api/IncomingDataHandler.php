@@ -66,10 +66,8 @@ class IncomingDataHandler {
 				if ( empty( $data[ $field ] ) ) {
 					$missing_fields[] = $field;
 				}
-			} else {
-				if ( empty( $data->{$field} ) ) {
+			} elseif ( empty( $data->{$field} ) ) {
 					$missing_fields[] = $field;
-				}
 			}
 		endforeach;
 
