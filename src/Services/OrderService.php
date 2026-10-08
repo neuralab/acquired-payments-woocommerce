@@ -754,7 +754,8 @@ class OrderService {
 				$log_error = 'Transaction can\'t be refunded until the next day.';
 				break;
 			default:
-				$error = false;
+				$error     = false;
+				$log_error = '';
 				break;
 		}
 
