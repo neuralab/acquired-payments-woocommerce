@@ -16,6 +16,7 @@ use AcquiredComForWooCommerce\Services\PaymentMethodService;
 use Exception;
 use WC_Order;
 use WC_Payment_Gateway;
+use WC_Payment_Token;
 
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 

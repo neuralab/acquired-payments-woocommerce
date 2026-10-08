@@ -14,6 +14,7 @@ use AcquiredComForWooCommerce\Tests\Framework\Traits\SettingsServiceMock;
 use AcquiredComForWooCommerce\Services\AdminService;
 use Brain\Monkey\Functions;
 use Mockery;
+use WC_Order;
 
 /**
  * Test case for AdminService.
