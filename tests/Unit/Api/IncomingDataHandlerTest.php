@@ -54,8 +54,10 @@ class IncomingDataHandlerTest extends TestCase {
 
 	/**
 	 * Set up the test case.
+	 *
+	 * @return void
 	 */
-	protected function setUp() : void {
+	protected function setUp(): void {
 		parent::setUp();
 
 		Functions\stubs(
@@ -81,8 +83,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test sanitize_data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::sanitize_data
+	 * @return void
 	 */
-	public function test_sanitize_data() : void {
+	public function test_sanitize_data(): void {
 		// Test string with HTML.
 		$this->assertEquals(
 			'Hello World',
@@ -138,8 +141,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_required_fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_required_fields
+	 * @return void
 	 */
-	public function test_validate_required_fields_with_valid_fields() : void {
+	public function test_validate_required_fields_with_valid_fields(): void {
 		$array_data = [
 			'field1' => 'value1',
 			'field2' => 'value2',
@@ -153,15 +157,15 @@ class IncomingDataHandlerTest extends TestCase {
 
 		$this->assertNull( $this->get_private_method_value( 'validate_required_fields', $array_data, $this->test_required_fields ) );
 		$this->assertNull( $this->get_private_method_value( 'validate_required_fields', $object_data, $this->test_required_fields ) );
-
 	}
 
 	/**
 	 * Test validate_required_fields with missing fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_required_fields
+	 * @return void
 	 */
-	public function test_validate_required_fields_array_with_missing_fields() : void {
+	public function test_validate_required_fields_array_with_missing_fields(): void {
 		$incomplete_array = [
 			'field1' => 'value1',
 			'field3' => 'value3',
@@ -176,8 +180,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_required_fields with object missing fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_required_fields
+	 * @return void
 	 */
-	public function test_validate_required_fields_object_with_missing_fields() : void {
+	public function test_validate_required_fields_object_with_missing_fields(): void {
 		$incomplete_object         = new stdClass();
 		$incomplete_object->field1 = 'value1';
 		$incomplete_object->field3 = 'value3';
@@ -191,8 +196,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_required_fields with empty array data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_required_fields
+	 * @return void
 	 */
-	public function test_validate_required_fields_array_with_empty_data() : void {
+	public function test_validate_required_fields_array_with_empty_data(): void {
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Missing required fields in webhook: "field1, field2".' );
 		$this->set_private_method_value( 'validate_required_fields', [], $this->test_required_fields, );
@@ -203,7 +209,7 @@ class IncomingDataHandlerTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	public function test_validate_required_fields_object_with_empty_data() : void {
+	public function test_validate_required_fields_object_with_empty_data(): void {
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Missing required fields in webhook: "field1, field2".' );
 		$this->set_private_method_value( 'validate_required_fields', new stdClass(), $this->test_required_fields, );
@@ -213,8 +219,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_redirect_hash.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_redirect_hash
+	 * @return void
 	 */
-	public function test_validate_redirect_hash() : void {
+	public function test_validate_redirect_hash(): void {
 		$redirect_data = $this->get_test_redirect_data();
 
 		// Test with valid data and hash.
@@ -234,8 +241,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_hash.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_hash
+	 * @return void
 	 */
-	public function test_validate_webhook_hash() : void {
+	public function test_validate_webhook_hash(): void {
 		$webhook_data = $this->get_test_webhook_data( 'status_update' );
 		$webhook_json = json_encode( $webhook_data );
 		$hash_valid   = $this->calculate_test_webhook_hash( $webhook_data );
@@ -259,8 +267,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_redirect_data with valid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_redirect_data
+	 * @return void
 	 */
-	public function test_format_redirect_data_with_valid_data() : void {
+	public function test_format_redirect_data_with_valid_data(): void {
 		$this->assertInstanceOf(
 			RedirectData::class,
 			$this->get_private_method_value( 'format_redirect_data', $this->get_test_redirect_data() )
@@ -271,8 +280,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_redirect_data with invalid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_redirect_data
+	 * @return void
 	 */
-	public function test_format_redirect_data_with_invalid_data() : void {
+	public function test_format_redirect_data_with_invalid_data(): void {
 		$data = $this->get_test_redirect_data();
 		unset( $data['status'] );
 
@@ -285,8 +295,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_redirect_data with invalid hash.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_redirect_data
+	 * @return void
 	 */
-	public function test_format_redirect_data_with_invalid_hash() : void {
+	public function test_format_redirect_data_with_invalid_hash(): void {
 		$data         = $this->get_test_redirect_data();
 		$data['hash'] = 'invalid_hash';
 
@@ -299,8 +310,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test that get_webhook_body_requirements returns correct array for status_update type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_body_requirements
+	 * @return void
 	 */
-	public function test_get_webhook_body_requirements_for_status_update() : void {
+	public function test_get_webhook_body_requirements_for_status_update(): void {
 		$result = $this->get_private_method_value( 'get_webhook_body_requirements', 'status_update' );
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'required', $result );
@@ -314,8 +326,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test that get_webhook_body_requirements returns correct array for card_new type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_body_requirements
+	 * @return void
 	 */
-	public function test_get_webhook_body_requirements_for_card_new() : void {
+	public function test_get_webhook_body_requirements_for_card_new(): void {
 		$result = $this->get_private_method_value( 'get_webhook_body_requirements', 'card_new' );
 
 		$this->assertIsArray( $result );
@@ -330,8 +343,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test that get_webhook_body_requirements returns correct array for card_update type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_body_requirements
+	 * @return void
 	 */
-	public function test_get_webhook_body_requirements_for_card_update() : void {
+	public function test_get_webhook_body_requirements_for_card_update(): void {
 		$result = $this->get_private_method_value( 'get_webhook_body_requirements', 'card_update' );
 
 		$this->assertIsArray( $result );
@@ -351,8 +365,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test that get_webhook_body_requirements returns empty array for invalid type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_body_requirements
+	 * @return void
 	 */
-	public function test_get_webhook_body_requirements_returns_empty_array_for_invalid_type() : void {
+	public function test_get_webhook_body_requirements_returns_empty_array_for_invalid_type(): void {
 		$result = $this->get_private_method_value( 'get_webhook_body_requirements', 'invalid_type' );
 
 		$this->assertIsArray( $result );
@@ -363,8 +378,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with valid status_update data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_with_valid_status_update_data() : void {
+	public function test_validate_webhook_body_with_valid_status_update_data(): void {
 		$this->assertNull( $this->get_private_method_value( 'validate_webhook_body', $this->get_test_webhook_data( 'status_update' )->webhook_body, 'status_update' ) );
 	}
 
@@ -372,8 +388,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with valid card_new data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_with_valid_card_new_data() : void {
+	public function test_validate_webhook_body_with_valid_card_new_data(): void {
 		$this->assertNull( $this->get_private_method_value( 'validate_webhook_body', $this->get_test_webhook_data( 'card_new' )->webhook_body, 'card_new' ) );
 	}
 
@@ -381,8 +398,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with valid card_update data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_with_valid_card_update_data() : void {
+	public function test_validate_webhook_body_with_valid_card_update_data(): void {
 		$this->assertNull( $this->get_private_method_value( 'validate_webhook_body', $this->get_test_webhook_data( 'card_update' )->webhook_body, 'card_update' ) );
 	}
 
@@ -390,8 +408,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with invalid webhook type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_throws_exception_for_invalid_type() : void {
+	public function test_validate_webhook_body_throws_exception_for_invalid_type(): void {
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Invalid webhook type: invalid_type.' );
 		$this->set_private_method_value( 'validate_webhook_body', $this->get_test_webhook_data( 'status_update' )->webhook_body, 'invalid_type' );
@@ -401,8 +420,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with missing required fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_throws_exception_for_missing_fields() : void {
+	public function test_validate_webhook_body_throws_exception_for_missing_fields(): void {
 		$body                 = new stdClass();
 		$body->transaction_id = 'test_transaction_456';
 
@@ -415,8 +435,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_body with missing nested fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_body
+	 * @return void
 	 */
-	public function test_validate_webhook_body_throws_exception_for_missing_nested_fields() : void {
+	public function test_validate_webhook_body_throws_exception_for_missing_nested_fields(): void {
 		$data                     = $this->get_test_webhook_data( 'card_update' )->webhook_body;
 		$data->card->number       = null;
 		$data->card->expiry_month = null;
@@ -430,8 +451,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with valid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_valid_data() : void {
+	public function test_format_webhook_data_with_valid_data(): void {
 		$data = $this->get_test_webhook_data( 'status_update' );
 		$hash = $this->calculate_test_webhook_hash( $data );
 
@@ -445,8 +467,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with invalid hash.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_invalid_hash() : void {
+	public function test_format_webhook_data_with_invalid_hash(): void {
 		$data = $this->get_test_webhook_data( 'status_update' );
 		$hash = 'invalid_hash';
 
@@ -459,8 +482,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with invalid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_invalid_data() : void {
+	public function test_format_webhook_data_with_invalid_data(): void {
 		$data = $this->get_test_webhook_data( 'status_update' );
 		$hash = $this->calculate_test_webhook_hash( $data );
 
@@ -475,8 +499,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with invalid fields.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_invalid_fields() : void {
+	public function test_format_webhook_data_with_invalid_fields(): void {
 		$data               = $this->get_test_webhook_data( 'status_update' );
 		$data->webhook_type = '';
 		$hash               = $this->calculate_test_webhook_hash( $data );
@@ -490,8 +515,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with invalid webhook type.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_invalid_webhook_type() : void {
+	public function test_format_webhook_data_with_invalid_webhook_type(): void {
 		$data               = $this->get_test_webhook_data( 'status_update' );
 		$data->webhook_type = 'invalid_type';
 		$hash               = $this->calculate_test_webhook_hash( $data );
@@ -505,8 +531,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test format_webhook_data with invalid webhook body.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_webhook_data
+	 * @return void
 	 */
-	public function test_format_webhook_data_with_invalid_webhook_body() : void {
+	public function test_format_webhook_data_with_invalid_webhook_body(): void {
 		$data                               = $this->get_test_webhook_data( 'status_update' );
 		$data->webhook_body->transaction_id = '';
 		$hash                               = $this->calculate_test_webhook_hash( $data );
@@ -520,8 +547,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test get_redirect_data with valid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_data
+	 * @return void
 	 */
-	public function test_get_redirect_data_with_valid_data() : void {
+	public function test_get_redirect_data_with_valid_data(): void {
 		$data = $this->get_test_redirect_data();
 
 		$this->get_logger_service()->expects( 'log' )
@@ -541,8 +569,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test get_redirect_data with invalid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_data
+	 * @return void
 	 */
-	public function test_get_redirect_data_with_invalid_data() : void {
+	public function test_get_redirect_data_with_invalid_data(): void {
 		$this->get_logger_service()->expects( 'log' )
 			->once()
 			->with(
@@ -560,8 +589,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test get_webhook_data with valid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_data
+	 * @return void
 	 */
-	public function test_get_webhook_data_with_valid_data() : void {
+	public function test_get_webhook_data_with_valid_data(): void {
 		$data = $this->get_test_webhook_data( 'status_update' );
 		$hash = $this->calculate_test_webhook_hash( $data );
 
@@ -582,8 +612,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test get_webhook_data with invalid data.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_webhook_data
+	 * @return void
 	 */
-	public function test_get_webhook_data_with_invalid_data() : void {
+	public function test_get_webhook_data_with_invalid_data(): void {
 		$data = $this->get_test_webhook_data( 'status_update' );
 		$hash = 'invalid_hash';
 
@@ -604,8 +635,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_redirect_hash with comma-delimited hashes (key rotation).
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_redirect_hash
+	 * @return void
 	 */
-	public function test_validate_redirect_hash_with_comma_delimited_hashes() : void {
+	public function test_validate_redirect_hash_with_comma_delimited_hashes(): void {
 		// Test: comma-delimited hash where first hash matches (primary key).
 		$redirect_data = $this->get_test_redirect_data_multi();
 		$this->assertTrue( $this->get_private_method_value( 'validate_redirect_hash', $redirect_data ) );
@@ -628,8 +660,9 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_hash with comma-delimited hashes (key rotation).
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_hash
+	 * @return void
 	 */
-	public function test_validate_webhook_hash_with_comma_delimited_hashes() : void {
+	public function test_validate_webhook_hash_with_comma_delimited_hashes(): void {
 		$webhook_data = $this->get_test_webhook_data( 'status_update' );
 		$webhook_json = json_encode( $webhook_data );
 
@@ -654,18 +687,19 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_redirect_hash with signing_key takes precedence over app_key.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_redirect_hash
+	 * @return void
 	 */
-	public function test_validate_redirect_hash_signing_key_precedence() : void {
-		// Create handler with both app_key and signing_key
+	public function test_validate_redirect_hash_signing_key_precedence(): void {
+		// Create handler with both app_key and signing_key.
 		$signing_key = 'sk_new_signing_key_123';
 		$handler     = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, $signing_key );
 		$this->initialize_reflection( $handler );
 
-		// Generate redirect data using signing_key
+		// Generate redirect data using signing_key.
 		$this->set_hash_key( $signing_key );
 		$redirect_data = $this->get_test_redirect_data();
 
-		// Validation should pass (uses signing_key, not app_key)
+		// Validation should pass (uses signing_key, not app_key).
 		$this->assertTrue( $this->get_private_method_value( 'validate_redirect_hash', $redirect_data, $handler ) );
 	}
 
@@ -673,20 +707,21 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_hash with signing_key takes precedence over app_key.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_hash
+	 * @return void
 	 */
-	public function test_validate_webhook_hash_signing_key_precedence() : void {
-		// Create handler with both app_key and signing_key
+	public function test_validate_webhook_hash_signing_key_precedence(): void {
+		// Create handler with both app_key and signing_key.
 		$signing_key = 'sk_new_signing_key_123';
 		$handler     = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, $signing_key );
 		$this->initialize_reflection( $handler );
 
-		// Generate webhook data using signing_key
+		// Generate webhook data using signing_key.
 		$this->set_hash_key( $signing_key );
 		$webhook_data = $this->get_test_webhook_data( 'status_update' );
 		$webhook_json = json_encode( $webhook_data );
 		$hash         = $this->calculate_test_webhook_hash( $webhook_data );
 
-		// Validation should pass (uses signing_key, not app_key)
+		// Validation should pass (uses signing_key, not app_key).
 		$this->assertTrue( $this->get_private_method_value( 'validate_webhook_hash', $webhook_json, $hash, $handler ) );
 	}
 
@@ -694,17 +729,18 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_redirect_hash with signing_key empty falls back to app_key.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_redirect_hash
+	 * @return void
 	 */
-	public function test_validate_redirect_hash_fallback_to_app_key() : void {
-		// Create handler with app_key but empty signing_key (backward compatibility)
+	public function test_validate_redirect_hash_fallback_to_app_key(): void {
+		// Create handler with app_key but empty signing_key (backward compatibility).
 		$handler = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, '' );
 		$this->initialize_reflection( $handler );
 
-		// Generate redirect data using app_key
+		// Generate redirect data using app_key.
 		$this->set_hash_key( $this->test_app_key );
 		$redirect_data = $this->get_test_redirect_data();
 
-		// Validation should pass (falls back to app_key since signing_key is empty)
+		// Validation should pass (falls back to app_key since signing_key is empty).
 		$this->assertTrue( $this->get_private_method_value( 'validate_redirect_hash', $redirect_data, $handler ) );
 	}
 
@@ -712,19 +748,20 @@ class IncomingDataHandlerTest extends TestCase {
 	 * Test validate_webhook_hash with signing_key empty falls back to app_key.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::validate_webhook_hash
+	 * @return void
 	 */
-	public function test_validate_webhook_hash_fallback_to_app_key() : void {
-		// Create handler with app_key but empty signing_key (backward compatibility)
+	public function test_validate_webhook_hash_fallback_to_app_key(): void {
+		// Create handler with app_key but empty signing_key (backward compatibility).
 		$handler = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, '' );
 		$this->initialize_reflection( $handler );
 
-		// Generate webhook data using app_key
+		// Generate webhook data using app_key.
 		$this->set_hash_key( $this->test_app_key );
 		$webhook_data = $this->get_test_webhook_data( 'status_update' );
 		$webhook_json = json_encode( $webhook_data );
 		$hash         = $this->calculate_test_webhook_hash( $webhook_data );
 
-		// Validation should pass (falls back to app_key since signing_key is empty)
+		// Validation should pass (falls back to app_key since signing_key is empty).
 		$this->assertTrue( $this->get_private_method_value( 'validate_webhook_hash', $webhook_json, $hash, $handler ) );
 	}
 }

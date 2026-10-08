@@ -34,7 +34,7 @@ class IncomingDataHandler {
 	 * @param mixed $data
 	 * @return mixed
 	 */
-	private function sanitize_data( mixed $data ) : string|int|array|stdClass {
+	private function sanitize_data( mixed $data ): string|int|array|stdClass {
 		if ( is_array( $data ) ) {
 			return array_map( [ $this, 'sanitize_data' ], $data );
 		}
@@ -55,9 +55,10 @@ class IncomingDataHandler {
 	 * @param array|stdClass $data
 	 * @param array $required_fields
 	 * @param string $context
+	 * @return void
 	 * @throws Exception
 	 */
-	private function validate_required_fields( array|stdClass $data, array $required_fields, string $context = 'webhook' ) : void {
+	private function validate_required_fields( array|stdClass $data, array $required_fields, string $context = 'webhook' ): void {
 		$missing_fields = [];
 
 		foreach ( $required_fields as $field ) :
@@ -89,8 +90,8 @@ class IncomingDataHandler {
 	 * @param array $data
 	 * @return bool
 	 */
-	private function validate_redirect_hash( array $data ) : bool {
-		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility
+	private function validate_redirect_hash( array $data ): bool {
+		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility.
 		$key = ( ! empty( $this->signing_key ) ) ? $this->signing_key : $this->app_key;
 
 		if ( ! $key ) {
@@ -118,8 +119,8 @@ class IncomingDataHandler {
 	 * @param string $hash
 	 * @return bool
 	 */
-	private function validate_webhook_hash( string $data, string $hash ) : bool {
-		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility
+	private function validate_webhook_hash( string $data, string $hash ): bool {
+		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility.
 		$key = ( ! empty( $this->signing_key ) ) ? $this->signing_key : $this->app_key;
 
 		if ( ! $key ) {
@@ -147,7 +148,7 @@ class IncomingDataHandler {
 	 * @return RedirectData
 	 * @throws Exception
 	 */
-	private function format_redirect_data( array $data ) : RedirectData {
+	private function format_redirect_data( array $data ): RedirectData {
 		$data = $this->sanitize_data( array_map( 'wp_unslash', $data ) );
 
 		$this->validate_required_fields( $data, [ 'status', 'transaction_id', 'order_id', 'timestamp', 'hash' ], 'redirect_data' );
@@ -165,7 +166,7 @@ class IncomingDataHandler {
 	 * @param string $webhook_type
 	 * @return array
 	 */
-	private function get_webhook_body_requirements( string $webhook_type ) : array {
+	private function get_webhook_body_requirements( string $webhook_type ): array {
 		$requirements = [
 			'status_update' => [
 				'required' => [ 'transaction_id', 'status', 'order_id' ],
@@ -189,9 +190,10 @@ class IncomingDataHandler {
 	 *
 	 * @param stdClass $body
 	 * @param string $webhook_type
+	 * @return void
 	 * @throws Exception
 	 */
-	private function validate_webhook_body( stdClass $body, string $webhook_type ) : void {
+	private function validate_webhook_body( stdClass $body, string $webhook_type ): void {
 		$requirements = $this->get_webhook_body_requirements( $webhook_type );
 
 		if ( ! $requirements ) {
@@ -215,7 +217,7 @@ class IncomingDataHandler {
 	 * @return WebhookData
 	 * @throws Exception
 	 */
-	private function format_webhook_data( string $data, string $hash ) : WebhookData {
+	private function format_webhook_data( string $data, string $hash ): WebhookData {
 		if ( ! $this->validate_webhook_hash( $data, $hash ) ) {
 			throw new Exception( 'Webhook hash is invalid.' );
 		}
@@ -246,7 +248,7 @@ class IncomingDataHandler {
 	 * @return RedirectData
 	 * @throws Exception
 	 */
-	public function get_redirect_data( array $data ) : RedirectData {
+	public function get_redirect_data( array $data ): RedirectData {
 		try {
 			$data = $this->format_redirect_data( $data );
 			$this->logger_service->log( 'Incoming redirect data received successfully.', 'debug', $data->get_log_data() );
@@ -266,7 +268,7 @@ class IncomingDataHandler {
 	 * @return WebhookData
 	 * @throws Exception
 	 */
-	public function get_webhook_data( string $data, string $hash ) : WebhookData {
+	public function get_webhook_data( string $data, string $hash ): WebhookData {
 		try {
 			$data = $this->format_webhook_data( $data, $hash );
 			$this->logger_service->log( 'Incoming webhook data received successfully.', 'debug', $data->get_log_data() );

@@ -20,7 +20,7 @@ class TransactionCapture extends TransactionAction {
 	 *
 	 * @return bool
 	 */
-	public function is_captured() : bool {
+	public function is_captured(): bool {
 		return $this->action_is_successful();
 	}
 }

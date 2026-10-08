@@ -26,12 +26,13 @@ class RedirectDataTest extends TestCase {
 	 * Test constructor properly initializes data and all getters work.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Api\IncomingData\RedirectData::__construct
+	 * @return void
 	 */
-	public function test_constructor_initializes_data() : void {
+	public function test_constructor_initializes_data(): void {
 		$test_data     = $this->get_test_redirect_data();
 		$redirect_data = new RedirectData( $test_data );
 
-		// Test that all getter methods return expected values
+		// Test that all getter methods return expected values.
 		$this->assertEquals( 'redirect', $redirect_data->get_type() );
 		$this->assertEquals( 'transaction_123', $redirect_data->get_transaction_id() );
 		$this->assertEquals( 'success', $redirect_data->get_transaction_status() );

@@ -23,7 +23,7 @@ class CustomerCreate extends Response {
 	 * @return void
 	 * @throws Exception
 	 */
-	protected function validate_data() : void {
+	protected function validate_data(): void {
 		parent::validate_data();
 
 		if ( ! $this->get_body_field( 'customer_id' ) ) {
@@ -50,7 +50,7 @@ class CustomerCreate extends Response {
 	 *
 	 * @return bool
 	 */
-	public function is_created() : bool {
+	public function is_created(): bool {
 		return $this->request_is_success() && 'success' === $this->get_status();
 	}
 
@@ -59,7 +59,7 @@ class CustomerCreate extends Response {
 	 *
 	 * @return string|null
 	 */
-	public function get_customer_id() : ?string {
+	public function get_customer_id(): ?string {
 		return $this->get_body_field( 'customer_id' );
 	}
 }

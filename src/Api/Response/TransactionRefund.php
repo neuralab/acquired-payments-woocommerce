@@ -20,7 +20,7 @@ class TransactionRefund extends TransactionAction {
 	 *
 	 * @return bool
 	 */
-	public function is_refunded() : bool {
+	public function is_refunded(): bool {
 		return $this->action_is_successful();
 	}
 }

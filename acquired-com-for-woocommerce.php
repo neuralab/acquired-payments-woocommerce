@@ -87,8 +87,10 @@ if ( ! defined( 'ACFW_WC_VERSION' ) ) {
 
 	/**
 	 * Initialization.
+	 *
+	 * @return void
 	 */
-	function init() : void {
+	function init(): void {
 		/**
 		 * Check if WooCommerce is active.
 		 */

@@ -36,6 +36,7 @@ class OrderService {
 	 * @param CustomerService $customer_service
 	 * @param LoggerService $logger_service
 	 * @param PaymentMethodService $payment_method_service
+	 * @param ScheduleService $schedule_service
 	 * @param SettingsService $settings_service
 	 * @param CustomerFactory $customer_factory
 	 */
@@ -54,7 +55,7 @@ class OrderService {
 	 *
 	 * @return bool
 	 */
-	private function is_capture() : bool {
+	private function is_capture(): bool {
 		return 'capture' === $this->settings_service->get_option( 'transaction_type', 'capture' );
 	}
 
@@ -64,7 +65,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return void
 	 */
-	private function set_transaction_type( WC_Order $order ) : void {
+	private function set_transaction_type( WC_Order $order ): void {
 		$order->update_meta_data( '_acfw_transaction_type', $this->settings_service->get_option( 'transaction_type', 'capture' ) );
 		$order->save();
 	}
@@ -74,7 +75,7 @@ class OrderService {
 	 *
 	 * @return string
 	 */
-	public function get_scheduled_action_hook() : string {
+	public function get_scheduled_action_hook(): string {
 		return $this->settings_service->config['plugin_id'] . '_scheduled_process_order';
 	}
 
@@ -82,10 +83,10 @@ class OrderService {
 	 * Check if order transaction was processed.
 	 *
 	 * @param string $data_transaction_id
-	 * @param string|null $current_transaction_id
+	 * @param string|null $order_transaction_id
 	 * @return bool
 	 */
-	private function order_transaction_id_processed( string $data_transaction_id, string|null $order_transaction_id ) : bool {
+	private function order_transaction_id_processed( string $data_transaction_id, string|null $order_transaction_id ): bool {
 		if ( ! $order_transaction_id ) {
 			return false;
 		}
@@ -99,7 +100,7 @@ class OrderService {
 	 * @param int $order_timestamp
 	 * @return bool
 	 */
-	public function is_day_older( int $order_timestamp ) : bool {
+	public function is_day_older( int $order_timestamp ): bool {
 		$time_zone    = new DateTimeZone( 'UTC' );
 		$current_date = new DateTime( 'now', $time_zone );
 		$order_date   = DateTime::createFromFormat( 'U', (string) $order_timestamp, $time_zone );
@@ -114,7 +115,7 @@ class OrderService {
 	 * @return Transaction
 	 * @throws Exception
 	 */
-	private function get_transaction( string $transaction_id ) : Transaction {
+	private function get_transaction( string $transaction_id ): Transaction {
 		$transaction = $this->api_client->get_transaction( $transaction_id );
 
 		if ( $transaction->request_is_error() ) {
@@ -130,7 +131,7 @@ class OrderService {
 	 * @param string $transaction_id
 	 * @return int
 	 */
-	private function get_transaction_time_updated( string $transaction_id ) : int {
+	private function get_transaction_time_updated( string $transaction_id ): int {
 		try {
 			$transaction = $this->get_transaction( $transaction_id );
 			return $transaction->get_created_timestamp();
@@ -145,7 +146,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return bool
 	 */
-	private function can_be_processed( WC_Order $order ) : bool {
+	private function can_be_processed( WC_Order $order ): bool {
 		return ! in_array( $order->get_meta( '_acfw_order_state' ), [ 'completed', 'cancelled', 'executed', 'refunded_full', 'refunded_partial' ], true );
 	}
 
@@ -154,7 +155,7 @@ class OrderService {
 	 *
 	 * @return int
 	 */
-	private function get_payment_link_expiration_time() : int {
+	private function get_payment_link_expiration_time(): int {
 		$hold_stock = $this->settings_service->get_wc_hold_stock_time();
 
 		if ( $hold_stock <= 0 ) {
@@ -221,7 +222,7 @@ class OrderService {
 	 *     }
 	 * }
 	 */
-	private function get_payment_link_body( WC_Order $order ) : array {
+	private function get_payment_link_body( WC_Order $order ): array {
 		$body = $this->api_client->get_payment_link_default_body();
 
 		$body['transaction'] = array_merge(
@@ -259,7 +260,7 @@ class OrderService {
 	 * @return string
 	 * @throws Exception
 	 */
-	public function get_payment_link( int $order_id ) : string {
+	public function get_payment_link( int $order_id ): string {
 		$order = $this->get_wc_order( $order_id );
 
 		if ( ! $order ) {
@@ -317,9 +318,10 @@ class OrderService {
 	 * Set additional order data.
 	 *
 	 * @param WC_Order $order
+	 * @param Transaction $transaction
 	 * @return void
 	 */
-	private function set_additional_order_data( WC_Order $order, Transaction $transaction ) : void {
+	private function set_additional_order_data( WC_Order $order, Transaction $transaction ): void {
 		$order->update_meta_data( '_acfw_transaction_payment_method', $transaction->get_payment_method() );
 		$order->add_order_note(
 			sprintf(
@@ -357,10 +359,11 @@ class OrderService {
 	 * Schedule process order.
 	 *
 	 * @param WebhookData $data
+	 * @param string $hash
 	 * @return void
 	 * @throws Exception
 	 */
-	public function schedule_process_order( WebhookData $data, string $hash ) : void {
+	public function schedule_process_order( WebhookData $data, string $hash ): void {
 		// The API sends webhook status_update notifications for adding payment methods so we check if this is for an order and schedule only those webhooks.
 		if ( ! $this->is_for_order( $data->get_order_id() ) ) {
 			return;
@@ -392,7 +395,7 @@ class OrderService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function process_order( RedirectData|WebhookData $data ) : void {
+	public function process_order( RedirectData|WebhookData $data ): void {
 		if ( ! $this->is_for_order( $data->get_order_id() ) ) {
 			return;
 		}
@@ -512,7 +515,7 @@ class OrderService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function process_scheduled_order( WebhookData $data ) : void {
+	public function process_scheduled_order( WebhookData $data ): void {
 		try {
 			$this->process_order( $data );
 		} catch ( Exception $exception ) {
@@ -529,7 +532,7 @@ class OrderService {
 	 * @return WC_Order
 	 * @throws Exception
 	 */
-	public function confirm_order( RedirectData $data ) : WC_Order {
+	public function confirm_order( RedirectData $data ): WC_Order {
 		try {
 			$order = $this->get_wc_order_from_incoming_data( $data->get_order_id() );
 			$this->process_order( $data );
@@ -547,7 +550,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return bool
 	 */
-	public function can_be_captured( WC_Order $order ) : bool {
+	public function can_be_captured( WC_Order $order ): bool {
 		return $this->is_acfw_payment_method( $order ) && $order->get_transaction_id() && 'authorisation' === $order->get_meta( '_acfw_transaction_type' ) && 'authorised' === $order->get_meta( '_acfw_order_state' ) && floatval( $order->get_total() ) > 0;
 	}
 
@@ -557,7 +560,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return string
 	 */
-	public function capture_order( WC_Order $order ) : string {
+	public function capture_order( WC_Order $order ): string {
 		if ( ! $this->can_be_captured( $order ) ) {
 			$order->add_order_note( __( 'Payment capture failed. Capture initiated for an order that can\'t be captured.', 'acquired-com-for-woocommerce' ) );
 
@@ -635,7 +638,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return bool
 	 */
-	public function can_be_cancelled( WC_Order $order ) : bool {
+	public function can_be_cancelled( WC_Order $order ): bool {
 		return $this->is_acfw_payment_method( $order ) && $order->get_transaction_id() && in_array( $order->get_meta( '_acfw_transaction_status' ), [ 'success', 'settled' ], true ) && in_array( $order->get_meta( '_acfw_order_state' ), [ 'authorised', 'executed', 'completed' ], true );
 	}
 
@@ -645,7 +648,7 @@ class OrderService {
 	 * @param WC_Order $order
 	 * @return string
 	 */
-	public function cancel_order( WC_Order $order ) : string {
+	public function cancel_order( WC_Order $order ): string {
 		if ( ! $this->can_be_cancelled( $order ) ) {
 			$order->add_order_note( __( 'Order cancellation failed. Cancellation initiated for an order that can\'t be cancelled.', 'acquired-com-for-woocommerce' ) );
 
@@ -729,9 +732,10 @@ class OrderService {
 	 *
 	 * @param WC_Order $order
 	 * @return bool
+	 * @param float $amount
 	 * @throws Exception
 	 */
-	private function can_be_refunded( WC_Order $order, float $amount ) : bool {
+	private function can_be_refunded( WC_Order $order, float $amount ): bool {
 		switch ( true ) {
 			case ! in_array( $order->get_meta( '_acfw_transaction_status' ), [ 'success', 'settled' ], true ):
 				$error     = __( 'Transaction is not in "success" or "settled" status.', 'acquired-com-for-woocommerce' );
@@ -780,7 +784,7 @@ class OrderService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function refund_order( int $order_id, float $amount ) : void {
+	public function refund_order( int $order_id, float $amount ): void {
 		$order = $this->get_wc_order( $order_id );
 
 		if ( ! $order ) {
@@ -897,7 +901,7 @@ class OrderService {
 	 * @param int $order_id
 	 * @return string|null
 	 */
-	public function get_fail_notice( int $order_id ) : ?string {
+	public function get_fail_notice( int $order_id ): ?string {
 		$order = $this->get_wc_order( $order_id );
 
 		if ( ! $order || ! $this->is_acfw_payment_method( $order ) || ! $order->has_status( 'failed' ) ) {

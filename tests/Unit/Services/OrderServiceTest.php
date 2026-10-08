@@ -60,7 +60,7 @@ class OrderServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	private function mock_get_payment_link_default_body_creation() : void {
+	private function mock_get_payment_link_default_body_creation(): void {
 		// Mock ApiClient.
 		$this->get_api_client()
 			->shouldReceive( 'get_payment_link_default_body' )
@@ -122,7 +122,7 @@ class OrderServiceTest extends TestCase {
 	 * @param MockInterface&Transaction $transaction
 	 * @return void
 	 */
-	private function mock_set_additional_order_data( $order, $transaction ) : void {
+	private function mock_set_additional_order_data( MockInterface&WC_Order $order, MockInterface&Transaction $transaction ): void {
 		// Mock WC_Order.
 		$order->shouldReceive( 'get_id' )->andReturn( 123 );
 		$order->shouldReceive( 'update_meta_data' )->with( '_acfw_transaction_payment_method', 'card' );
@@ -157,7 +157,7 @@ class OrderServiceTest extends TestCase {
 	 * @param int $timestamp
 	 * @return MockInterface&WC_Order
 	 */
-	private function mock_order_for_processing( string $transaction_type, string $transaction_status, int $order_id, string $transaction_id, int $timestamp ) : MockInterface {
+	private function mock_order_for_processing( string $transaction_type, string $transaction_status, int $order_id, string $transaction_id, int $timestamp ): MockInterface {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->times( 5 )->andReturn( $order_id );
@@ -195,7 +195,7 @@ class OrderServiceTest extends TestCase {
 	 * @param int $timestamp
 	 * @return MockInterface&Transaction
 	 */
-	private function mock_transaction_for_processing( string $transaction_id, string $status, int $timestamp ) : MockInterface {
+	private function mock_transaction_for_processing( string $transaction_id, string $status, int $timestamp ): MockInterface {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
 		$transaction->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
@@ -219,9 +219,10 @@ class OrderServiceTest extends TestCase {
 	/**
 	 * Mock log for processing.
 	 *
+	 * @param int $order_id
 	 * @return void
 	 */
-	private function mock_log_for_processing( int $order_id ) : void {
+	private function mock_log_for_processing( int $order_id ): void {
 		// Mock LoggerService.
 		$this->get_logger_service()
 			->shouldReceive( 'log' )
@@ -246,7 +247,7 @@ class OrderServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp() : void {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$this->mock_api_client();
@@ -276,7 +277,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::__construct
 	 * @return void
 	 */
-	public function test_constructor() : void {
+	public function test_constructor(): void {
 		$this->assertSame( $this->get_api_client(), $this->get_private_property_value( 'api_client' ) );
 		$this->assertSame( $this->get_customer_service(), $this->get_private_property_value( 'customer_service' ) );
 		$this->assertSame( $this->get_logger_service(), $this->get_private_property_value( 'logger_service' ) );
@@ -292,7 +293,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::is_capture
 	 * @return void
 	 */
-	public function test_is_capture() : void {
+	public function test_is_capture(): void {
 		// Mock SettingsService.
 		$this->get_settings_service()
 			->shouldReceive( 'get_option' )
@@ -310,7 +311,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::is_capture
 	 * @return void
 	 */
-	public function test_is_capture_with_authorization() : void {
+	public function test_is_capture_with_authorization(): void {
 		// Mock SettingsService.
 		$this->get_settings_service()
 			->shouldReceive( 'get_option' )
@@ -328,7 +329,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::set_transaction_type
 	 * @return void
 	 */
-	public function test_set_transaction_type() : void {
+	public function test_set_transaction_type(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_transaction_type', 'capture' );
@@ -351,7 +352,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::set_transaction_type
 	 * @return void
 	 */
-	public function test_set_transaction_type_with_authorization() : void {
+	public function test_set_transaction_type_with_authorization(): void {
 		// Mock SettingsService.
 		$this->get_settings_service()
 			->shouldReceive( 'get_option' )
@@ -374,7 +375,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_scheduled_action_hook
 	 * @return void
 	 */
-	public function test_get_scheduled_action_hook() : void {
+	public function test_get_scheduled_action_hook(): void {
 		$this->assertEquals( 'acfw_scheduled_process_order', $this->service->get_scheduled_action_hook() );
 	}
 
@@ -384,7 +385,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::order_transaction_id_processed
 	 * @return void
 	 */
-	public function test_order_transaction_id_processed_with_matching_ids() : void {
+	public function test_order_transaction_id_processed_with_matching_ids(): void {
 		$this->assertTrue( $this->get_private_method_value( 'order_transaction_id_processed', 'transaction_123', 'transaction_123' ) );
 	}
 
@@ -394,7 +395,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::order_transaction_id_processed
 	 * @return void
 	 */
-	public function test_order_transaction_id_processed_with_different_ids() : void {
+	public function test_order_transaction_id_processed_with_different_ids(): void {
 		$this->assertFalse( $this->get_private_method_value( 'order_transaction_id_processed', 'transaction_123', 'transaction_456' ) );
 	}
 
@@ -404,7 +405,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::order_transaction_id_processed
 	 * @return void
 	 */
-	public function test_order_transaction_id_processed_with_null_order_id() : void {
+	public function test_order_transaction_id_processed_with_null_order_id(): void {
 		$this->assertFalse( $this->get_private_method_value( 'order_transaction_id_processed', 'transaction_123', null ) );
 	}
 
@@ -414,7 +415,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::is_day_older
 	 * @return void
 	 */
-	public function test_is_day_older_with_older_timestamp() : void {
+	public function test_is_day_older_with_older_timestamp(): void {
 		$this->assertTrue( $this->service->is_day_older( strtotime( '-1 day' ) ) );
 	}
 
@@ -424,7 +425,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::is_day_older
 	 * @return void
 	 */
-	public function test_is_day_older_with_same_day() : void {
+	public function test_is_day_older_with_same_day(): void {
 		$this->assertFalse( $this->service->is_day_older( strtotime( 'today' ) ) );
 	}
 
@@ -434,7 +435,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::is_day_older
 	 * @return void
 	 */
-	public function test_is_day_older_with_future_timestamp() : void {
+	public function test_is_day_older_with_future_timestamp(): void {
 		$this->assertFalse( $this->service->is_day_older( strtotime( '+1 day' ) ) );
 	}
 
@@ -444,7 +445,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_transaction
 	 * @return void
 	 */
-	public function test_get_transaction_with_successful_response() : void {
+	public function test_get_transaction_with_successful_response(): void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
 		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( false );
@@ -466,7 +467,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_transaction
 	 * @return void
 	 */
-	public function test_get_transaction_with_error_response() : void {
+	public function test_get_transaction_with_error_response(): void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
 		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( true );
@@ -490,7 +491,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_transaction_time_updated
 	 * @return void
 	 */
-	public function test_get_transaction_time_updated_with_successful_response() : void {
+	public function test_get_transaction_time_updated_with_successful_response(): void {
 		// Mock Transaction.
 		$transaction = Mockery::mock( Transaction::class );
 		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( false );
@@ -513,7 +514,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_transaction_time_updated
 	 * @return void
 	 */
-	public function test_get_transaction_time_updated_with_error_response() : void {
+	public function test_get_transaction_time_updated_with_error_response(): void {
 		// Mock ApiClient.
 		$this->get_api_client()
 			->shouldReceive( 'get_transaction' )
@@ -536,7 +537,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_processed
 	 * @return void
 	 */
-	public function test_can_be_processed_with_processable_order() : void {
+	public function test_can_be_processed_with_processable_order(): void {
 		// Mock WC_Order with 'authorised' state.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->once()->with( '_acfw_order_state' )->andReturn( 'authorised' );
@@ -559,7 +560,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_processed
 	 * @return void
 	 */
-	public function test_can_be_processed_with_non_processable_states() : void {
+	public function test_can_be_processed_with_non_processable_states(): void {
 		// Mock WC_Order with 'completed' state.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->once()->with( '_acfw_order_state' )->andReturn( 'completed' );
@@ -592,7 +593,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_expiration_time
 	 * @return void
 	 */
-	public function test_get_payment_link_expiration_time_with_disabled_hold_stock() : void {
+	public function test_get_payment_link_expiration_time_with_disabled_hold_stock(): void {
 		// Mock SettingsService.
 
 		$this->get_settings_service()
@@ -615,7 +616,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_expiration_time
 	 * @return void
 	 */
-	public function test_get_payment_link_expiration_time_with_enabled_hold_stock() : void {
+	public function test_get_payment_link_expiration_time_with_enabled_hold_stock(): void {
 		// Mock SettingsService.
 		$this->get_settings_service()
 			->shouldReceive( 'get_wc_hold_stock_time' )
@@ -637,7 +638,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_expiration_time
 	 * @return void
 	 */
-	public function test_get_payment_link_expiration_time_with_max_limit() : void {
+	public function test_get_payment_link_expiration_time_with_max_limit(): void {
 		// Mock SettingsService.
 
 		$this->get_settings_service()
@@ -660,7 +661,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_body
 	 * @return void
 	 */
-	public function test_get_payment_link_body() : void {
+	public function test_get_payment_link_body(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -713,7 +714,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_body
 	 * @return void
 	 */
-	public function test_get_payment_link_body_with_customer_data() : void {
+	public function test_get_payment_link_body_with_customer_data(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -767,7 +768,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link_body
 	 * @return void
 	 */
-	public function test_get_payment_link_body_with_payment_method_data() : void {
+	public function test_get_payment_link_body_with_payment_method_data(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -822,7 +823,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link
 	 * @return void
 	 */
-	public function test_get_payment_link_with_non_existent_order() : void {
+	public function test_get_payment_link_with_non_existent_order(): void {
 		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
@@ -850,7 +851,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link
 	 * @return void
 	 */
-	public function test_get_payment_link_with_processed_order() : void {
+	public function test_get_payment_link_with_processed_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -885,8 +886,8 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link
 	 * @return void
 	 */
-	public function test_get_payment_link_with_successful_response() : void {
-		// Mock WC_Order
+	public function test_get_payment_link_with_successful_response(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->twice()->andReturn( 123 );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -964,8 +965,8 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_payment_link
 	 * @return void
 	 */
-	public function test_get_payment_link_with_error_response() : void {
-		// Mock WC_Order
+	public function test_get_payment_link_with_error_response(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->twice()->andReturn( 123 );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -1031,7 +1032,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::set_additional_order_data
 	 * @return void
 	 */
-	public function test_set_additional_order_data() : void {
+	public function test_set_additional_order_data(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -1067,7 +1068,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::set_additional_order_data
 	 * @return void
 	 */
-	public function test_set_additional_order_data_with_decline_reason() : void {
+	public function test_set_additional_order_data_with_decline_reason(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -1105,7 +1106,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::schedule_process_order
 	 * @return void
 	 */
-	public function test_schedule_process_order_not_for_order() : void {
+	public function test_schedule_process_order_not_for_order(): void {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->once()->andReturn( '456-add_payment_method' );
@@ -1120,7 +1121,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::schedule_process_order
 	 * @return void
 	 */
-	public function test_schedule_process_order_with_successful_scheduling() : void {
+	public function test_schedule_process_order_with_successful_scheduling(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -1176,7 +1177,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::schedule_process_order
 	 * @return void
 	 */
-	public function test_schedule_process_order_with_error() : void {
+	public function test_schedule_process_order_with_error(): void {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( 'invalid_id' );
@@ -1204,7 +1205,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_not_for_order() : void {
+	public function test_process_order_not_for_order(): void {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->once()->andReturn( '456-add_payment_method' );
@@ -1219,7 +1220,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_already_processed_transaction() : void {
+	public function test_process_order_with_already_processed_transaction(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1271,7 +1272,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_already_updated_order() : void {
+	public function test_process_order_with_already_updated_order(): void {
 		// Set test data.
 		$order_id               = 123;
 		$transaction_order_id   = '123-wc_order_key';
@@ -1342,7 +1343,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_invalid_order_status() : void {
+	public function test_process_order_with_invalid_order_status(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1423,7 +1424,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_success_status_and_capture_type() : void {
+	public function test_process_order_with_success_status_and_capture_type(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1474,7 +1475,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_settled_status_and_capture_type() : void {
+	public function test_process_order_with_settled_status_and_capture_type(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1525,7 +1526,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_success_status_and_authorisation_type() : void {
+	public function test_process_order_with_success_status_and_authorisation_type(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1574,7 +1575,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_executed_status_and_capture_type() : void {
+	public function test_process_order_with_executed_status_and_capture_type(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1623,7 +1624,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_failed_status_and_capture_type() : void {
+	public function test_process_order_with_failed_status_and_capture_type(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1673,7 +1674,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_order
 	 * @return void
 	 */
-	public function test_process_order_with_invalid_order() : void {
+	public function test_process_order_with_invalid_order(): void {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( 'invalid_order_id' );
@@ -1702,7 +1703,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_scheduled_order
 	 * @return void
 	 */
-	public function test_process_scheduled_order_success() : void {
+	public function test_process_scheduled_order_success(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1753,7 +1754,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_scheduled_order
 	 * @return void
 	 */
-	public function test_process_scheduled_order_error() : void {
+	public function test_process_scheduled_order_error(): void {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( 'invalid_id' );
@@ -1792,7 +1793,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_order
 	 * @return void
 	 */
-	public function test_confirm_order_success() : void {
+	public function test_confirm_order_success(): void {
 		// Set test data.
 		$order_id             = 123;
 		$transaction_order_id = '123-wc_order_key';
@@ -1850,7 +1851,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_order
 	 * @return void
 	 */
-	public function test_confirm_order_error() : void {
+	public function test_confirm_order_error(): void {
 		// Mock WebhookData.
 		$redirect = Mockery::mock( RedirectData::class );
 		$redirect->shouldReceive( 'get_order_id' )->once()->andReturn( 'invalid_id' );
@@ -1878,7 +1879,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_valid_order() : void {
+	public function test_can_be_captured_with_valid_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '100.00' );
@@ -1897,7 +1898,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_other_payment_method() : void {
+	public function test_can_be_captured_with_other_payment_method(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'other_payment_method' );
@@ -1912,7 +1913,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_missing_transaction_id() : void {
+	public function test_can_be_captured_with_missing_transaction_id(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( '' );
@@ -1928,7 +1929,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_wrong_transaction_type() : void {
+	public function test_can_be_captured_with_wrong_transaction_type(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_type' )->once()->andReturn( 'authorised' );
@@ -1945,7 +1946,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_wrong_order_state() : void {
+	public function test_can_be_captured_with_wrong_order_state(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_state' )->once()->andReturn( 'completed' );
@@ -1963,7 +1964,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_captured
 	 * @return void
 	 */
-	public function test_can_be_captured_with_zero_total() : void {
+	public function test_can_be_captured_with_zero_total(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_total' )->once()->andReturn( '0.00' );
@@ -1982,7 +1983,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::capture_order
 	 * @return void
 	 */
-	public function test_capture_order_with_invalid_order() : void {
+	public function test_capture_order_with_invalid_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -2008,7 +2009,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::capture_order
 	 * @return void
 	 */
-	public function test_capture_order_success() : void {
+	public function test_capture_order_success(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2074,7 +2075,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::capture_order
 	 * @return void
 	 */
-	public function test_capture_order_decline() : void {
+	public function test_capture_order_decline(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2124,7 +2125,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::capture_order
 	 * @return void
 	 */
-	public function test_capture_order_error() : void {
+	public function test_capture_order_error(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2173,7 +2174,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_cancelled
 	 * @return void
 	 */
-	public function test_can_be_cancelled_with_valid_order() : void {
+	public function test_can_be_cancelled_with_valid_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_state' )->once()->andReturn( 'authorised' );
@@ -2191,7 +2192,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_cancelled
 	 * @return void
 	 */
-	public function test_can_be_cancelled_with_other_payment_method() : void {
+	public function test_can_be_cancelled_with_other_payment_method(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'other_payment_method' );
@@ -2206,7 +2207,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_cancelled
 	 * @return void
 	 */
-	public function test_can_be_cancelled_with_missing_transaction_id() : void {
+	public function test_can_be_cancelled_with_missing_transaction_id(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( '' );
@@ -2222,7 +2223,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_cancelled
 	 * @return void
 	 */
-	public function test_can_be_cancelled_with_wrong_transaction_status() : void {
+	public function test_can_be_cancelled_with_wrong_transaction_status(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'failed' );
@@ -2239,7 +2240,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_cancelled
 	 * @return void
 	 */
-	public function test_can_be_cancelled_with_wrong_order_state() : void {
+	public function test_can_be_cancelled_with_wrong_order_state(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_state' )->once()->andReturn( 'cancelled' );
@@ -2257,7 +2258,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::cancel_order
 	 * @return void
 	 */
-	public function test_cancel_order_with_invalid_order() : void {
+	public function test_cancel_order_with_invalid_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -2283,7 +2284,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::cancel_order
 	 * @return void
 	 */
-	public function test_cancel_order_with_invalid_date() : void {
+	public function test_cancel_order_with_invalid_date(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_state' )->twice()->andReturn( 'completed' );
@@ -2314,7 +2315,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::cancel_order
 	 * @return void
 	 */
-	public function test_cancel_order_success() : void {
+	public function test_cancel_order_success(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2385,7 +2386,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::cancel_order
 	 * @return void
 	 */
-	public function test_cancel_order_decline() : void {
+	public function test_cancel_order_decline(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2441,7 +2442,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::cancel_order
 	 * @return void
 	 */
-	public function test_cancel_order_error() : void {
+	public function test_cancel_order_error(): void {
 		// Set test data.
 		$order_id       = 123;
 		$transaction_id = 'transaction_123';
@@ -2496,7 +2497,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_success_transaction_status() : void {
+	public function test_can_be_refunded_with_success_transaction_status(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2514,7 +2515,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_settled_transaction_status() : void {
+	public function test_can_be_refunded_with_settled_transaction_status(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'settled' );
@@ -2532,7 +2533,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_wrong_transaction_status() : void {
+	public function test_can_be_refunded_with_wrong_transaction_status(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'failed' );
@@ -2559,7 +2560,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_refunded_order() : void {
+	public function test_can_be_refunded_with_refunded_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2587,7 +2588,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_cancelled_order() : void {
+	public function test_can_be_refunded_with_cancelled_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2615,7 +2616,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_authorized_and_completed_order() : void {
+	public function test_can_be_refunded_with_authorized_and_completed_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2645,7 +2646,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_partial_refund() : void {
+	public function test_can_be_refunded_with_partial_refund(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2664,7 +2665,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_refunded
 	 * @return void
 	 */
-	public function test_can_be_refunded_with_partial_refund_error() : void {
+	public function test_can_be_refunded_with_partial_refund_error(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2695,7 +2696,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_with_non_existent_order() : void {
+	public function test_refund_order_with_non_existent_order(): void {
 		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
@@ -2714,7 +2715,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_with_invalid_order() : void {
+	public function test_refund_order_with_invalid_order(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'failed' );
@@ -2748,7 +2749,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_with_wrong_total() : void {
+	public function test_refund_order_with_wrong_total(): void {
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
@@ -2785,7 +2786,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_success() : void {
+	public function test_refund_order_success(): void {
 		// Set test data.
 		$order_id                = 123;
 		$transaction_id          = 'transaction_123';
@@ -2880,7 +2881,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_partial_success() : void {
+	public function test_refund_order_partial_success(): void {
 		// Set test data.
 		$order_id                = 123;
 		$transaction_id          = 'transaction_123';
@@ -2976,7 +2977,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_decline() : void {
+	public function test_refund_order_decline(): void {
 		// Set test data.
 		$order_id                = 123;
 		$transaction_id          = 'transaction_123';
@@ -3057,7 +3058,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::refund_order
 	 * @return void
 	 */
-	public function test_refund_order_error() : void {
+	public function test_refund_order_error(): void {
 		// Set test data.
 		$order_id                = 123;
 		$transaction_id          = 'transaction_123';
@@ -3138,7 +3139,7 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_invalid_order() : void {
+	public function test_get_fail_notice_with_invalid_order(): void {
 		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
@@ -3155,18 +3156,18 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_non_acfw_payment() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_non_acfw_payment(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'other_payment_method' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertNull( $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3176,19 +3177,19 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_non_failed_status() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_non_failed_status(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( false );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertNull( $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3198,20 +3199,20 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_blocked_status() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_blocked_status(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( true );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'blocked' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertEquals( 'Your payment was blocked.', $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3221,20 +3222,20 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_tds_error_status() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_tds_error_status(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( true );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'tds_error' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertEquals( 'Your payment has been declined due to failed authentication with your bank.', $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3244,20 +3245,20 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_tds_expired_status() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_tds_expired_status(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( true );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'tds_expired' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertEquals( 'Your payment has been declined due to failed authentication with your bank.', $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3267,20 +3268,20 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_tds_failed_status() : void {
-		// Mock WC_Order
+	public function test_get_fail_notice_with_tds_failed_status(): void {
+		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( true );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'tds_failed' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertEquals( 'Your payment has been declined due to failed authentication with your bank.', $this->service->get_fail_notice( 123 ) );
 	}
 
@@ -3290,20 +3291,20 @@ class OrderServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\OrderService::get_fail_notice
 	 * @return void
 	 */
-	public function test_get_fail_notice_with_default_status() : void {
-			// Mock WC_Order
+	public function test_get_fail_notice_with_default_status(): void {
+			// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
 		$order->shouldReceive( 'has_status' )->once()->with( 'failed' )->andReturn( true );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'declined' );
 
-		// Mock wc_get_order
+		// Mock wc_get_order.
 		Functions\expect( 'wc_get_order' )
 			->once()
 			->with( 123 )
 			->andReturn( $order );
 
-		// Test the method
+		// Test the method.
 		$this->assertEquals( 'Your payment was declined.', $this->service->get_fail_notice( 123 ) );
 	}
 }

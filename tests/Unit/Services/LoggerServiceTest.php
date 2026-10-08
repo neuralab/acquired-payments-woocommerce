@@ -46,7 +46,7 @@ class LoggerServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp() : void {
+	protected function setUp(): void {
 		parent::setUp();
 
 		$this->mock_settings_service();
@@ -62,7 +62,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::__construct
 	 * @return void
 	 */
-	public function test_constructor() : void {
+	public function test_constructor(): void {
 		// Test if SettingsService is set correctly.
 		$this->assertSame( $this->get_settings_service(), $this->get_private_property_value( 'settings_service' ) );
 
@@ -122,7 +122,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::redact_sensitive_data
 	 * @return void
 	 */
-	public function test_redact_sensitive_data() : void {
+	public function test_redact_sensitive_data(): void {
 		// Test redacting array data.
 
 		$array_data = [
@@ -177,7 +177,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::log
 	 * @return void
 	 */
-	public function test_log_with_debug_disabled() : void {
+	public function test_log_with_debug_disabled(): void {
 		// When the log is disabled the log method should not be called.
 
 		$this->get_settings_service()
@@ -197,7 +197,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::log
 	 * @return void
 	 */
-	public function test_log_with_debug_enabled() : void {
+	public function test_log_with_debug_enabled(): void {
 		// When the log is enabled the log method should be called with info level.
 
 		$this->get_settings_service()
@@ -219,7 +219,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::log
 	 * @return void
 	 */
-	public function test_log_with_invalid_level() : void {
+	public function test_log_with_invalid_level(): void {
 		// test if we get info for log level when the log level is invalid.
 
 		$this->get_settings_service()
@@ -241,7 +241,7 @@ class LoggerServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\LoggerService::log
 	 * @return void
 	 */
-	public function test_log_with_context_and_sensitive_data() : void {
+	public function test_log_with_context_and_sensitive_data(): void {
 		// Test is log context returns redacted data for all the private field names.
 
 		$this->get_settings_service()

@@ -30,7 +30,7 @@ class TransactionAction extends Response {
 	 * @return void
 	 * @throws Exception
 	 */
-	protected function validate_data() : void {
+	protected function validate_data(): void {
 		parent::validate_data();
 
 		if ( ! $this->get_body_field( 'transaction_id' ) || ! $this->get_body_field( 'status' ) ) {
@@ -43,7 +43,7 @@ class TransactionAction extends Response {
 	 *
 	 * @return string|null
 	 */
-	public function get_transaction_id() : ?string {
+	public function get_transaction_id(): ?string {
 		return $this->get_body_field( 'transaction_id' );
 	}
 
@@ -52,7 +52,7 @@ class TransactionAction extends Response {
 	 *
 	 * @return bool
 	 */
-	protected function action_is_successful() : bool {
+	protected function action_is_successful(): bool {
 		return $this->request_is_success() && in_array( $this->get_status(), $this->success_statuses, true );
 	}
 
@@ -61,7 +61,7 @@ class TransactionAction extends Response {
 	 *
 	 * @return string|null
 	 */
-	public function get_decline_reason() : ?string {
+	public function get_decline_reason(): ?string {
 		return ! $this->action_is_successful() && $this->get_status() ? $this->get_status() : null;
 	}
 }

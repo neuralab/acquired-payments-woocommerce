@@ -20,7 +20,7 @@ class TransactionCancel extends TransactionAction {
 	 *
 	 * @return bool
 	 */
-	public function is_cancelled() : bool {
+	public function is_cancelled(): bool {
 		return $this->action_is_successful();
 	}
 }

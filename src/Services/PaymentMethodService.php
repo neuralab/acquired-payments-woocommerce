@@ -60,7 +60,7 @@ class PaymentMethodService {
 	 * @param string $status
 	 * @return bool
 	 */
-	public function is_transaction_success( string $status ) : bool {
+	public function is_transaction_success( string $status ): bool {
 		return in_array( $status, [ 'success', 'settled', 'executed' ], true );
 	}
 
@@ -69,7 +69,7 @@ class PaymentMethodService {
 	 *
 	 * @return string
 	 */
-	public function get_status_key() : string {
+	public function get_status_key(): string {
 		return $this->settings_service->config['plugin_id'] . '_payment_method_status';
 	}
 
@@ -78,7 +78,7 @@ class PaymentMethodService {
 	 *
 	 * @return string
 	 */
-	public function get_scheduled_action_hook() : string {
+	public function get_scheduled_action_hook(): string {
 		return $this->settings_service->config['plugin_id'] . '_scheduled_save_payment_method';
 	}
 
@@ -89,7 +89,7 @@ class PaymentMethodService {
 	 * @param stdClass $card_data
 	 * @return void
 	 */
-	private function set_token_card_data( WC_Payment_Token_CC $token, stdClass $card_data ) : void {
+	private function set_token_card_data( WC_Payment_Token_CC $token, stdClass $card_data ): void {
 		$token->set_card_type( $card_data->scheme );
 		// We have to convert all numbers to strings because the WC_Payment_Token_CC class expects them to be strings.
 		$token->set_last4( (string) $card_data->number );
@@ -103,10 +103,11 @@ class PaymentMethodService {
 	 * @param string $card_id
 	 * @param stdClass $card_data
 	 * @param int $user_id
-	 * @param WC_Order|null $object
+	 * @param WC_Order|null $order
+	 * @return void
 	 * @throws Exception
 	 */
-	private function create_token( string $card_id, stdClass $card_data, int $user_id, WC_Order|null $order = null ) : void {
+	private function create_token( string $card_id, stdClass $card_data, int $user_id, WC_Order|null $order = null ): void {
 		$token = $this->token_factory->get_wc_payment_token();
 
 		$token->set_token( $card_id );
@@ -130,9 +131,10 @@ class PaymentMethodService {
 	 *
 	 * @param WC_Payment_Token_CC $token
 	 * @param stdClass $card_data
+	 * @return void
 	 * @throws Exception
 	 */
-	private function update_token( WC_Payment_Token_CC $token, stdClass $card_data ) : void {
+	private function update_token( WC_Payment_Token_CC $token, stdClass $card_data ): void {
 		$this->set_token_card_data( $token, $card_data );
 
 		if ( ! $token->validate() ) {
@@ -149,7 +151,7 @@ class PaymentMethodService {
 	 * @return Card
 	 * @throws Exception
 	 */
-	private function get_card( string $card_id ) : Card {
+	private function get_card( string $card_id ): Card {
 		$response = $this->api_client->get_card( $card_id );
 
 		if ( $response->is_active() ) {
@@ -170,7 +172,7 @@ class PaymentMethodService {
 	 * @return string|null
 	 * @throws Exception
 	 */
-	private function get_card_id_from_transaction( string $transaction_id ) : ?string {
+	private function get_card_id_from_transaction( string $transaction_id ): ?string {
 		$response = $this->api_client->get_transaction( $transaction_id );
 
 		if ( $response->request_is_error() ) {
@@ -190,7 +192,7 @@ class PaymentMethodService {
 	 * @param WC_Payment_Token_CC $token
 	 * @return void
 	 */
-	public function deactivate_card( WC_Payment_Token_CC $token ) : void {
+	public function deactivate_card( WC_Payment_Token_CC $token ): void {
 		$response = $this->api_client->update_card( $token->get_token(), [ 'is_active' => false ] );
 
 		if ( $response->request_is_success() ) {
@@ -206,9 +208,10 @@ class PaymentMethodService {
 	 * @param string $operation
 	 * @param callable $process
 	 * @param RedirectData|WebhookData $data
+	 * @return void
 	 * @throws Exception
 	 */
-	private function process_payment_method( string $operation, callable $process, RedirectData|WebhookData $data ) : void {
+	private function process_payment_method( string $operation, callable $process, RedirectData|WebhookData $data ): void {
 		if ( ! $this->settings_service->is_enabled( 'tokenization' ) ) {
 			$error = sprintf( 'Payment method %s failed. Tokenization is disabled.', $operation );
 			$this->logger_service->log( $error, 'error', $data->get_log_data() );
@@ -241,7 +244,7 @@ class PaymentMethodService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function schedule_save_payment_method( WebhookData $data, string $hash ) : void {
+	public function schedule_save_payment_method( WebhookData $data, string $hash ): void {
 		try {
 			$customer = $this->get_wc_customer_from_incoming_data( $data->get_order_id() );
 
@@ -268,10 +271,10 @@ class PaymentMethodService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function save_payment_method_from_customer( RedirectData|WebhookData $data ) : void {
+	public function save_payment_method_from_customer( RedirectData|WebhookData $data ): void {
 		$this->process_payment_method(
 			'saving',
-			function( RedirectData|WebhookData $data, callable $log ) : WC_Customer {
+			function( RedirectData|WebhookData $data, callable $log ): WC_Customer {
 				$customer = $this->get_wc_customer_from_incoming_data( $data->get_order_id() );
 				$log( sprintf( 'User found successfully from incoming %s data. User ID: %s.', $data->get_type(), $customer->get_id() ) );
 
@@ -294,10 +297,10 @@ class PaymentMethodService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function save_payment_method_from_order( WebhookData $data ) : void {
+	public function save_payment_method_from_order( WebhookData $data ): void {
 		$this->process_payment_method(
 			'saving',
-			function( WebhookData $data, callable $log ) : WC_Order {
+			function( WebhookData $data, callable $log ): WC_Order {
 				$order = $this->get_wc_order_from_incoming_data( $data->get_order_id() );
 				$log( sprintf( 'Order found successfully from incoming webhook data. Order ID: %s.', $order->get_id() ) );
 
@@ -320,10 +323,10 @@ class PaymentMethodService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function update_payment_method( WebhookData $data ) : void {
+	public function update_payment_method( WebhookData $data ): void {
 		$this->process_payment_method(
 			'updating',
-			function( WebhookData $data, callable $log ) : WC_Customer {
+			function( WebhookData $data, callable $log ): WC_Customer {
 				$card = $this->get_card( $data->get_card_id() );
 				$log( 'Payment method found successfully from incoming webhook data.' );
 
@@ -347,7 +350,7 @@ class PaymentMethodService {
 	 * @return void
 	 * @throws Exception
 	 */
-	public function process_scheduled_save_payment_method( WebhookData $data ) : void {
+	public function process_scheduled_save_payment_method( WebhookData $data ): void {
 		try {
 			$customer = $this->get_wc_customer_from_incoming_data( $data->get_order_id() );
 			$this->logger_service->log( sprintf( 'Customer found successfully from scheduled webhook data. User ID: %s.', $customer->get_id() ), 'debug', $data->get_log_data() );
@@ -372,7 +375,7 @@ class PaymentMethodService {
 	 * @param WC_Order $order
 	 * @return string|null
 	 */
-	public function get_payment_method_for_checkout( WC_Order $order ) : ?string {
+	public function get_payment_method_for_checkout( WC_Order $order ): ?string {
 		if ( ! $order->get_user_id() ) {
 			return null;
 		}
@@ -429,7 +432,7 @@ class PaymentMethodService {
 	 *     }
 	 * }
 	 */
-	private function get_payment_link_body( WC_Customer $customer ) : array {
+	private function get_payment_link_body( WC_Customer $customer ): array {
 		$body = $this->api_client->get_payment_link_default_body();
 
 		$body['transaction'] = array_merge(
@@ -459,11 +462,11 @@ class PaymentMethodService {
 	/**
 	 * Get payment link URL.
 	 *
-	 * @param int $link_id
+	 * @param int $user_id
 	 * @return string
 	 * @throws Exception
 	 */
-	public function get_payment_link( int $user_id ) : string {
+	public function get_payment_link( int $user_id ): string {
 		if ( ! $user_id ) {
 			$error = 'Payment link creation failed. User ID is not set.';
 			$this->logger_service->log( $error, 'error' );
@@ -506,7 +509,7 @@ class PaymentMethodService {
 	 * @return WC_Customer
 	 * @throws Exception
 	 */
-	public function confirm_payment_method( RedirectData $data ) : WC_Customer {
+	public function confirm_payment_method( RedirectData $data ): WC_Customer {
 		try {
 			$customer = $this->get_wc_customer_from_incoming_data( $data->get_order_id() );
 			$card_id  = $this->get_card_id_from_transaction( $data->get_transaction_id() );
@@ -534,7 +537,7 @@ class PaymentMethodService {
 	 *     type: string
 	 * }
 	 */
-	public function get_notice_data( string $status ) : array {
+	public function get_notice_data( string $status ): array {
 		if ( $this->is_transaction_success( $status ) ) {
 			return [
 				'message' => __( 'Payment method successfully added.', 'acquired-com-for-woocommerce' ),

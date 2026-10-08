@@ -25,7 +25,8 @@ class AdminService {
 	/**
 	 * Constructor.
 	 *
-	 * @var string
+	 * @param AssetsService $assets_service
+	 * @param SettingsService $settings_service
 	 */
 	public function __construct( private AssetsService $assets_service, private SettingsService $settings_service ) {}
 
@@ -37,7 +38,7 @@ class AdminService {
 	 * @param bool $dismissible
 	 * @return void
 	 */
-	private function add_notice( string $message, string $type, bool $dismissible = false ) : void {
+	private function add_notice( string $message, string $type, bool $dismissible = false ): void {
 		wp_admin_notice(
 			$message,
 			[
@@ -52,7 +53,7 @@ class AdminService {
 	 *
 	 * @return WP_Screen|null
 	 */
-	private function get_current_screen() : ?WP_Screen {
+	private function get_current_screen(): ?WP_Screen {
 		$screen = get_current_screen();
 
 		return $screen instanceof WP_Screen ? $screen : null;
@@ -63,7 +64,7 @@ class AdminService {
 	 *
 	 * @return bool
 	 */
-	public function is_payment_gateway_screen() : bool {
+	public function is_payment_gateway_screen(): bool {
 		$screen = $this->get_current_screen();
 
 		if ( ! ( $screen && 'woocommerce_page_wc-settings' === $screen->id ) ) {
@@ -82,7 +83,7 @@ class AdminService {
 	 *
 	 * @return WC_Order|null
 	 */
-	private function get_order_from_order_admin_screen() : ?WC_Order {
+	private function get_order_from_order_admin_screen(): ?WC_Order {
 		$screen = $this->get_current_screen();
 
 		if ( ! ( $screen && 'woocommerce_page_wc-orders' === $screen->id ) ) {
@@ -110,7 +111,7 @@ class AdminService {
 	 * @param string $notice_value
 	 * @return void
 	 */
-	public function add_order_notice( int $order_id, string $notice_id, string $notice_value ) : void {
+	public function add_order_notice( int $order_id, string $notice_id, string $notice_value ): void {
 		set_transient(
 			sprintf( '%s_order_notice_%s', $this->settings_service->config['plugin_id'], $order_id ),
 			[
@@ -130,7 +131,7 @@ class AdminService {
 	 *     value: string
 	 * }|null
 	 */
-	private function get_order_notice( int $order_id ) : ?array {
+	private function get_order_notice( int $order_id ): ?array {
 		$notice_value = get_transient( sprintf( '%s_order_notice_%s', $this->settings_service->config['plugin_id'], $order_id ) );
 		delete_transient( sprintf( '%s_order_notice_%s', $this->settings_service->config['plugin_id'], $order_id ) );
 
@@ -143,7 +144,7 @@ class AdminService {
 	 * @param array $notice_data
 	 * @return void
 	 */
-	private function show_order_notice( array $notice_data ) : void {
+	private function show_order_notice( array $notice_data ): void {
 		if ( ! $notice_data ) {
 			return;
 		}
@@ -175,7 +176,7 @@ class AdminService {
 	 *
 	 * @return void
 	 */
-	public function order_notice() : void {
+	public function order_notice(): void {
 		$order = $this->get_order_from_order_admin_screen();
 		if ( ! $order ) {
 			return;
@@ -192,7 +193,7 @@ class AdminService {
 	 *
 	 * @return void
 	 */
-	public function settings_notice() : void {
+	public function settings_notice(): void {
 		if ( ! $this->settings_service->get_api_credentials() ) {
 			/* translators: %1$s is the opening <a> tag, %2$s is the closing <a> tag.. */
 			$message = sprintf( __( 'Acquired.com for WooCommerce is not fully configured. Please enter your API credentials %1$sin the settings page%2$s.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' );
@@ -211,7 +212,7 @@ class AdminService {
 	 *
 	 * @return void
 	 */
-	public function add_order_assets() : void {
+	public function add_order_assets(): void {
 		if ( ! $this->get_order_from_order_admin_screen() ) {
 			return;
 		}
@@ -233,8 +234,10 @@ class AdminService {
 
 	/**
 	 * Add settings assets.
+	 *
+	 * @return void
 	 */
-	public function add_settings_assets() : void {
+	public function add_settings_assets(): void {
 		if ( ! $this->is_payment_gateway_screen() ) {
 			return;
 		}

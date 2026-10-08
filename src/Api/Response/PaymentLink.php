@@ -23,7 +23,7 @@ class PaymentLink extends Response {
 	 * @return void
 	 * @throws Exception
 	 */
-	protected function validate_data() : void {
+	protected function validate_data(): void {
 		parent::validate_data();
 
 		if ( ! $this->get_body_field( 'link_id' ) ) {
@@ -36,7 +36,7 @@ class PaymentLink extends Response {
 	 *
 	 * @return string|null
 	 */
-	public function get_link_id() : ?string {
+	public function get_link_id(): ?string {
 		return $this->get_body_field( 'link_id' );
 	}
 }

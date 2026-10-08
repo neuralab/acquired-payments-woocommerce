@@ -65,7 +65,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function init_form_fields() : void {
+	public function init_form_fields(): void {
 		$this->form_fields = $this->settings_service->get_fields();
 	}
 
@@ -74,7 +74,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	private function init_hooks() : void {
+	private function init_hooks(): void {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
 		add_action( 'admin_notices', [ $this, 'display_errors' ] );
 		add_action( 'admin_enqueue_scripts', [ $this->admin_service, 'add_order_assets' ] );
@@ -97,7 +97,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function admin_options() : void {
+	public function admin_options(): void {
 		?>
 		<h2><?php esc_html_e( 'Acquired.com', 'acquired-com-for-woocommerce' ); ?></h2>
 
@@ -112,7 +112,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return bool
 	 */
-	public function needs_setup() : bool {
+	public function needs_setup(): bool {
 		if ( ! $this->settings_service->is_environment_production() ) {
 			return true;
 		}
@@ -125,7 +125,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return bool
 	 */
-	public function is_available() : bool {
+	public function is_available(): bool {
 		if ( ! $this->settings_service->get_api_credentials() ) {
 			return false;
 		}
@@ -140,9 +140,11 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Show staging message.
 	 *
+	 * @param string $description
+	 * @param string $id
 	 * @return string
 	 */
-	public function show_staging_message( $description, $id ) : string {
+	public function show_staging_message( $description, $id ): string {
 		if ( $id !== $this->id ) {
 			return $description;
 		}
@@ -164,7 +166,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @param int $order_id
 	 * @return string
 	 */
-	public function set_order_fully_refunded_status( string $status, int $order_id ) : string {
+	public function set_order_fully_refunded_status( string $status, int $order_id ): string {
 		if ( $this->order_service->is_acfw_payment_method( $order_id ) && $this->settings_service->is_enabled( 'cancel_refunded' ) ) {
 			$status = 'cancelled';
 		}
@@ -179,7 +181,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @param WC_Order|null $order
 	 * @return array
 	 */
-	public function add_order_actions( array $actions, WC_Order|null $order ) : array {
+	public function add_order_actions( array $actions, WC_Order|null $order ): array {
 		if ( ! $order instanceof WC_Order ) {
 			return $actions;
 		}
@@ -199,9 +201,9 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * Get saved payment method option HTML.
 	 *
 	 * @param WC_Payment_Token $token
-	 * @return void
+	 * @return string
 	 */
-	public function get_saved_payment_method_option_html( $token ) {
+	public function get_saved_payment_method_option_html( $token ) { // phpcs:ignore Squiz.Commenting.FunctionComment.TypeHintMissing
 		if ( is_add_payment_method_page() ) {
 			return '';
 		}
@@ -212,10 +214,10 @@ class PaymentGateway extends WC_Payment_Gateway {
 	/**
 	 * Get new payment method option HTML.
 	 *
-	 * @return void
+	 * @return string
 	 */
 	public function get_new_payment_method_option_html() {
-		if ( is_checkout() && ! $this->get_tokens() || is_add_payment_method_page() ) {
+		if ( is_checkout() && ! $this->get_tokens() || is_add_payment_method_page() ) { // phpcs:ignore Generic.CodeAnalysis.RequireExplicitBooleanOperatorPrecedence.MissingParentheses
 			return '';
 		}
 
@@ -238,7 +240,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @param int $order_id
 	 * @return array
 	 */
-	public function process_payment( $order_id ) : array {
+	public function process_payment( $order_id ): array {
 		try {
 			$payment_link = $this->order_service->get_payment_link( $order_id );
 
@@ -261,7 +263,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function process_refund( $order_id, $amount = null, $reason = '' ) : bool {
+	public function process_refund( $order_id, $amount = null, $reason = '' ): bool {
 		try {
 			$this->order_service->refund_order( $order_id, floatval( $amount ), $reason );
 			return true;
@@ -276,7 +278,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @param WC_Order|null $order
 	 * @return void
 	 */
-	public function process_capture( WC_Order|null $order ) : void {
+	public function process_capture( WC_Order|null $order ): void {
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger_service->log( 'Order not found for capture payment action.' );
 			return;
@@ -291,7 +293,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @param WC_Order|null $order
 	 * @return void
 	 */
-	public function process_cancellation( WC_Order|null $order ) : void {
+	public function process_cancellation( WC_Order|null $order ): void {
 		if ( ! $order instanceof WC_Order ) {
 			$this->logger_service->log( 'Order not found for cancel order action.' );
 			return;
@@ -305,7 +307,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return array
 	 */
-	public function add_payment_method() : array {
+	public function add_payment_method(): array {
 		try {
 			$payment_link = $this->payment_method_service->get_payment_link( get_current_user_id() );
 
@@ -326,9 +328,9 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @return void
 	 */
-	public function process_webhook() : void {
+	public function process_webhook(): void {
 		try {
-			if ( $webhook_data = file_get_contents( 'php://input' ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+			if ( $webhook_data = file_get_contents( 'php://input' ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, Generic.CodeAnalysis.AssignmentInCondition.Found
 				$hash = $_SERVER['HTTP_HASH'] ?? '';
 				$data = $this->incoming_data_handler->get_webhook_data( $webhook_data, $_SERVER['HTTP_HASH'] ?? '' );
 
@@ -364,7 +366,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public function redirect_new_order() : void {
+	public function redirect_new_order(): void {
 		try {
 			$data         = $this->incoming_data_handler->get_redirect_data( $_POST );  // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$order        = $this->order_service->confirm_order( $data );
@@ -383,7 +385,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @codeCoverageIgnore
 	 * @return void
 	 */
-	public function redirect_new_payment_method() : void {
+	public function redirect_new_payment_method(): void {
 		$redirect_url = wc_get_endpoint_url( 'payment-methods', '', wc_get_page_permalink( 'myaccount' ) );
 
 		try {
@@ -411,7 +413,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @param string $key
 	 * @param string $value
-	 * @return void
+	 * @return string
 	 * @throws Exception
 	 */
 	public function validate_select_field( $key, $value ) {
@@ -434,7 +436,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 *
 	 * @param string $key
 	 * @param string $value
-	 * @return void
+	 * @return string
 	 * @throws Exception
 	 */
 	public function validate_url_field( $key, $value ) {
@@ -456,7 +458,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return string
 	 * @throws Exception
 	 */
-	public function validate_payment_reference_field( $key, $value ) : string {
+	public function validate_payment_reference_field( $key, $value ): string {
 		$field = $this->settings_service->get_field( $key );
 		$value = trim( $value );
 
@@ -476,7 +478,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return string
 	 * @throws Exception
 	 */
-	public function validate_company_id_field( $key, $value ) : string {
+	public function validate_company_id_field( $key, $value ): string {
 		$field = $this->settings_service->get_field( $key );
 		$value = trim( $value );
 
@@ -496,7 +498,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return string
 	 * @throws Exception
 	 */
-	public function validate_company_id_staging_field( $key, $value ) : string {
+	public function validate_company_id_staging_field( $key, $value ): string {
 		return $this->validate_company_id_field( $key, $value );
 	}
 
@@ -508,7 +510,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return string
 	 * @throws Exception
 	 */
-	public function validate_company_id_production_field( $key, $value ) : string {
+	public function validate_company_id_production_field( $key, $value ): string {
 		return $this->validate_company_id_field( $key, $value );
 	}
 }

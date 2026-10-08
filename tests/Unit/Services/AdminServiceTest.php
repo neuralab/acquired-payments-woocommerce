@@ -48,7 +48,7 @@ class AdminServiceTest extends TestCase {
 	 * @param string|null $screen_id
 	 * @return void
 	 */
-	private function mock_admin_screen( string|null $screen_id ) : void {
+	private function mock_admin_screen( string|null $screen_id ): void {
 		if ( ! $screen_id ) {
 			Functions\expect( 'get_current_screen' )
 				->once()
@@ -69,7 +69,7 @@ class AdminServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	private function mock_get_params_for_settings_page() : void {
+	private function mock_get_params_for_settings_page(): void {
 		$_GET['tab']     = 'checkout';
 		$_GET['section'] = 'acfw';
 
@@ -90,7 +90,7 @@ class AdminServiceTest extends TestCase {
 	 * @param bool   $dismissible
 	 * @return void
 	 */
-	private function mock_admin_notice( string $message, string $type, bool $dismissible = false ) : void {
+	private function mock_admin_notice( string $message, string $type, bool $dismissible = false ): void {
 		Functions\expect( 'wp_admin_notice' )
 			->once()
 			->with(
@@ -106,17 +106,14 @@ class AdminServiceTest extends TestCase {
 	 * Mock get notice transient.
 	 *
 	 * @param int $order_id
-	 * @param array{
-	 *     id: string,
-	 *     value: string
-	 * }|null $return
+	 * @param array|null $return_value
 	 * @return void
 	 */
-	private function mock_get_notice_transient( int $order_id, null|array $return ) : void {
+	private function mock_get_notice_transient( int $order_id, null|array $return_value ): void {
 		Functions\expect( 'get_transient' )
 			->once()
 			->with( 'acfw_order_notice_' . $order_id )
-			->andReturn( $return );
+			->andReturn( $return_value );
 
 		Functions\expect( 'delete_transient' )
 			->once()
@@ -148,7 +145,7 @@ class AdminServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp() : void {
+	protected function setUp(): void {
 		parent::setUp();
 
 		// Clear $_GET before each test.
@@ -170,7 +167,7 @@ class AdminServiceTest extends TestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown() : void {
+	protected function tearDown(): void {
 		// Clear $_GET after each test.
 		$_GET = [];
 
@@ -183,7 +180,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::add_notice
 	 * @return void
 	 */
-	public function test_add_notice() : void {
+	public function test_add_notice(): void {
 		// Test notice.
 		$this->mock_admin_notice( 'Test message', 'error' );
 		$this->get_private_method_value( 'add_notice', 'Test message', 'error' );
@@ -199,7 +196,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::get_current_screen
 	 * @return void
 	 */
-	public function test_get_current_screen() : void {
+	public function test_get_current_screen(): void {
 		// Test when screen is null.
 		$this->mock_admin_screen( null );
 		$this->assertNull( $this->get_private_method_value( 'get_current_screen' ) );
@@ -215,7 +212,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::is_payment_gateway_screen
 	 * @return void
 	 */
-	public function test_is_payment_gateway_screen() : void {
+	public function test_is_payment_gateway_screen(): void {
 		// Test when not on the right screen.
 		$this->mock_admin_screen( 'not_the_right_screen' );
 		$this->assertFalse( $this->service->is_payment_gateway_screen() );
@@ -236,7 +233,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::get_order_from_order_admin_screen
 	 * @return void
 	 */
-	public function test_get_order_from_order_admin_screen() : void {
+	public function test_get_order_from_order_admin_screen(): void {
 		$method_name = 'get_order_from_order_admin_screen';
 
 		// Test when not on orders screen.
@@ -271,7 +268,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::add_order_notice
 	 * @return void
 	 */
-	public function test_add_order_notice() : void {
+	public function test_add_order_notice(): void {
 		Functions\expect( 'set_transient' )
 			->once()
 			->with(
@@ -292,7 +289,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::get_order_notice
 	 * @return void
 	 */
-	public function test_get_order_notice() : void {
+	public function test_get_order_notice(): void {
 		// Test when notice does not exist.
 		$this->mock_get_notice_transient( $this->order_id, null );
 		$this->assertNull( $this->get_private_method_value( 'get_order_notice', $this->order_id ) );
@@ -319,7 +316,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::show_order_notice
 	 * @return void
 	 */
-	public function test_show_order_notice() : void {
+	public function test_show_order_notice(): void {
 		// Test empty notice data.
 		Functions\expect( 'wp_admin_notice' )->never();
 		$this->get_private_method_value( 'show_order_notice', [] );
@@ -389,7 +386,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::order_notice
 	 * @return void
 	 */
-	public function test_order_notice() : void {
+	public function test_order_notice(): void {
 		// Test when not on order screen.
 		$this->mock_admin_screen( 'not_the_right_screen' );
 		$this->service->order_notice();
@@ -430,7 +427,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::settings_notice
 	 * @return void
 	 */
-	public function test_settings_notice() : void {
+	public function test_settings_notice(): void {
 		// Test when API credentials are missing.
 
 		$this->get_settings_service()
@@ -505,7 +502,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::add_order_assets
 	 * @return void
 	 */
-	public function test_add_order_assets() : void {
+	public function test_add_order_assets(): void {
 		// Test when not on order screen.
 		$this->mock_admin_screen( 'not_the_right_screen' );
 		$this->service->add_order_assets();
@@ -545,7 +542,7 @@ class AdminServiceTest extends TestCase {
 	 * @covers \AcquiredComForWooCommerce\Services\AdminService::add_settings_assets
 	 * @return void
 	 */
-	public function test_add_settings_assets() : void {
+	public function test_add_settings_assets(): void {
 		// Test when not on payment gateway setting screen.
 		$this->mock_admin_screen( 'not_the_right_screen' );
 		$this->service->add_settings_assets();
