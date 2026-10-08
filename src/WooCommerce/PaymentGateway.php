@@ -332,8 +332,8 @@ class PaymentGateway extends WC_Payment_Gateway {
 	public function process_webhook(): void {
 		try {
 			if ( $webhook_data = file_get_contents( 'php://input' ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, Generic.CodeAnalysis.AssignmentInCondition.Found
-				$hash = $_SERVER['HTTP_HASH'] ?? '';
-				$data = $this->incoming_data_handler->get_webhook_data( $webhook_data, $_SERVER['HTTP_HASH'] ?? '' );
+				$hash = $_SERVER['HTTP_HASH'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$data = $this->incoming_data_handler->get_webhook_data( $webhook_data, $_SERVER['HTTP_HASH'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 				switch ( $data->get_webhook_type() ) {
 					case 'status_update':
