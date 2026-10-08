@@ -36,7 +36,9 @@
     }
   },
   "scripts": {
-    "lint": "php ./vendor/bin/phpcs . --report=source",
+    "lint": "@php ./vendor/bin/phpcs .",
+    "lint-source": "@php ./vendor/bin/phpcs . --report=source",
+    "fix": "@php ./vendor/bin/phpcbf .",
     "test": "php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
     "test-coverage": [
       "@putenv XDEBUG_MODE=coverage",
