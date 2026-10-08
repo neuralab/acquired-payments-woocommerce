@@ -882,7 +882,7 @@ class PaymentGatewayTest extends TestCase {
 		$this->get_order_service()
 			->shouldReceive( 'refund_order' )
 			->once()
-			->with( 123, 10.00, 'Test refund' )
+			->with( 123, 10.00 )
 			->andReturn( true );
 
 		$this->assertTrue( $this->test_class->process_refund( 123, 10.00, 'Test refund' ) );
@@ -899,7 +899,7 @@ class PaymentGatewayTest extends TestCase {
 		$this->get_order_service()
 			->shouldReceive( 'refund_order' )
 			->once()
-			->with( 123, 10.00, 'Test refund' )
+			->with( 123, 10.00 )
 			->andThrow( new Exception( 'Payment refund failed.' ) );
 
 		// Test the method.
