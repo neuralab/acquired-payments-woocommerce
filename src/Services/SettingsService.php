@@ -212,7 +212,7 @@ class SettingsService {
 	 * @return array{
 	 *     app_id: string,
 	 *     app_key: string
-	 * }|array<empty>
+	 * }|array{}
 	 */
 	public function get_api_credentials_for_environment( string $environment ): array {
 		$credentials = [

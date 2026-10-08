@@ -490,7 +490,7 @@ class CustomerService {
 	 * Get customer data for new payment method.
 	 *
 	 * @param int $user_id
-	 * @return array{customer_id: string}|array<empty>
+	 * @return array{customer_id: string}|array{}
 	 */
 	public function get_customer_data_for_new_payment_method( int $user_id ): array {
 		$customer = $this->get_or_create_customer_for_new_payment_method( $user_id );
