@@ -199,7 +199,7 @@ class AdminService {
 			$message = sprintf( __( 'Acquired.com for WooCommerce is not fully configured. Please enter your API credentials %1$sin the settings page%2$s.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' );
 		} elseif ( ! $this->settings_service->are_api_credentials_valid() ) {
 			/* translators: %1$s is the opening <a> tag, %2$s is the closing <a> tag.. */
-			$message = sprintf( __( 'Acquired.com for WooCommerce API credentials are invalid. Please enter valid credentials %1$sin the settings page%2$s.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' );
+			$message = sprintf( __( 'Your API credentials and configuration are incorrect or incomplete. You are receiving a 401 response. Please check that your API credentials are correct %1$sin the settings page%2$s and that you have whitelisted your IP address within the Acquired Hub. To get your IP address contact your hosting provider.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' );
 		}
 
 		if ( ! empty( $message ) ) {
