@@ -26,7 +26,7 @@
   },
   "require-dev": {
     "brain/monkey": "2.*",
-    "phpunit/phpunit": "^10.5",
+    "phpunit/phpunit": "^11.0",
     "wp-coding-standards/wpcs": "^3.4"
   },
   "config": {
