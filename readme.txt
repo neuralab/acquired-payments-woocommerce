@@ -2,7 +2,7 @@
 Contributors: acquired
 Tags: acquired, acquired payment, payments, gateway, payment gateway, credit card, card
 Requires at least: 6.5
-Tested up to: 6.8.3
+Tested up to: 7.1.3
 Requires PHP: 8.1
 Stable tag: 2.1.0
 License: MIT License
