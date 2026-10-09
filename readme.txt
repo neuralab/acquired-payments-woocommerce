@@ -1,7 +1,7 @@
 === Acquired.com for WooCommerce ===
 Contributors: acquired
 Tags: acquired, acquired payment, payments, gateway, payment gateway, credit card, card
-Requires at least: 6.5
+Requires at least: 7.0
 Tested up to: 7.1.3
 Requires PHP: 8.1
 Stable tag: 2.1.0

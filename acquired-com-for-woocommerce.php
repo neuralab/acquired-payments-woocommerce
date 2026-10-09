@@ -12,7 +12,7 @@
  * License:     MIT License
  * License URI: https://opensource.org/license/mit
  *
- * Requires at least: 6.5
+ * Requires at least: 7.0
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce
  *
