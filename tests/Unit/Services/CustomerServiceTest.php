@@ -545,9 +545,11 @@ class CustomerServiceTest extends TestCase {
 		$customer = Mockery::mock( 'WC_Customer' );
 		$customer->shouldReceive( 'get_billing' )->once()->andReturn( $billing_address );
 		$customer->shouldReceive( 'has_shipping_address' )->once()->andReturn( false );
+		$customer->shouldReceive( 'get_email' )->once()->andReturn( '' );
 
 		// Test the method.
 		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Customer data is not valid.' );
 		$this->get_private_method_value( 'get_customer_address_data', $customer );
 	}
 
