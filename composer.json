@@ -39,14 +39,14 @@
     "lint": "@php ./vendor/bin/phpcs .",
     "lint-source": "@php ./vendor/bin/phpcs . --report=source",
     "fix": "@php ./vendor/bin/phpcbf .",
-    "test": "php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
+    "test": "@php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
     "test-coverage": [
       "@putenv XDEBUG_MODE=coverage",
-      "php ./vendor/bin/phpunit --coverage-text"
+      "@php ./vendor/bin/phpunit --coverage-text"
     ],
     "test-coverage-report": [
       "@putenv XDEBUG_MODE=coverage",
-      "php ./vendor/bin/phpunit --coverage-html coverage-report"
+      "@php ./vendor/bin/phpunit --coverage-html coverage-report"
     ],
     "create-pot": "wp i18n make-pot . languages/acquired-com-for-woocommerce.pot --domain=acquired-com-for-woocommerce"
   }
