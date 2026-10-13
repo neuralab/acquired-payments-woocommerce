@@ -204,6 +204,21 @@ class PaymentGatewayTest extends TestCase {
 	}
 
 	/**
+	 * Mock the webhook hash header.
+	 *
+	 * @param string $hash
+	 * @return void
+	 */
+	private function mock_webhook_hash_header( string $hash ): void {
+		$_SERVER['HTTP_HASH'] = $hash;
+
+		Functions\expect( 'wp_unslash' )
+			->once()
+			->with( $hash )
+			->andReturn( $hash );
+	}
+
+	/**
 	 * Set up the test case.
 	 *
 	 * @return void
@@ -1073,8 +1088,8 @@ class PaymentGatewayTest extends TestCase {
 		$webhook_data = '{"type":"status_update"}';
 		$hash         = 'test-hash';
 
-		// Set the HTTP header for hash.
-		$_SERVER['HTTP_HASH'] = $hash;
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( $hash );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
@@ -1119,8 +1134,8 @@ class PaymentGatewayTest extends TestCase {
 		$webhook_data = '{"type":"card_new"}';
 		$hash         = 'test-hash';
 
-		// Set the HTTP header for hash.
-		$_SERVER['HTTP_HASH'] = $hash;
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( $hash );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
@@ -1173,8 +1188,8 @@ class PaymentGatewayTest extends TestCase {
 		$webhook_data = '{"type":"card_new"}';
 		$hash         = 'test-hash';
 
-		// Set the HTTP header for hash.
-		$_SERVER['HTTP_HASH'] = $hash;
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( $hash );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
@@ -1227,8 +1242,8 @@ class PaymentGatewayTest extends TestCase {
 		$webhook_data = '{"type":"card_update"}';
 		$hash         = 'test-hash';
 
-		// Set the HTTP header for hash.
-		$_SERVER['HTTP_HASH'] = $hash;
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( $hash );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
@@ -1290,8 +1305,8 @@ class PaymentGatewayTest extends TestCase {
 		$webhook_data = '{"type":"invalid"}';
 		$hash         = 'test-hash';
 
-		// Set the HTTP header for hash.
-		$_SERVER['HTTP_HASH'] = $hash;
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( $hash );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
@@ -1328,6 +1343,9 @@ class PaymentGatewayTest extends TestCase {
 	public function test_process_webhook_without_hash(): void {
 		// Test data.
 		$webhook_data = '{"type":"invalid"}';
+
+		// Mock the HTTP_HASH header.
+		$this->mock_webhook_hash_header( '' );
 
 		// Mock file_get_contents.
 		Functions\expect( 'file_get_contents' )
