@@ -74,6 +74,14 @@ class AdminServiceTest extends TestCase {
 		$_GET['tab']     = 'checkout';
 		$_GET['section'] = 'acfw';
 
+		Functions\expect( 'wp_unslash' )
+			->twice()
+			->andReturnUsing(
+				function( $input ) {
+					return $input;
+				}
+			);
+
 		Functions\expect( 'sanitize_text_field' )
 			->twice()
 			->andReturnUsing(

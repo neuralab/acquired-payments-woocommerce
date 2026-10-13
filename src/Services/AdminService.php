@@ -71,7 +71,7 @@ class AdminService {
 			return false;
 		}
 
-		if ( isset( $_GET['tab'] ) && 'checkout' === sanitize_text_field( $_GET['tab'] ) && isset( $_GET['section'] ) && sanitize_text_field( $_GET['section'] ) === $this->settings_service->config['plugin_id'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		if ( isset( $_GET['tab'] ) && 'checkout' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) && isset( $_GET['section'] ) && sanitize_text_field( wp_unslash( $_GET['section'] ) ) === $this->settings_service->config['plugin_id'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return true;
 		}
 
