@@ -8,6 +8,7 @@
 /.eslintrc.json
 /.gitattributes
 /.gitignore
+/AGENTS.md
 /CHANGELOG.md
 /composer.json
 /composer.lock

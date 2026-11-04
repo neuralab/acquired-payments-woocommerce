@@ -48,6 +48,7 @@ jobs:
             -x ".eslintrc.json" \
             -x ".gitattributes" \
             -x ".gitignore" \
+            -x "AGENTS.md" \
             -x "CHANGELOG.md" \
             -x "composer.json" \
             -x "composer.lock" \
