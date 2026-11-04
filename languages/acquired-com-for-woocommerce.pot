@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-09T10:13:59+00:00\n"
+"POT-Creation-Date: 2026-11-04T14:59:22+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: acquired-com-for-woocommerce\n"
@@ -588,7 +588,7 @@ msgid "Automatically switch fully refunded order status to canceled."
 msgstr ""
 
 #: src/Services/SettingsService.php:587
-msgid "Wallet for WooCommerce failed orders."
+msgid "Wallet for WooCommerce failed orders"
 msgstr ""
 
 #: src/Services/SettingsService.php:589
@@ -613,27 +613,27 @@ msgstr ""
 msgid "Cancel order"
 msgstr ""
 
-#: src/WooCommerce/PaymentGateway.php:424
+#: src/WooCommerce/PaymentGateway.php:425
 msgid "Invalid field."
 msgstr ""
 
 #. translators: %1$s is the field title, %2$s are the field options.
-#: src/WooCommerce/PaymentGateway.php:429
+#: src/WooCommerce/PaymentGateway.php:430
 msgid "Invalid value for \"%1$s\" field. Accepted values are: %2$s."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:448
+#: src/WooCommerce/PaymentGateway.php:449
 msgid "Invalid value for \"%s\" field. Field value has to be URL."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:468
+#: src/WooCommerce/PaymentGateway.php:469
 msgid "Invalid value for \"%s\". Field can't be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:488
+#: src/WooCommerce/PaymentGateway.php:489
 msgid "Invalid format for \"%s\" field."
 msgstr ""
 
