@@ -76,7 +76,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return void
 	 */
 	private function init_hooks(): void {
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] ); // @phpstan-ignore return.void
 		add_action( 'admin_notices', [ $this, 'display_errors' ] );
 		add_action( 'admin_enqueue_scripts', [ $this->admin_service, 'add_order_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this->admin_service, 'add_settings_assets' ] );

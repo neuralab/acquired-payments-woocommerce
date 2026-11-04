@@ -32,7 +32,7 @@ class IncomingDataHandler {
 	 * Sanitize data recursively.
 	 *
 	 * @param mixed $data
-	 * @return mixed
+	 * @return string|int|array|stdClass
 	 */
 	private function sanitize_data( mixed $data ): string|int|array|stdClass {
 		if ( is_array( $data ) ) {

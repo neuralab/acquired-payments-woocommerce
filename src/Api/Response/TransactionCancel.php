@@ -7,6 +7,10 @@ declare( strict_types = 1 );
 
 namespace AcquiredComForWooCommerce\Api\Response;
 
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
+use Exception;
+
 defined( 'ABSPATH' ) || exit; // Exit if accessed directly.
 
 /**

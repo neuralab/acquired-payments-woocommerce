@@ -29,18 +29,12 @@ trait PaymentLink {
 	 * @return string
 	 */
 	protected function format_order_id_for_payment_link( WC_Order|WC_Customer $object ): string { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		switch ( true ) {
-			case $object instanceof WC_Order:
-				$id  = $object->get_id();
-				$key = $object->get_order_key();
-				break;
-			case $object instanceof WC_Customer:
-				$id  = $object->get_id();
-				$key = 'add_payment_method_' . wp_generate_password( 13, false );
-				break;
-		}
+		$key = match ( true ) {
+			$object instanceof WC_Order    => $object->get_order_key(),
+			$object instanceof WC_Customer => 'add_payment_method_' . wp_generate_password( 13, false ),
+		};
 
-		return sprintf( '%s-%s', $id, $key );
+		return sprintf( '%s-%s', $object->get_id(), $key );
 	}
 
 	/**
