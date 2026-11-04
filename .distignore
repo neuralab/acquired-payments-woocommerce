@@ -1,6 +1,7 @@
 /.git
 /.github
 /node_modules
+/stubs
 /tests
 /.wordpress-org
 /.editorconfig
@@ -14,6 +15,7 @@
 /package-lock.json
 /patchwork.json
 /phpcs.xml
+/phpstan.neon
 /phpunit.xml
 /README.md
 /webpack.mix.js

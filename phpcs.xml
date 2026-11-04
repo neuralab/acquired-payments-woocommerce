@@ -2,6 +2,7 @@
 <ruleset name="Acquired.com for WooCommerce">
   <!-- Exclude paths and patterns. -->
   <exclude-pattern>/vendor/*</exclude-pattern>
+  <exclude-pattern>/stubs/*</exclude-pattern>
   <exclude-pattern>/node_modules/*</exclude-pattern>
   <exclude-pattern>/assets/*</exclude-pattern>
   <exclude-pattern>*.js</exclude-pattern>

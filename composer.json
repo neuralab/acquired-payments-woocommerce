@@ -27,7 +27,10 @@
   "require-dev": {
     "brain/monkey": "2.*",
     "phpunit/phpunit": "^11.0",
-    "wp-coding-standards/wpcs": "^3.4"
+    "wp-coding-standards/wpcs": "^3.4",
+    "phpstan/phpstan": "^2.3",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "php-stubs/woocommerce-stubs": "^11.2"
   },
   "config": {
     "optimize-autoloader": true,
@@ -39,6 +42,7 @@
     "lint": "@php ./vendor/bin/phpcs .",
     "lint-source": "@php ./vendor/bin/phpcs . --report=source",
     "fix": "@php ./vendor/bin/phpcbf .",
+    "analyse": "@php ./vendor/bin/phpstan analyse",
     "test": "@php ./vendor/bin/phpunit --testdox --display-warnings --display-skipped --display-incomplete",
     "test-coverage": [
       "@putenv XDEBUG_MODE=coverage",
