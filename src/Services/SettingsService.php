@@ -584,7 +584,7 @@ class SettingsService {
 				'desc_tip'    => false,
 			],
 			'woo_wallet_refund'       => [
-				'title'       => __( 'Wallet for WooCommerce failed orders.', 'acquired-com-for-woocommerce' ),
+				'title'       => __( 'Wallet for WooCommerce failed orders', 'acquired-com-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Refund wallet credit for failed orders  paid partially with Wallet for WooCommerce.', 'acquired-com-for-woocommerce' ),
 				'label'       => __( 'Enable/Disable', 'acquired-com-for-woocommerce' ),
