@@ -17,7 +17,7 @@
  * Requires Plugins:  woocommerce
  *
  * WC requires at least: 8.1
- * WC tested up to:      11.2.0
+ * WC tested up to:      11.2.1
  */
 
 declare( strict_types = 1 );
