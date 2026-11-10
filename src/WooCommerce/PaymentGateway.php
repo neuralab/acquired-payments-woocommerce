@@ -265,12 +265,8 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @throws Exception
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ): bool {
-		try {
-			$this->order_service->refund_order( $order_id, floatval( $amount ) );
-			return true;
-		} catch ( Exception $exception ) {
-			throw new Exception( $exception->getMessage() );
-		}
+		$this->order_service->refund_order( $order_id, floatval( $amount ) );
+		return true;
 	}
 
 	/**
