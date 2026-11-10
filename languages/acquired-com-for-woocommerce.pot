@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-04T14:59:22+00:00\n"
+"POT-Creation-Date: 2026-11-10T14:36:26+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: acquired-com-for-woocommerce\n"
@@ -45,7 +45,7 @@ msgstr ""
 msgid "Acquired.com for WooCommerce requires WooCommerce to be installed and active. You can download %s here."
 msgstr ""
 
-#. translators: %s: Required PHP version
+#. translators: %s: Required WooCommerce version
 #: acquired-com-for-woocommerce.php:122
 msgid "Acquired.com for WooCommerce requires WooCommerce version %s or higher. Please upgrade your WooCommerce version."
 msgstr ""
@@ -81,21 +81,41 @@ msgid "Order cancellation successful."
 msgstr ""
 
 #: src/Services/AdminService.php:159
-msgid "Order cancellation failed. Captured orders can be canceled on the next day."
+msgid "Order cancellation failed. Captured orders can be cancelled on the next day."
 msgstr ""
 
 #: src/Services/AdminService.php:160
 msgid "Order cancellation failed. Check order notes for more details."
 msgstr ""
 
-#. translators: %1$s is the opening <a> tag, %2$s is the closing <a> tag..
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
 #: src/Services/AdminService.php:199
 msgid "Acquired.com for WooCommerce is not fully configured. Please enter your API credentials %1$sin the settings page%2$s."
 msgstr ""
 
-#. translators: %1$s is the opening <a> tag, %2$s is the closing <a> tag..
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
 #: src/Services/AdminService.php:202
 msgid "Your API credentials and configuration are incorrect or incomplete. You are receiving a 401 response. Please check that your API credentials are correct %1$sin the settings page%2$s and that you have whitelisted your IP address within the Acquired Hub. To get your IP address contact your hosting provider."
+msgstr ""
+
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
+#: src/Services/AdminService.php:211
+msgid "Acquired.com sent a redirect without a hash, so it couldn't be verified. Activate a signing key in the Acquired Hub and enter it %1$sin the settings page%2$s. Until then, payment status is checked with the Acquired.com API."
+msgstr ""
+
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
+#: src/Services/AdminService.php:213
+msgid "Acquired.com is signing redirects with a different key than the signing key %1$sin the settings page%2$s. Check that the signing key is activated in the Acquired Hub. Until then, payment status is checked with the Acquired.com API."
+msgstr ""
+
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
+#: src/Services/AdminService.php:215
+msgid "Acquired.com is signing redirects with a signing key that isn't added to the plugin. Add your signing key from the Acquired Hub %1$sin the settings page%2$s. Until then, payment status is checked with the Acquired.com API."
+msgstr ""
+
+#. translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag.
+#: src/Services/AdminService.php:217
+msgid "Redirects from Acquired.com don't match the signing key %1$sin the settings page%2$s. Check the key for typos and that it belongs to the selected environment. Until then, payment status is checked with the Acquired.com API."
 msgstr ""
 
 #: src/Services/OrderService.php:271
@@ -126,473 +146,481 @@ msgid "Transaction (ID: %1$s) decline reason: \"%2$s\"."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:442
+#: src/Services/OrderService.php:437
 msgid "Payment authorised. Transaction ID: %s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:455
+#: src/Services/OrderService.php:450
 msgid "Payment successful. Transaction ID: %s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:469
+#: src/Services/OrderService.php:464
 msgid "Bank payment executed. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is order status, %2$s is transaction ID.
-#: src/Services/OrderService.php:482
+#: src/Services/OrderService.php:477
 msgid "Payment failed with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is data type.
-#: src/Services/OrderService.php:500
+#: src/Services/OrderService.php:495
 msgid "Order processed successfully from incoming %s data."
 msgstr ""
 
-#: src/Services/OrderService.php:565
+#: src/Services/OrderService.php:625
+msgid "Redirect data from Acquired.com couldn't be verified with the signing key. Payment status checked with the Acquired.com API."
+msgstr ""
+
+#: src/Services/OrderService.php:631
+msgid "Payment status checked with Acquired.com. No successful payment found."
+msgstr ""
+
+#: src/Services/OrderService.php:663
 msgid "Payment capture failed. Capture initiated for an order that can't be captured."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:588
+#: src/Services/OrderService.php:686
 msgid "Payment captured successfully. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is capture status, %2$s is transaction ID.
-#: src/Services/OrderService.php:600
+#: src/Services/OrderService.php:698
 msgid "Payment capture declined with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:609
+#: src/Services/OrderService.php:707
 msgid "Payment capture failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:653
+#: src/Services/OrderService.php:751
 msgid "Order cancellation failed. Cancellation initiated for an order that can't be cancelled."
 msgstr ""
 
-#: src/Services/OrderService.php:660
-msgid "Order cancellation failed. Captured orders can be canceled the next day."
+#: src/Services/OrderService.php:758
+msgid "Order cancellation failed. Captured orders can be cancelled the next day."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:685
+#: src/Services/OrderService.php:783
 msgid "Order cancelled successfully. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is cancellation status, %2$s is transaction ID.
-#: src/Services/OrderService.php:695
+#: src/Services/OrderService.php:793
 msgid "Order cancellation declined with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:704
+#: src/Services/OrderService.php:802
 msgid "Order cancellation failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:741
+#: src/Services/OrderService.php:839
 msgid "Transaction is not in \"success\" or \"settled\" status."
 msgstr ""
 
-#: src/Services/OrderService.php:745
+#: src/Services/OrderService.php:843
 msgid "Transaction has already been fully refunded."
 msgstr ""
 
-#: src/Services/OrderService.php:749
+#: src/Services/OrderService.php:847
 msgid "Order has already been cancelled."
 msgstr ""
 
-#: src/Services/OrderService.php:753
+#: src/Services/OrderService.php:851
 msgid "Captured orders can be refunded the next day."
 msgstr ""
 
-#: src/Services/OrderService.php:773
+#: src/Services/OrderService.php:871
 msgid "Partial refunds are only available on the next day."
 msgstr ""
 
-#: src/Services/OrderService.php:800
+#: src/Services/OrderService.php:898
 msgid "Payment refund failed."
 msgstr ""
 
 #. translators: %1$s is refund amount, %2$s is order total.
-#: src/Services/OrderService.php:814
+#: src/Services/OrderService.php:912
 msgid "Payment refund failed. Refund amount \"%1$s\" is greater than order total \"%2$s\"."
 msgstr ""
 
 #. translators: %1$s is the refund amount, %2$s is transaction ID, %3$s is refund transaction ID.
-#: src/Services/OrderService.php:844
+#: src/Services/OrderService.php:942
 msgid "Payment refunded successfully. Refund amount: %1$s. Transaction ID: %2$s. Refund transaction ID: %3$s."
 msgstr ""
 
-#. translators:  %1$s is capture status, %2$s is the refund amount, %3$s is transaction ID.
-#: src/Services/OrderService.php:855
+#. translators: %1$s is refund status, %2$s is the refund amount, %3$s is transaction ID.
+#: src/Services/OrderService.php:953
 msgid "Payment refund declined with status \"%1$s\". Refund amount: %2$s. Transaction ID: %3$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:865
+#: src/Services/OrderService.php:963
 msgid "Payment refund failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:895
+#: src/Services/OrderService.php:993
 msgid "Payment refund failed. Check order notes for more details."
 msgstr ""
 
-#: src/Services/OrderService.php:914
+#: src/Services/OrderService.php:1012
 msgid "Your payment was blocked."
 msgstr ""
 
-#: src/Services/OrderService.php:918
+#: src/Services/OrderService.php:1016
 msgid "Your payment has been declined due to failed authentication with your bank."
 msgstr ""
 
-#: src/Services/OrderService.php:920
+#: src/Services/OrderService.php:1018
 msgid "Your payment was declined."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:539
+#: src/Services/PaymentMethodService.php:544
 msgid "Payment method successfully added."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:546
+#: src/Services/PaymentMethodService.php:551
 msgid "Unable to add payment method to your account."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:549
+#: src/Services/PaymentMethodService.php:554
 msgid "Your payment method was blocked."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:554
+#: src/Services/PaymentMethodService.php:559
 msgid "Your payment method has been declined due to failed authentication with your bank."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:557
+#: src/Services/PaymentMethodService.php:562
 msgid "Your payment method was declined."
 msgstr ""
 
-#: src/Services/SettingsService.php:369
+#: src/Services/SettingsService.php:405
 msgid "Enable Acquired.com payment gateway"
 msgstr ""
 
-#: src/Services/SettingsService.php:371
-#: src/Services/SettingsService.php:500
-#: src/Services/SettingsService.php:513
-#: src/Services/SettingsService.php:521
-#: src/Services/SettingsService.php:582
-#: src/Services/SettingsService.php:590
+#: src/Services/SettingsService.php:407
+#: src/Services/SettingsService.php:536
+#: src/Services/SettingsService.php:549
+#: src/Services/SettingsService.php:557
+#: src/Services/SettingsService.php:618
+#: src/Services/SettingsService.php:626
 msgid "Enable/Disable"
 msgstr ""
 
-#: src/Services/SettingsService.php:375
+#: src/Services/SettingsService.php:411
 msgid "Title"
 msgstr ""
 
-#: src/Services/SettingsService.php:377
+#: src/Services/SettingsService.php:413
 msgid "This controls the title which the user sees during the checkout."
 msgstr ""
 
-#: src/Services/SettingsService.php:378
+#: src/Services/SettingsService.php:414
 msgid "Cards, Apple Pay, Google Pay"
 msgstr ""
 
-#: src/Services/SettingsService.php:382
+#: src/Services/SettingsService.php:418
 msgid "Description"
 msgstr ""
 
-#: src/Services/SettingsService.php:384
+#: src/Services/SettingsService.php:420
 msgid "Payment method description that the customer will see on your checkout."
 msgstr ""
 
-#: src/Services/SettingsService.php:385
+#: src/Services/SettingsService.php:421
 msgid "Checkout with Apple Pay, Google Pay, Card and Pay by Bank."
 msgstr ""
 
-#: src/Services/SettingsService.php:389
+#: src/Services/SettingsService.php:425
 msgid "Environment"
 msgstr ""
 
-#: src/Services/SettingsService.php:391
+#: src/Services/SettingsService.php:427
 msgid "Select the environment you want to use. Staging is used to test transactions. Production is the live environment."
 msgstr ""
 
-#: src/Services/SettingsService.php:395
+#: src/Services/SettingsService.php:431
 msgid "Staging"
 msgstr ""
 
-#: src/Services/SettingsService.php:396
+#: src/Services/SettingsService.php:432
 msgid "Production"
 msgstr ""
 
-#: src/Services/SettingsService.php:400
+#: src/Services/SettingsService.php:436
 msgid "Live Company-Id"
 msgstr ""
 
 #. translators: %s is the Acquired hub link.
-#: src/Services/SettingsService.php:403
-#: src/Services/SettingsService.php:410
+#: src/Services/SettingsService.php:439
+#: src/Services/SettingsService.php:446
 msgid "You can find your Company-Id in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to REFERENCES IDS -> Retrieve your Company-Id."
 msgstr ""
 
-#: src/Services/SettingsService.php:404
+#: src/Services/SettingsService.php:440
 msgid "Enter your Acquired.com Company-Id."
 msgstr ""
 
-#: src/Services/SettingsService.php:407
+#: src/Services/SettingsService.php:443
 msgid "Staging Company-Id"
 msgstr ""
 
-#: src/Services/SettingsService.php:411
+#: src/Services/SettingsService.php:447
 msgid "Enter your Acquired.com staging Company-Id."
 msgstr ""
 
-#: src/Services/SettingsService.php:414
+#: src/Services/SettingsService.php:450
 msgid "Acquired.com API settings"
 msgstr ""
 
 #. translators: %s is the Acquired hub link.
-#: src/Services/SettingsService.php:416
+#: src/Services/SettingsService.php:452
 msgid "You can find your API credentials in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to API ACCESS -> Retrieve your credentials."
 msgstr ""
 
-#: src/Services/SettingsService.php:420
+#: src/Services/SettingsService.php:456
 msgid "Live App ID"
 msgstr ""
 
-#: src/Services/SettingsService.php:422
+#: src/Services/SettingsService.php:458
 msgid "Enter your Acquired.com App ID."
 msgstr ""
 
-#: src/Services/SettingsService.php:426
+#: src/Services/SettingsService.php:462
 msgid "Live App Key"
 msgstr ""
 
-#: src/Services/SettingsService.php:428
+#: src/Services/SettingsService.php:464
 msgid "Enter your Acquired.com App Key."
 msgstr ""
 
-#: src/Services/SettingsService.php:432
+#: src/Services/SettingsService.php:468
 msgid "Staging App ID"
 msgstr ""
 
-#: src/Services/SettingsService.php:434
+#: src/Services/SettingsService.php:470
 msgid "Enter your Acquired.com staging App ID."
 msgstr ""
 
-#: src/Services/SettingsService.php:438
+#: src/Services/SettingsService.php:474
 msgid "Staging App Key"
 msgstr ""
 
-#: src/Services/SettingsService.php:440
+#: src/Services/SettingsService.php:476
 msgid "Enter your Acquired.com staging App Key."
 msgstr ""
 
-#: src/Services/SettingsService.php:444
+#: src/Services/SettingsService.php:480
 msgid "Signing Keys"
 msgstr ""
 
-#: src/Services/SettingsService.php:445
+#: src/Services/SettingsService.php:481
 msgid "Signing keys for webhook and redirect hash validation. For backward compatibility, the App Key will be used if no signing key is provided."
 msgstr ""
 
-#: src/Services/SettingsService.php:449
+#: src/Services/SettingsService.php:485
 msgid "Live Signing Key"
 msgstr ""
 
-#: src/Services/SettingsService.php:451
-msgid "Enter your Acquired.com production signing key (format: sk_{32-bit hex})."
+#: src/Services/SettingsService.php:487
+msgid "Enter your Acquired.com production signing key (format: sk_{64-character hex})."
 msgstr ""
 
-#: src/Services/SettingsService.php:455
+#: src/Services/SettingsService.php:491
 msgid "Staging Signing Key"
 msgstr ""
 
-#: src/Services/SettingsService.php:457
-msgid "Enter your Acquired.com staging signing key (format: sk_{32-bit hex})."
+#: src/Services/SettingsService.php:493
+msgid "Enter your Acquired.com staging signing key (format: sk_{64-character hex})."
 msgstr ""
 
-#: src/Services/SettingsService.php:461
+#: src/Services/SettingsService.php:497
 msgid "Additional settings"
 msgstr ""
 
-#: src/Services/SettingsService.php:465
+#: src/Services/SettingsService.php:501
 msgid "Transaction type"
 msgstr ""
 
-#: src/Services/SettingsService.php:469
+#: src/Services/SettingsService.php:505
 msgid "Capture - Charges the customer immediately. Typically used to complete orders and collect payment right away."
 msgstr ""
 
-#: src/Services/SettingsService.php:470
+#: src/Services/SettingsService.php:506
 msgid "Authorise - Places a hold on the customer's funds without charging them immediately. Commonly used by merchants who fulfil orders at a later time."
 msgstr ""
 
-#: src/Services/SettingsService.php:473
+#: src/Services/SettingsService.php:509
 msgid "Select the transaction type you want to use."
 msgstr ""
 
-#: src/Services/SettingsService.php:475
+#: src/Services/SettingsService.php:511
 msgid "Capture"
 msgstr ""
 
-#: src/Services/SettingsService.php:476
+#: src/Services/SettingsService.php:512
 msgid "Authorise"
 msgstr ""
 
-#: src/Services/SettingsService.php:480
+#: src/Services/SettingsService.php:516
 msgid "Payment reference"
 msgstr ""
 
-#: src/Services/SettingsService.php:482
+#: src/Services/SettingsService.php:518
 msgid "Payment reference visible on bank account statement. We recommend to input your Business Name."
 msgstr ""
 
-#: src/Services/SettingsService.php:488
+#: src/Services/SettingsService.php:524
 msgid "Only letters, numbers, spaces and hyphens allowed (max 18 characters)"
 msgstr ""
 
-#: src/Services/SettingsService.php:492
+#: src/Services/SettingsService.php:528
 msgid "Debug log"
 msgstr ""
 
 #. translators: %s is the path to log file.
-#: src/Services/SettingsService.php:497
+#: src/Services/SettingsService.php:533
 msgid "Log events, stored in %s."
 msgstr ""
 
-#: src/Services/SettingsService.php:498
+#: src/Services/SettingsService.php:534
 msgid "Note: this may log personal information. We recommend using this for debugging purposes only and deleting the logs when finished."
 msgstr ""
 
-#: src/Services/SettingsService.php:504
+#: src/Services/SettingsService.php:540
 msgid "Save payment methods"
 msgstr ""
 
 #. translators: %s is the Acquired hub link.
-#: src/Services/SettingsService.php:509
+#: src/Services/SettingsService.php:545
 msgid "For this feature to work you also have to enable this in your %s account."
 msgstr ""
 
-#: src/Services/SettingsService.php:510
+#: src/Services/SettingsService.php:546
 msgid "Login to the Acquired Hub -> Go to SETTINGS -> Click on HOSTED CHECKOUT -> Click on \"SETTINGS\" button for Cards payment method."
 msgstr ""
 
-#: src/Services/SettingsService.php:511
+#: src/Services/SettingsService.php:547
 msgid "Turn on \"SAVE CARDS\" option and click the \"SAVE\" button."
 msgstr ""
 
-#: src/Services/SettingsService.php:515
+#: src/Services/SettingsService.php:551
 msgid "Allow customers to securely save their payment details for future checkout."
 msgstr ""
 
-#: src/Services/SettingsService.php:518
+#: src/Services/SettingsService.php:554
 msgid "3D-Secure"
 msgstr ""
 
-#: src/Services/SettingsService.php:520
+#: src/Services/SettingsService.php:556
 msgid "Enable 3D-Secure authentication."
 msgstr ""
 
-#: src/Services/SettingsService.php:526
+#: src/Services/SettingsService.php:562
 msgid "Challenge Preferences"
 msgstr ""
 
-#: src/Services/SettingsService.php:528
+#: src/Services/SettingsService.php:564
 msgid "Select your challenge preferences."
 msgstr ""
 
-#: src/Services/SettingsService.php:532
+#: src/Services/SettingsService.php:568
 msgid "Challenge mandated"
 msgstr ""
 
-#: src/Services/SettingsService.php:533
+#: src/Services/SettingsService.php:569
 msgid "Challenge preferred"
 msgstr ""
 
-#: src/Services/SettingsService.php:534
+#: src/Services/SettingsService.php:570
 msgid "No challenge requested"
 msgstr ""
 
-#: src/Services/SettingsService.php:535
+#: src/Services/SettingsService.php:571
 msgid "No preference"
 msgstr ""
 
-#: src/Services/SettingsService.php:539
+#: src/Services/SettingsService.php:575
 msgid "Contact URL"
 msgstr ""
 
-#: src/Services/SettingsService.php:541
+#: src/Services/SettingsService.php:577
 msgid "Enter your contact URL."
 msgstr ""
 
-#: src/Services/SettingsService.php:546
+#: src/Services/SettingsService.php:582
 msgid "Submit Type"
 msgstr ""
 
-#: src/Services/SettingsService.php:548
+#: src/Services/SettingsService.php:584
 msgid "Select your button text. The value you select will be presented to the customer when checking out."
 msgstr ""
 
-#: src/Services/SettingsService.php:552
+#: src/Services/SettingsService.php:588
 msgid "Pay"
 msgstr ""
 
-#: src/Services/SettingsService.php:553
+#: src/Services/SettingsService.php:589
 msgid "Buy"
 msgstr ""
 
-#: src/Services/SettingsService.php:554
+#: src/Services/SettingsService.php:590
 msgid "Checkout"
 msgstr ""
 
-#: src/Services/SettingsService.php:555
+#: src/Services/SettingsService.php:591
 msgid "Donate"
 msgstr ""
 
-#: src/Services/SettingsService.php:556
+#: src/Services/SettingsService.php:592
 msgid "Register"
 msgstr ""
 
-#: src/Services/SettingsService.php:557
+#: src/Services/SettingsService.php:593
 msgid "Subscribe"
 msgstr ""
 
-#: src/Services/SettingsService.php:561
+#: src/Services/SettingsService.php:597
 msgid "Update card webhook"
 msgstr ""
 
 #. translators: %s is the Acquired hub link.
-#: src/Services/SettingsService.php:566
+#: src/Services/SettingsService.php:602
 msgid "Webhook URL for card update notifications for saved payment methods. Copy this value to your %s account."
 msgstr ""
 
-#: src/Services/SettingsService.php:567
+#: src/Services/SettingsService.php:603
 msgid "Login to the Acquired Hub -> Go to SETTINGS -> Go to WEBHOOKS -> Click on \"+ADD ENDPOINT\" button and add the value to Endpoint URL field."
 msgstr ""
 
-#: src/Services/SettingsService.php:568
+#: src/Services/SettingsService.php:604
 msgid "Check \"card_update\" checkbox and click on the \"+ADD ENDPOINT\" button."
 msgstr ""
 
-#: src/Services/SettingsService.php:575
+#: src/Services/SettingsService.php:611
 msgid "Order settings"
 msgstr ""
 
-#: src/Services/SettingsService.php:579
+#: src/Services/SettingsService.php:615
 msgid "Cancel refunded orders"
 msgstr ""
 
-#: src/Services/SettingsService.php:581
-msgid "Automatically switch fully refunded order status to canceled."
+#: src/Services/SettingsService.php:617
+msgid "Automatically switch fully refunded order status to cancelled."
 msgstr ""
 
-#: src/Services/SettingsService.php:587
+#: src/Services/SettingsService.php:623
 msgid "Wallet for WooCommerce failed orders"
 msgstr ""
 
-#: src/Services/SettingsService.php:589
-msgid "Refund wallet credit for failed orders  paid partially with Wallet for WooCommerce."
+#: src/Services/SettingsService.php:625
+msgid "Refund wallet credit for failed orders paid partially with Wallet for WooCommerce."
 msgstr ""
 
 #: src/WooCommerce/PaymentGateway.php:46
@@ -613,27 +641,27 @@ msgstr ""
 msgid "Cancel order"
 msgstr ""
 
-#: src/WooCommerce/PaymentGateway.php:425
+#: src/WooCommerce/PaymentGateway.php:427
 msgid "Invalid field."
 msgstr ""
 
 #. translators: %1$s is the field title, %2$s are the field options.
-#: src/WooCommerce/PaymentGateway.php:430
+#: src/WooCommerce/PaymentGateway.php:432
 msgid "Invalid value for \"%1$s\" field. Accepted values are: %2$s."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:449
+#: src/WooCommerce/PaymentGateway.php:451
 msgid "Invalid value for \"%s\" field. Field value has to be URL."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:469
-msgid "Invalid value for \"%s\". Field can't be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters."
+#: src/WooCommerce/PaymentGateway.php:471
+msgid "Invalid value for \"%s\". Field can't be empty and must contain only letters, numbers, spaces, hyphens and be between 1-18 characters."
 msgstr ""
 
 #. translators: %s is the field title.
-#: src/WooCommerce/PaymentGateway.php:489
+#: src/WooCommerce/PaymentGateway.php:491
 msgid "Invalid format for \"%s\" field."
 msgstr ""
 
