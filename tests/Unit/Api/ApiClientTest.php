@@ -15,6 +15,7 @@ use AcquiredComForWooCommerce\Api\Response\Transaction;
 use AcquiredComForWooCommerce\Api\Response\TransactionCapture;
 use AcquiredComForWooCommerce\Api\Response\TransactionRefund;
 use AcquiredComForWooCommerce\Api\Response\TransactionCancel;
+use AcquiredComForWooCommerce\Api\Response\TransactionList;
 use AcquiredComForWooCommerce\Api\Response\Customer;
 use AcquiredComForWooCommerce\Api\Response\CustomerCreate;
 use AcquiredComForWooCommerce\Api\Response\Card;
@@ -354,6 +355,45 @@ class ApiClientTest extends TestCase {
 		// Test response data.
 		$result = $this->get_private_method_value( 'get_api_url', 'transactions', '12345', '', [ 'id', 'status' ] );
 		$this->assertEquals( 'https://api.acquired.com/v1/transactions/12345/?filter=id,status', $result );
+	}
+
+	/**
+	 * Test get_api_url with query parameters.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\ApiClient::get_api_url
+	 * @return void
+	 */
+	public function test_get_api_url_with_query(): void {
+		// Mock get_api_url creation.
+		$this->mock_get_api_url_creation( 'transactions' );
+
+		// Mock add_query_arg.
+		Functions\expect( 'add_query_arg' )
+			->once()
+			->with(
+				[
+					'order_id' => '518-wc_order_test',
+					'status'   => 'success',
+					'limit'    => 1,
+				],
+				'transactions/'
+			)
+			->andReturn( 'transactions/?order_id=518-wc_order_test&status=success&limit=1' );
+
+		// Test response data.
+		$result = $this->get_private_method_value(
+			'get_api_url',
+			'transactions',
+			'',
+			'',
+			[],
+			[
+				'order_id' => '518-wc_order_test',
+				'status'   => 'success',
+				'limit'    => 1,
+			]
+		);
+		$this->assertEquals( 'https://api.acquired.com/v1/transactions/?order_id=518-wc_order_test&status=success&limit=1', $result );
 	}
 
 	/**
@@ -918,6 +958,71 @@ class ApiClientTest extends TestCase {
 		$this->assertTrue( $result->request_is_success() );
 		$this->assertFalse( $result->request_is_error() );
 		$this->assertEquals( 'success', $result->get_status() );
+	}
+
+	/**
+	 * Test get_transactions.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\ApiClient::get_transactions
+	 * @return void
+	 */
+	public function test_get_transactions(): void {
+		// Mock token request.
+		$this->mock_get_access_token( 'success' );
+
+		// Mock API URL creation.
+		$this->mock_get_api_url_creation( 'transactions' );
+
+		// Mock add_query_arg.
+		Functions\expect( 'add_query_arg' )
+			->once()
+			->with(
+				[
+					'order_id' => '518-wc_order_test',
+					'status'   => 'success',
+					'limit'    => 1,
+				],
+				'transactions/'
+			)
+			->andReturn( 'transactions/?order_id=518-wc_order_test&status=success&limit=1' );
+
+		Functions\expect( 'add_query_arg' )
+			->once()
+			->with( 'filter', 'transaction_id', 'transactions/?order_id=518-wc_order_test&status=success&limit=1' )
+			->andReturn( 'transactions/?order_id=518-wc_order_test&status=success&limit=1&filter=transaction_id' );
+
+		// Mock client request that happens in make_request.
+		$this->mock_client_request(
+			'GET',
+			'https://api.acquired.com/v1/transactions/?order_id=518-wc_order_test&status=success&limit=1&filter=transaction_id',
+			[
+				'Accept'        => 'application/json',
+				'Content-Type'  => 'application/json',
+				'Authorization' => 'Bearer token_1234567890',
+			],
+			[],
+			200,
+			[
+				'meta' => [
+					'count' => 0,
+					'total' => 0,
+				],
+				'data' => null,
+			]
+		);
+
+		$result = $this->test_class->get_transactions(
+			[
+				'order_id' => '518-wc_order_test',
+				'status'   => 'success',
+				'limit'    => 1,
+			],
+			[ 'transaction_id' ]
+		);
+
+		$this->assertInstanceOf( TransactionList::class, $result );
+		$this->assertTrue( $result->request_is_success() );
+		$this->assertNull( $result->get_first_transaction_id() );
 	}
 
 	/**

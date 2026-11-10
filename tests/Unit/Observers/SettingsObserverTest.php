@@ -120,6 +120,10 @@ class SettingsObserverTest extends TestCase {
 				}
 			);
 
+		$this->get_settings_service()
+			->shouldReceive( 'clear_signing_key_issue' )
+			->once();
+
 			// Test the method.
 		$this->test_class->options_updated();
 	}

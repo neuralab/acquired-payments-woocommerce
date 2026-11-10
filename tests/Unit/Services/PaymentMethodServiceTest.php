@@ -1881,6 +1881,7 @@ class PaymentMethodServiceTest extends TestCase {
 
 		// Mock RedirectData.
 		$redirect_data = Mockery::mock( RedirectData::class );
+		$redirect_data->shouldReceive( 'is_hash_valid' )->once()->andReturn( true );
 		$redirect_data->shouldReceive( 'get_order_id' )->twice()->andReturn( '456-add_payment_method_key' );
 		$redirect_data->shouldReceive( 'get_transaction_id' )->once()->andReturn( 'transaction_123' );
 		$redirect_data->shouldReceive( 'set_card_id' )->once()->with( 'token_123' );
@@ -1979,6 +1980,7 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_confirm_payment_method_token_exists(): void {
 		// Mock RedirectData.
 		$redirect_data = Mockery::mock( RedirectData::class );
+		$redirect_data->shouldReceive( 'is_hash_valid' )->once()->andReturn( true );
 		$redirect_data->shouldReceive( 'get_order_id' )->once()->andReturn( '456-add_payment_method_key' );
 		$redirect_data->shouldReceive( 'get_transaction_id' )->once()->andReturn( 'transaction_123' );
 		$redirect_data->shouldReceive( 'set_card_id' )->once()->with( 'token_123' );
@@ -2027,6 +2029,7 @@ class PaymentMethodServiceTest extends TestCase {
 	public function test_confirm_payment_method_failure(): void {
 		// Mock RedirectData.
 		$redirect_data = Mockery::mock( RedirectData::class );
+		$redirect_data->shouldReceive( 'is_hash_valid' )->once()->andReturn( true );
 		$redirect_data->shouldReceive( 'get_order_id' )->once()->andReturn( 'invalid_order_id' );
 		$redirect_data->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
@@ -2039,6 +2042,46 @@ class PaymentMethodServiceTest extends TestCase {
 		// Test the method.
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'No valid customer ID in incoming data.' );
+		$this->service->confirm_payment_method( $redirect_data );
+	}
+
+	/**
+	 * Test confirm_payment_method rejects redirect data with an unverified hash.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\PaymentMethodService::confirm_payment_method
+	 * @return void
+	 */
+	public function test_confirm_payment_method_unverified_hash(): void {
+		// Mock RedirectData.
+		$redirect_data = Mockery::mock( RedirectData::class );
+		$redirect_data->shouldReceive( 'is_hash_valid' )->once()->andReturn( false );
+		$redirect_data->shouldReceive( 'get_hash_status' )->once()->andReturn( 'invalid' );
+		$redirect_data->shouldReceive( 'get_log_data' )->never();
+		$redirect_data->shouldReceive( 'get_order_id' )->never();
+
+		// Mock CustomerFactory.
+		$this->get_customer_factory()
+			->shouldReceive( 'get_wc_customer' )
+			->never();
+
+		// Mock ApiClient.
+		$this->get_api_client()
+			->shouldReceive( 'get_transaction' )
+			->never();
+
+		// Mock TokenService.
+		$this->get_token_service()
+			->shouldReceive( 'payment_token_exists' )
+			->never();
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->never();
+
+		// Test the method.
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Redirect data hash is not valid. Hash status: invalid.' );
 		$this->service->confirm_payment_method( $redirect_data );
 	}
 

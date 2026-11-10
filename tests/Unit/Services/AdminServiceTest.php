@@ -449,6 +449,11 @@ class AdminServiceTest extends TestCase {
 			->once()
 			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
 
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( '' );
+
 		$this->mock_admin_notice(
 			'Acquired.com for WooCommerce is not fully configured. Please enter your API credentials <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a>.',
 			'error'
@@ -478,6 +483,11 @@ class AdminServiceTest extends TestCase {
 			->once()
 			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
 
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( '' );
+
 		$this->mock_admin_notice(
 			'Your API credentials and configuration are incorrect or incomplete. You are receiving a 401 response. Please check that your API credentials are correct <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a> and that you have whitelisted your IP address within the Acquired Hub. To get your IP address contact your hosting provider.',
 			'error'
@@ -502,8 +512,158 @@ class AdminServiceTest extends TestCase {
 			->once()
 			->andReturn( true );
 
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( '' );
+
 		$this->service->settings_notice();
 	}
+
+	/**
+	 * Test settings notice display for signing key issues.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\AdminService::settings_notice
+	 * @return void
+	 */
+	public function test_settings_notice_with_signing_key_issue(): void {
+		// Test when the redirect hash is empty.
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_api_credentials' )
+			->once()
+			->andReturn(
+				[
+					'app_id'  => 'test_id',
+					'app_key' => 'test_key',
+				]
+			);
+
+		$this->get_settings_service()
+			->shouldReceive( 'are_api_credentials_valid' )
+			->once()
+			->andReturn( true );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( 'empty' );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_admin_settings_url' )
+			->once()
+			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
+
+		$this->mock_admin_notice(
+			'Acquired.com sent a redirect without a hash, so it couldn\'t be verified. Activate a signing key in the Acquired Hub and enter it <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a>. Until then, payment status is checked with the Acquired.com API.',
+			'error'
+		);
+
+		$this->service->settings_notice();
+
+		// Test when the app key is used for signing.
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_api_credentials' )
+			->once()
+			->andReturn(
+				[
+					'app_id'  => 'test_id',
+					'app_key' => 'test_key',
+				]
+			);
+
+		$this->get_settings_service()
+			->shouldReceive( 'are_api_credentials_valid' )
+			->once()
+			->andReturn( true );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( 'using_app_key_for_signing' );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_admin_settings_url' )
+			->once()
+			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
+
+		$this->mock_admin_notice(
+			'Acquired.com is signing redirects with a different key than the signing key <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a>. Check that the signing key is activated in the Acquired Hub. Until then, payment status is checked with the Acquired.com API.',
+			'error'
+		);
+
+		$this->service->settings_notice();
+
+		// Test when no signing key is added.
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_api_credentials' )
+			->once()
+			->andReturn(
+				[
+					'app_id'  => 'test_id',
+					'app_key' => 'test_key',
+				]
+			);
+
+		$this->get_settings_service()
+			->shouldReceive( 'are_api_credentials_valid' )
+			->once()
+			->andReturn( true );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( 'no_signing_key' );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_admin_settings_url' )
+			->once()
+			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
+
+		$this->mock_admin_notice(
+			'Acquired.com is signing redirects with a signing key that isn\'t added to the plugin. Add your signing key from the Acquired Hub <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a>. Until then, payment status is checked with the Acquired.com API.',
+			'error'
+		);
+
+		$this->service->settings_notice();
+
+		// Test when the signing key is invalid.
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_api_credentials' )
+			->once()
+			->andReturn(
+				[
+					'app_id'  => 'test_id',
+					'app_key' => 'test_key',
+				]
+			);
+
+		$this->get_settings_service()
+			->shouldReceive( 'are_api_credentials_valid' )
+			->once()
+			->andReturn( true );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_signing_key_issue' )
+			->once()
+			->andReturn( 'invalid' );
+
+		$this->get_settings_service()
+			->shouldReceive( 'get_admin_settings_url' )
+			->once()
+			->andReturn( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw' );
+
+		$this->mock_admin_notice(
+			'Redirects from Acquired.com don\'t match the signing key <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a>. Check the key for typos and that it belongs to the selected environment. Until then, payment status is checked with the Acquired.com API.',
+			'error'
+		);
+
+		$this->service->settings_notice();
+	}
+
 
 	/**
 	 * Test add order assets.

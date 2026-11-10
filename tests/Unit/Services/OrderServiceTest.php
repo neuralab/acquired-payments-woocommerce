@@ -23,6 +23,7 @@ use AcquiredComForWooCommerce\Api\IncomingData\WebhookData;
 use AcquiredComForWooCommerce\Api\IncomingData\RedirectData;
 use AcquiredComForWooCommerce\Api\Response\TransactionCapture;
 use AcquiredComForWooCommerce\Api\Response\TransactionCancel;
+use AcquiredComForWooCommerce\Api\Response\TransactionList;
 use AcquiredComForWooCommerce\Api\Response\TransactionRefund;
 use Exception;
 use Mockery;
@@ -240,6 +241,52 @@ class OrderServiceTest extends TestCase {
 					) && 'debug' === $level;
 				}
 			);
+	}
+
+	/**
+	 * Mock a pending order for payment status checks.
+	 *
+	 * @param int $order_id
+	 * @return MockInterface&WC_Order
+	 */
+	private function mock_order_for_status_check( int $order_id ): MockInterface {
+		$order = Mockery::mock( 'WC_Order' );
+		$order->shouldReceive( 'get_id' )->andReturn( $order_id );
+		$order->shouldReceive( 'get_order_key' )->andReturn( 'wc_order_key' );
+		$order->shouldReceive( 'get_payment_method' )->andReturn( 'acfw' );
+		$order->shouldReceive( 'has_status' )->with( [ 'pending', 'failed' ] )->andReturn( true );
+
+		return $order;
+	}
+
+	/**
+	 * Mock get_transactions API call for an order.
+	 *
+	 * @param string $transaction_order_id
+	 * @param string|null $transaction_id
+	 * @param bool $is_error
+	 * @return void
+	 */
+	private function mock_get_transactions( string $transaction_order_id, ?string $transaction_id, bool $is_error = false ): void {
+		// Mock TransactionList.
+		$transaction_list = Mockery::mock( TransactionList::class );
+		$transaction_list->shouldReceive( 'request_is_error' )->once()->andReturn( $is_error );
+		$transaction_list->shouldReceive( 'get_first_transaction_id' )->andReturn( $transaction_id );
+		$transaction_list->shouldReceive( 'get_log_data' )->andReturn( [] );
+
+		// Mock ApiClient.
+		$this->get_api_client()
+			->shouldReceive( 'get_transactions' )
+			->once()
+			->with(
+				[
+					'order_id' => $transaction_order_id,
+					'status'   => 'success',
+					'limit'    => 1,
+				],
+				[ 'transaction_id' ]
+			)
+			->andReturn( $transaction_list );
 	}
 
 	/**
@@ -1230,8 +1277,8 @@ class OrderServiceTest extends TestCase {
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
 		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->once()->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->twice()->andReturn( [] );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
@@ -1284,9 +1331,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $earlier_transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 3 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->twice()->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $earlier_transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = Mockery::mock( 'WC_Order' );
@@ -1353,8 +1400,8 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->times( 3 )->andReturn( 'webhook' );
 		$webhook->shouldReceive( 'get_log_data' )->twice()->andReturn( [] );
 
 		// Mock WC_Order.
@@ -1434,9 +1481,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'success', $order_id, $transaction_id, $timestamp );
@@ -1485,9 +1532,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'settled', $order_id, $transaction_id, $timestamp );
@@ -1536,9 +1583,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'authorisation', 'success', $order_id, $transaction_id, $timestamp );
@@ -1585,9 +1632,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'executed', $order_id, $transaction_id, $timestamp );
@@ -1634,9 +1681,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'failed', $order_id, $transaction_id, $timestamp );
@@ -1713,9 +1760,9 @@ class OrderServiceTest extends TestCase {
 		// Mock WebhookData.
 		$webhook = Mockery::mock( WebhookData::class );
 		$webhook->shouldReceive( 'get_order_id' )->twice()->andReturn( $transaction_order_id );
-		$webhook->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$webhook->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$webhook->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$webhook->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$webhook->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$webhook->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'success', $order_id, $transaction_id, $timestamp );
@@ -1803,9 +1850,9 @@ class OrderServiceTest extends TestCase {
 		// Mock RedirectData.
 		$redirect = Mockery::mock( RedirectData::class );
 		$redirect->shouldReceive( 'get_order_id' )->times( 3 )->andReturn( $transaction_order_id );
-		$redirect->shouldReceive( 'get_transaction_id' )->twice()->andReturn( $transaction_id );
-		$redirect->shouldReceive( 'get_type' )->times( 4 )->andReturn( 'webhook' );
-		$redirect->shouldReceive( 'get_log_data' )->times( 3 )->andReturn( [] );
+		$redirect->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+		$redirect->shouldReceive( 'get_type' )->twice()->andReturn( 'webhook' );
+		$redirect->shouldReceive( 'get_log_data' )->once()->andReturn( [] );
 
 		// Mock WC_Order.
 		$order = $this->mock_order_for_processing( 'capture', 'success', $order_id, $transaction_id, $timestamp );
@@ -1840,6 +1887,11 @@ class OrderServiceTest extends TestCase {
 				'debug',
 				[]
 			);
+
+		// Mock SettingsService.
+		$this->get_settings_service()
+			->shouldReceive( 'clear_signing_key_issue' )
+			->once();
 
 		// Test the method.
 		$this->assertSame( $order, $this->service->confirm_order( $redirect ) );
@@ -3306,5 +3358,374 @@ class OrderServiceTest extends TestCase {
 
 		// Test the method.
 		$this->assertEquals( 'Your payment was declined.', $this->service->get_fail_notice( 123 ) );
+	}
+
+	/**
+	 * Test can_be_synced.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::can_be_synced
+	 * @return void
+	 */
+	public function test_can_be_synced(): void {
+		// Set test data.
+		$order_id = 123;
+
+		// Test pending order paid with Acquired.com.
+		$this->assertTrue( $this->get_private_method_value( 'can_be_synced', $this->mock_order_for_status_check( $order_id ) ) );
+
+		// Test order paid with another payment method.
+		$order = Mockery::mock( 'WC_Order' );
+		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'bacs' );
+		$this->assertFalse( $this->get_private_method_value( 'can_be_synced', $order ) );
+
+		// Test order that is already processed.
+		$order = Mockery::mock( 'WC_Order' );
+		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
+		$order->shouldReceive( 'has_status' )->once()->with( [ 'pending', 'failed' ] )->andReturn( false );
+		$this->assertFalse( $this->get_private_method_value( 'can_be_synced', $order ) );
+	}
+
+	/**
+	 * Test sync_order processes the successful transaction.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::sync_order
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::process_transaction
+	 * @return void
+	 */
+	public function test_sync_order_success(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+		$transaction_id       = 'transaction_123';
+		$timestamp            = 1234567890;
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( null );
+		$order->shouldReceive( 'get_transaction_id' )->andReturn( $transaction_id );
+		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_time_updated' )->once()->andReturn( '' );
+		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
+		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_type' )->once()->andReturn( 'capture' );
+		$order->shouldReceive( 'has_status' )->once()->with( [ 'pending', 'failed', 'on-hold' ] )->andReturn( true );
+		$order->shouldReceive( 'set_transaction_id' )->once()->with( $transaction_id );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_transaction_status', 'success' );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_order_time_updated', $timestamp );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_version', '2.0.0' );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_order_state', 'completed' );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_order_time_completed', $timestamp );
+		$order->shouldReceive( 'payment_complete' )->once();
+		$order->shouldReceive( 'add_order_note' )->once()->with( sprintf( 'Payment successful. Transaction ID: %s.', $transaction_id ) );
+		$order->shouldReceive( 'add_order_note' )->once()->with( 'Order processed successfully from incoming API data.' );
+		$order->shouldReceive( 'save' )->twice();
+
+		// Mock Transaction.
+		$transaction = Mockery::mock( Transaction::class );
+		$transaction->shouldReceive( 'get_status' )->once()->andReturn( 'success' );
+		$transaction->shouldReceive( 'get_created_timestamp' )->andReturn( $timestamp );
+		$transaction->shouldReceive( 'request_is_error' )->once()->andReturn( false );
+
+		// Mock set_additional_order_data.
+		$this->mock_set_additional_order_data( $order, $transaction );
+
+		// Mock ApiClient.
+
+		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+
+		$this->get_api_client()
+			->shouldReceive( 'get_transaction' )
+			->once()
+			->with( $transaction_id )
+			->andReturn( $transaction );
+
+		// Mock LoggerService.
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Transaction found successfully from incoming API data. Order ID: %d.', $order_id ), 'debug', [] );
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Payment complete for order. Order ID: %d.', $order_id ), 'debug', [] );
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Order processed successfully from incoming API data. Order ID: %d.', $order_id ), 'debug', [] );
+
+		// Test the method.
+		$this->assertTrue( $this->get_private_method_value( 'sync_order', $order ) );
+	}
+
+	/**
+	 * Test sync_order when no successful transaction exists.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::sync_order
+	 * @return void
+	 */
+	public function test_sync_order_not_found(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+
+		// Mock ApiClient.
+		$this->mock_get_transactions( $transaction_order_id, null );
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'No successful transaction found on Acquired.com. Order ID: %d.', $order_id ), 'debug', [] );
+
+		// Test the method.
+		$this->assertFalse( $this->get_private_method_value( 'sync_order', $this->mock_order_for_status_check( $order_id ) ) );
+	}
+
+	/**
+	 * Test sync_order when the transaction is already on the order.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::sync_order
+	 * @return void
+	 */
+	public function test_sync_order_already_processed(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+		$transaction_id       = 'transaction_123';
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+
+		// Mock ApiClient.
+
+		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+
+		$this->get_api_client()
+			->shouldReceive( 'get_transaction' )
+			->never();
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Order transaction already processed. Skipping the processing. Order ID: %d.', $order_id ), 'debug' );
+
+		// Test the method.
+		$this->assertTrue( $this->get_private_method_value( 'sync_order', $order ) );
+	}
+
+	/**
+	 * Test sync_order when the API request fails.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::sync_order
+	 * @return void
+	 */
+	public function test_sync_order_request_error(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+
+		// Mock ApiClient.
+		$this->mock_get_transactions( $transaction_order_id, null, true );
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Failed to get transactions. Order ID: %d.', $order_id ), 'error', [] );
+
+		// Test the method.
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Failed to get transactions.' );
+		$this->get_private_method_value( 'sync_order', $this->mock_order_for_status_check( $order_id ) );
+	}
+
+	/**
+	 * Test confirm_unverified_order checks the payment status with Acquired.com.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_unverified_order
+	 * @return void
+	 */
+	public function test_confirm_unverified_order_checks_payment_status(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+
+		// Mock RedirectData.
+		$redirect = Mockery::mock( RedirectData::class );
+		$redirect->shouldReceive( 'get_order_id' )->andReturn( $transaction_order_id );
+		$redirect->shouldReceive( 'get_hash_status' )->once()->andReturn( 'invalid' );
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+		$order->shouldReceive( 'update_meta_data' )->once()->with( '_acfw_order_state', 'failed' );
+		$order->shouldReceive( 'update_status' )->once()->with( 'failed' );
+		$order->shouldReceive( 'save' )->once();
+		$order->shouldReceive( 'add_order_note' )->once()->with( 'Redirect data from Acquired.com couldn\'t be verified with the signing key. Payment status checked with the Acquired.com API.' );
+		$order->shouldReceive( 'add_order_note' )->once()->with( 'Payment status checked with Acquired.com. No successful payment found.' );
+
+		// Mock wc_get_order.
+		Functions\expect( 'wc_get_order' )
+			->once()
+			->with( $order_id )
+			->andReturn( $order );
+
+		// Mock SettingsService.
+		$this->get_settings_service()
+			->shouldReceive( 'set_signing_key_issue' )
+			->once()
+			->with( 'invalid' );
+
+		// Mock ApiClient.
+		$this->mock_get_transactions( $transaction_order_id, null );
+
+		// Mock LoggerService.
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'No successful transaction found on Acquired.com. Order ID: %d.', $order_id ), 'debug', [] );
+
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Payment failed for order. Order ID: %d.', $order_id ), 'debug' );
+
+		// Test the method.
+		$this->assertSame( $order, $this->service->confirm_unverified_order( $redirect ) );
+	}
+
+	/**
+	 * Test confirm_unverified_order when the successful payment is found.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_unverified_order
+	 * @return void
+	 */
+	public function test_confirm_unverified_order_with_successful_payment(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+		$transaction_id       = 'transaction_123';
+
+		// Mock RedirectData.
+		$redirect = Mockery::mock( RedirectData::class );
+		$redirect->shouldReceive( 'get_order_id' )->andReturn( $transaction_order_id );
+		$redirect->shouldReceive( 'get_hash_status' )->once()->andReturn( 'invalid' );
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+		$order->shouldReceive( 'update_status' )->never();
+		$order->shouldReceive( 'add_order_note' )->once()->with( 'Redirect data from Acquired.com couldn\'t be verified with the signing key. Payment status checked with the Acquired.com API.' );
+		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+
+		// Mock wc_get_order.
+		Functions\expect( 'wc_get_order' )
+			->once()
+			->with( $order_id )
+			->andReturn( $order );
+
+		// Mock SettingsService.
+		$this->get_settings_service()
+			->shouldReceive( 'set_signing_key_issue' )
+			->once()
+			->with( 'invalid' );
+
+		// Mock ApiClient.
+		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Order transaction already processed. Skipping the processing. Order ID: %d.', $order_id ), 'debug' );
+
+		// Test the method.
+		$this->assertSame( $order, $this->service->confirm_unverified_order( $redirect ) );
+	}
+
+	/**
+	 * Test confirm_unverified_order for an order that doesn't need a check.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_unverified_order
+	 * @return void
+	 */
+	public function test_confirm_unverified_order_for_processed_order(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+
+		// Mock RedirectData.
+		$redirect = Mockery::mock( RedirectData::class );
+		$redirect->shouldReceive( 'get_order_id' )->andReturn( $transaction_order_id );
+
+		// Mock WC_Order.
+		$order = Mockery::mock( 'WC_Order' );
+		$order->shouldReceive( 'get_id' )->andReturn( $order_id );
+		$order->shouldReceive( 'get_order_key' )->andReturn( 'wc_order_key' );
+		$order->shouldReceive( 'get_payment_method' )->andReturn( 'acfw' );
+		$order->shouldReceive( 'has_status' )->with( [ 'pending', 'failed' ] )->andReturn( false );
+
+		// Mock wc_get_order.
+		Functions\expect( 'wc_get_order' )
+			->once()
+			->with( $order_id )
+			->andReturn( $order );
+
+		// Mock ApiClient.
+		$this->get_api_client()
+			->shouldReceive( 'get_transactions' )
+			->never();
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Unverified redirect for an order that doesn\'t need a payment status check. Order ID: %d.', $order_id ), 'debug' );
+
+		// Test the method.
+		$this->assertSame( $order, $this->service->confirm_unverified_order( $redirect ) );
+	}
+
+	/**
+	 * Test confirm_unverified_order with an invalid order key.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::confirm_unverified_order
+	 * @return void
+	 */
+	public function test_confirm_unverified_order_with_invalid_order_key(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_wrong';
+
+		// Mock RedirectData.
+		$redirect = Mockery::mock( RedirectData::class );
+		$redirect->shouldReceive( 'get_order_id' )->andReturn( $transaction_order_id );
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+
+		// Mock wc_get_order.
+		Functions\expect( 'wc_get_order' )
+			->once()
+			->with( $order_id )
+			->andReturn( $order );
+
+		// Mock ApiClient.
+		$this->get_api_client()
+			->shouldReceive( 'get_transactions' )
+			->never();
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Error processing order from unverified redirect data. Order key in incoming data is invalid. Order ID: %d.', $order_id ), 'error' );
+
+		// Test the method.
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( sprintf( 'Order key in incoming data is invalid. Order ID: %d.', $order_id ) );
+		$this->service->confirm_unverified_order( $redirect );
 	}
 }

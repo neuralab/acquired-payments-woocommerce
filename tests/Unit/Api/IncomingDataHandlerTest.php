@@ -14,6 +14,7 @@ use AcquiredComForWooCommerce\Api\IncomingData\RedirectData;
 use AcquiredComForWooCommerce\Api\IncomingData\WebhookData;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\IncomingDataTestData;
 use AcquiredComForWooCommerce\Tests\Framework\Traits\Reflection;
+use AcquiredComForWooCommerce\Tests\Framework\Helpers\ReflectionHelper;
 use Brain\Monkey\Functions;
 use Exception;
 use stdClass;
@@ -301,9 +302,87 @@ class IncomingDataHandlerTest extends TestCase {
 		$data         = $this->get_test_redirect_data();
 		$data['hash'] = 'invalid_hash';
 
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Redirect data hash is invalid.' );
-		$this->set_private_method_value( 'format_redirect_data', $data );
+		$result = $this->get_private_method_value( 'format_redirect_data', $data );
+
+		$this->assertInstanceOf( RedirectData::class, $result );
+		$this->assertEquals( 'no_signing_key', $result->get_hash_status() );
+		$this->assertFalse( $result->is_hash_valid() );
+	}
+
+	/**
+	 * Test format_redirect_data with valid hash sets valid hash status.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_redirect_data
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_hash_status
+	 * @return void
+	 */
+	public function test_format_redirect_data_with_valid_hash_status(): void {
+		$result = $this->get_private_method_value( 'format_redirect_data', $this->get_test_redirect_data() );
+
+		// Test with valid hash.
+		$this->assertEquals( 'valid', $result->get_hash_status() );
+		$this->assertTrue( $result->is_hash_valid() );
+	}
+
+	/**
+	 * Test format_redirect_data with empty hash.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::format_redirect_data
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_hash_status
+	 * @return void
+	 */
+	public function test_format_redirect_data_with_empty_hash(): void {
+		$data         = $this->get_test_redirect_data();
+		$data['hash'] = '';
+
+		// Test with empty hash.
+		$this->assertEquals( 'empty', $this->get_private_method_value( 'format_redirect_data', $data )->get_hash_status() );
+
+		// Test with missing hash.
+		unset( $data['hash'] );
+		$this->assertEquals( 'empty', $this->get_private_method_value( 'format_redirect_data', $data )->get_hash_status() );
+	}
+
+	/**
+	 * Test get_redirect_hash_status when the hash matches the app key but not the signing key.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_hash_status
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::redirect_hash_matches_key
+	 * @return void
+	 */
+	public function test_get_redirect_hash_status_with_app_key_match(): void {
+		$handler = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, 'sk_not_activated_key' );
+
+		// Test with hash created with the app key.
+		$this->assertEquals( 'using_app_key_for_signing', ( new ReflectionHelper( $handler ) )->get_private_method_value( 'get_redirect_hash_status', $this->get_test_redirect_data() ) );
+	}
+
+	/**
+	 * Test get_redirect_hash_status when the hash matches neither key.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_hash_status
+	 * @return void
+	 */
+	public function test_get_redirect_hash_status_with_no_key_match(): void {
+		$handler = new IncomingDataHandler( $this->get_logger_service(), $this->test_app_key, 'sk_typo_key' );
+
+		$this->set_hash_key( 'sk_correct_key' );
+
+		// Test with hash created with a different signing key.
+		$this->assertEquals( 'invalid', ( new ReflectionHelper( $handler ) )->get_private_method_value( 'get_redirect_hash_status', $this->get_test_redirect_data() ) );
+	}
+
+	/**
+	 * Test get_redirect_hash_status when no signing key is set and the hash doesn't match the app key.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_hash_status
+	 * @return void
+	 */
+	public function test_get_redirect_hash_status_with_no_signing_key(): void {
+		$this->set_hash_key( 'sk_active_key' );
+
+		// Test with hash created with a signing key that isn't added to the plugin.
+		$this->assertEquals( 'no_signing_key', $this->get_private_method_value( 'get_redirect_hash_status', $this->get_test_redirect_data() ) );
 	}
 
 	/**
@@ -575,14 +654,37 @@ class IncomingDataHandlerTest extends TestCase {
 		$this->get_logger_service()->expects( 'log' )
 			->once()
 			->with(
-				'Missing required fields in redirect_data: "status, transaction_id, order_id, timestamp, hash".',
+				'Missing required fields in redirect_data: "status, transaction_id, order_id, timestamp".',
 				'error'
 			);
 
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Missing required fields in redirect_data: "status, transaction_id, order_id, timestamp, hash".' );
+		$this->expectExceptionMessage( 'Missing required fields in redirect_data: "status, transaction_id, order_id, timestamp".' );
 
 		$this->test_class->get_redirect_data( [] );
+	}
+
+	/**
+	 * Test get_redirect_data with an unverified hash logs an error.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\IncomingDataHandler::get_redirect_data
+	 * @return void
+	 */
+	public function test_get_redirect_data_with_unverified_hash(): void {
+		$data         = $this->get_test_redirect_data();
+		$data['hash'] = 'invalid_hash';
+
+		$this->get_logger_service()->expects( 'log' )
+			->once()
+			->with(
+				'Incoming redirect data received with an unverified hash. Hash status: no_signing_key.',
+				'error'
+			);
+
+		$result = $this->test_class->get_redirect_data( $data );
+
+		$this->assertInstanceOf( RedirectData::class, $result );
+		$this->assertFalse( $result->is_hash_valid() );
 	}
 
 	/**

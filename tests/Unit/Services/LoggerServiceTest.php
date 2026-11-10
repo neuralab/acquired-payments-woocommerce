@@ -88,6 +88,8 @@ class LoggerServiceTest extends TestCase {
 			'holder_name',
 			'scheme',
 			'number',
+			'dob',
+			'ip',
 		];
 
 		foreach ( $expected_sensitive_fields as $field ) :
@@ -271,6 +273,8 @@ class LoggerServiceTest extends TestCase {
 				],
 				'app_id'     => 'test_id',
 				'app_key'    => 'test_key',
+				'dob'        => '1990-01-01',
+				'ip'         => '192.168.1.1',
 			],
 		];
 
@@ -296,6 +300,8 @@ class LoggerServiceTest extends TestCase {
 				],
 				'app_id'     => '[REDACTED]',
 				'app_key'    => '[REDACTED]',
+				'dob'        => '[REDACTED]',
+				'ip'         => '[REDACTED]',
 			],
 		];
 

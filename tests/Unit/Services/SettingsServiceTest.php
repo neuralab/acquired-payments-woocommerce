@@ -410,6 +410,66 @@ class SettingsServiceTest extends TestCase {
 	}
 
 	/**
+	 * Test set signing key issue.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\SettingsService::set_signing_key_issue
+	 * @return void
+	 */
+	public function test_set_signing_key_issue(): void {
+		// Test setting signing key issue.
+
+		Functions\expect( 'update_option' )
+			->once()
+			->with( 'acfw_signing_key_issue', 'invalid', false )
+			->andReturn( true );
+
+		$this->service->set_signing_key_issue( 'invalid' );
+	}
+
+	/**
+	 * Test get signing key issue.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\SettingsService::get_signing_key_issue
+	 * @return void
+	 */
+	public function test_get_signing_key_issue(): void {
+		// Test when there is no signing key issue.
+
+		Functions\expect( 'get_option' )
+			->once()
+			->with( 'acfw_signing_key_issue', '' )
+			->andReturn( '' );
+
+		$this->assertEquals( '', $this->service->get_signing_key_issue() );
+
+		// Test when there is a signing key issue.
+
+		Functions\expect( 'get_option' )
+			->once()
+			->with( 'acfw_signing_key_issue', '' )
+			->andReturn( 'invalid' );
+
+		$this->assertEquals( 'invalid', $this->service->get_signing_key_issue() );
+	}
+
+	/**
+	 * Test clear signing key issue.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\SettingsService::clear_signing_key_issue
+	 * @return void
+	 */
+	public function test_clear_signing_key_issue(): void {
+		// Test clearing signing key issue.
+
+		Functions\expect( 'delete_option' )
+			->once()
+			->with( 'acfw_signing_key_issue' )
+			->andReturn( true );
+
+		$this->service->clear_signing_key_issue();
+	}
+
+	/**
 	 * Test get WooCommerce API endpoint.
 	 *
 	 * @covers \AcquiredComForWooCommerce\Services\SettingsService::get_wc_api_endpoint

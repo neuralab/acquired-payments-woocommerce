@@ -72,6 +72,26 @@ class ResponseTest extends ResponseTestCase {
 	}
 
 	/**
+	 * Test has_body_field.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Api\Response\Response::has_body_field
+	 * @return void
+	 */
+	public function test_has_body_field(): void {
+		$result     = Response::make( $this->mock_response( 200, 'OK', $this->get_test_response_data( 'success' ) ) );
+		$reflection = new ReflectionHelper( $result );
+
+		// Test with field that has a value.
+		$this->assertTrue( $reflection->get_private_method_value( 'has_body_field', 'transaction_id' ) );
+
+		// Test with field that is empty.
+		$this->assertTrue( $reflection->get_private_method_value( 'has_body_field', 'reason' ) );
+
+		// Test with missing field.
+		$this->assertFalse( $reflection->get_private_method_value( 'has_body_field', 'missing_field' ) );
+	}
+
+	/**
 	 * Test with RequestException.
 	 *
 	 * @return void
