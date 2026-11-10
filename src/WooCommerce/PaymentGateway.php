@@ -218,7 +218,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_new_payment_method_option_html() {
-		if ( is_checkout() && ! $this->get_tokens() || is_add_payment_method_page() ) { // phpcs:ignore Generic.CodeAnalysis.RequireExplicitBooleanOperatorPrecedence.MissingParentheses
+		if ( ( is_checkout() && ! $this->get_tokens() ) || is_add_payment_method_page() ) {
 			return '';
 		}
 
