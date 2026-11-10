@@ -52,6 +52,8 @@ class LoggerService {
 		'holder_name',
 		'scheme',
 		'number',
+		'dob',
+		'ip',
 	];
 
 	/**
