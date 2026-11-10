@@ -2343,7 +2343,7 @@ class OrderServiceTest extends TestCase {
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_status' )->once()->andReturn( 'success' );
 		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( 'transaction_123' );
 		$order->shouldReceive( 'get_payment_method' )->once()->andReturn( 'acfw' );
-		$order->shouldReceive( 'add_order_note' )->once()->with( 'Order cancellation failed. Captured orders can be canceled the next day.' );
+		$order->shouldReceive( 'add_order_note' )->once()->with( 'Order cancellation failed. Captured orders can be cancelled the next day.' );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_order_time_completed' )->once()->andReturn( strtotime( 'today' ) );
 		$order->shouldReceive( 'get_meta' )->with( '_acfw_transaction_type' )->once()->andReturn( 'authorisation' );
 		$order->shouldReceive( 'get_id' )->once()->andReturn( 123 );
@@ -2353,7 +2353,7 @@ class OrderServiceTest extends TestCase {
 			->shouldReceive( 'log' )
 			->once()
 			->with(
-				'Order cancellation failed. Captured orders can be canceled the next day. Order ID: 123.',
+				'Order cancellation failed. Captured orders can be cancelled the next day. Order ID: 123.',
 				'debug'
 			);
 

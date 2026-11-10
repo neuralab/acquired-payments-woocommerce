@@ -484,13 +484,13 @@ class SettingsService {
 			'signing_key_production'  => [
 				'title'       => __( 'Live Signing Key', 'acquired-com-for-woocommerce' ),
 				'type'        => 'password',
-				'description' => __( 'Enter your Acquired.com production signing key (format: sk_{32-bit hex}).', 'acquired-com-for-woocommerce' ),
+				'description' => __( 'Enter your Acquired.com production signing key (format: sk_{64-character hex}).', 'acquired-com-for-woocommerce' ),
 				'desc_tip'    => true,
 			],
 			'signing_key_staging'     => [
 				'title'       => __( 'Staging Signing Key', 'acquired-com-for-woocommerce' ),
 				'type'        => 'password',
-				'description' => __( 'Enter your Acquired.com staging signing key (format: sk_{32-bit hex}).', 'acquired-com-for-woocommerce' ),
+				'description' => __( 'Enter your Acquired.com staging signing key (format: sk_{64-character hex}).', 'acquired-com-for-woocommerce' ),
 				'desc_tip'    => true,
 			],
 			'additional'              => [
@@ -614,7 +614,7 @@ class SettingsService {
 			'cancel_refunded'         => [
 				'title'       => __( 'Cancel refunded orders', 'acquired-com-for-woocommerce' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Automatically switch fully refunded order status to canceled.', 'acquired-com-for-woocommerce' ),
+				'description' => __( 'Automatically switch fully refunded order status to cancelled.', 'acquired-com-for-woocommerce' ),
 				'label'       => __( 'Enable/Disable', 'acquired-com-for-woocommerce' ),
 				'default'     => 'no',
 				'desc_tip'    => false,
@@ -622,7 +622,7 @@ class SettingsService {
 			'woo_wallet_refund'       => [
 				'title'       => __( 'Wallet for WooCommerce failed orders', 'acquired-com-for-woocommerce' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Refund wallet credit for failed orders  paid partially with Wallet for WooCommerce.', 'acquired-com-for-woocommerce' ),
+				'description' => __( 'Refund wallet credit for failed orders paid partially with Wallet for WooCommerce.', 'acquired-com-for-woocommerce' ),
 				'label'       => __( 'Enable/Disable', 'acquired-com-for-woocommerce' ),
 				'default'     => 'no',
 				'desc_tip'    => false,

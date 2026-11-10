@@ -156,7 +156,7 @@ class AdminService {
 			],
 			'cancel_order'        => [
 				'success' => __( 'Order cancellation successful.', 'acquired-com-for-woocommerce' ),
-				'invalid' => __( 'Order cancellation failed. Captured orders can be canceled on the next day.', 'acquired-com-for-woocommerce' ),
+				'invalid' => __( 'Order cancellation failed. Captured orders can be cancelled on the next day.', 'acquired-com-for-woocommerce' ),
 				'error'   => __( 'Order cancellation failed. Check order notes for more details.', 'acquired-com-for-woocommerce' ),
 			],
 		];

@@ -755,9 +755,9 @@ class OrderService {
 		}
 
 		if ( 'authorisation' === $order->get_meta( '_acfw_transaction_type' ) && 'completed' === $order->get_meta( '_acfw_order_state' ) && ! $this->is_day_older( (int) $order->get_meta( '_acfw_order_time_completed' ) ) ) {
-			$order->add_order_note( __( 'Order cancellation failed. Captured orders can be canceled the next day.', 'acquired-com-for-woocommerce' ) );
+			$order->add_order_note( __( 'Order cancellation failed. Captured orders can be cancelled the next day.', 'acquired-com-for-woocommerce' ) );
 
-			$this->logger_service->log( sprintf( 'Order cancellation failed. Captured orders can be canceled the next day. Order ID: %s.', $order->get_id() ), 'debug' );
+			$this->logger_service->log( sprintf( 'Order cancellation failed. Captured orders can be cancelled the next day. Order ID: %s.', $order->get_id() ), 'debug' );
 			return 'invalid';
 		}
 
@@ -949,7 +949,7 @@ class OrderService {
 		} else {
 			if ( $response->get_decline_reason() ) {
 				$order_note = sprintf(
-					/* translators:  %1$s is capture status, %2$s is the refund amount, %3$s is transaction ID. */
+					/* translators: %1$s is refund status, %2$s is the refund amount, %3$s is transaction ID. */
 					__( 'Payment refund declined with status "%1$s". Refund amount: %2$s. Transaction ID: %3$s.', 'acquired-com-for-woocommerce' ),
 					$response->get_decline_reason(),
 					$amount_formatted,

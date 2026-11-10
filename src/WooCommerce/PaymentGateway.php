@@ -313,7 +313,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 			$payment_link = $this->payment_method_service->get_payment_link( get_current_user_id() );
 
 			return [
-				'result'   => '', // We have ot add this as an empty string, otherwise WooCommerce will throw a success notice. We can't use 'success' here because we don't know the outcome of the action since it happens offsite.
+				'result'   => '', // We have to add this as an empty string, otherwise WooCommerce will throw a success notice. We can't use 'success' here because we don't know the outcome of the action since it happens offsite.
 				'redirect' => $payment_link,
 			];
 		} catch ( Exception $exception ) {
@@ -472,7 +472,7 @@ class PaymentGateway extends WC_Payment_Gateway {
 
 		if ( ! preg_match( '/^[\w \-]{1,18}$/', $value ) ) {
 			/* translators: %s is the field title. */
-			throw new Exception( sprintf( __( 'Invalid value for "%s". Field can\'t be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.', 'acquired-com-for-woocommerce' ), $field['title'] ) );
+			throw new Exception( sprintf( __( 'Invalid value for "%s". Field can\'t be empty and must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.', 'acquired-com-for-woocommerce' ), $field['title'] ) );
 		}
 
 		return $this->validate_text_field( $key, $value );

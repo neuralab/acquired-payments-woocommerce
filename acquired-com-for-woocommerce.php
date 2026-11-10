@@ -118,7 +118,7 @@ if ( ! defined( 'ACFW_WC_VERSION' ) ) {
 				function() {
 					wp_admin_notice(
 						sprintf(
-							/* translators: %s: Required PHP version */
+							/* translators: %s: Required WooCommerce version */
 							esc_html__( 'Acquired.com for WooCommerce requires WooCommerce version %s or higher. Please upgrade your WooCommerce version.', 'acquired-com-for-woocommerce' ),
 							ACFW_WC_VERSION
 						),

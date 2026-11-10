@@ -1556,7 +1556,7 @@ class PaymentGatewayTest extends TestCase {
 
 		// Test the method.
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
+		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty and must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
 		$this->test_class->validate_payment_reference_field( $key, $value );
 	}
 
@@ -1581,7 +1581,7 @@ class PaymentGatewayTest extends TestCase {
 
 		// Test the method.
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
+		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty and must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
 		$this->test_class->validate_payment_reference_field( $key, $value );
 	}
 
@@ -1606,7 +1606,7 @@ class PaymentGatewayTest extends TestCase {
 
 		// Test the method.
 		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
+		$this->expectExceptionMessage( 'Invalid value for "Payment Reference". Field can\'t be empty and must contain only letters, numbers, spaces, hyphens and be between 1-18 characters.' );
 		$this->test_class->validate_payment_reference_field( $key, $value );
 	}
 
