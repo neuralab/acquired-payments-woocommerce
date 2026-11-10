@@ -629,7 +629,7 @@ class SettingsServiceTest extends TestCase {
 
 		// Test if we have the expected link structure.
 		$this->assertStringContainsString( 'class="acfw-env-link"', $result );
-		$this->assertStringContainsString( 'href=" https://hub.acquired.com/"', $result );
+		$this->assertStringContainsString( 'href="https://hub.acquired.com/"', $result );
 		$this->assertStringContainsString( 'data-env-href-production="https://hub.acquired.com/"', $result );
 		$this->assertStringContainsString( 'data-env-href-staging="https://qahub.acquired.com/"', $result );
 		$this->assertStringContainsString( 'target="_blank"', $result );

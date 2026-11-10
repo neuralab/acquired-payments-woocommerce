@@ -391,7 +391,7 @@ class SettingsService {
 	 * @return string
 	 */
 	private function get_hub_link(): string {
-		return '<a class="acfw-env-link" href=" ' . esc_url( $this->get_hub_url( 'production' ) ) . '" data-env-href-production="' . esc_url( $this->get_hub_url( 'production' ) ) . '" data-env-href-staging="' . esc_url( $this->get_hub_url( 'staging' ) ) . '" target="_blank">Acquired.com</a>';
+		return '<a class="acfw-env-link" href="' . esc_url( $this->get_hub_url( 'production' ) ) . '" data-env-href-production="' . esc_url( $this->get_hub_url( 'production' ) ) . '" data-env-href-staging="' . esc_url( $this->get_hub_url( 'staging' ) ) . '" target="_blank">Acquired.com</a>';
 	}
 
 	/**
@@ -436,14 +436,14 @@ class SettingsService {
 				'title'       => __( 'Live Company-Id', 'acquired-com-for-woocommerce' ),
 				'type'        => 'text',
 				// translators: %s is the Acquired hub link.
-				'description' => sprintf( __( 'You can find your Company-Id in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to REFERENCES IDS -> Retrieve your Company-Id.', 'acquired-com-for-woocommerce' ), '<a href=" ' . esc_url( $this->get_hub_url( 'production' ) ) . '" target="_blank">Acquired.com</a>' ),
+				'description' => sprintf( __( 'You can find your Company-Id in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to REFERENCES IDS -> Retrieve your Company-Id.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->get_hub_url( 'production' ) ) . '" target="_blank">Acquired.com</a>' ),
 				'desc_tip'    => __( 'Enter your Acquired.com Company-Id.', 'acquired-com-for-woocommerce' ),
 			],
 			'company_id_staging'      => [
 				'title'       => __( 'Staging Company-Id', 'acquired-com-for-woocommerce' ),
 				'type'        => 'text',
 				// translators: %s is the Acquired hub link.
-				'description' => sprintf( __( 'You can find your Company-Id in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to REFERENCES IDS -> Retrieve your Company-Id.', 'acquired-com-for-woocommerce' ), '<a href=" ' . esc_url( $this->get_hub_url( 'staging' ) ) . '" target="_blank">Acquired.com</a>' ),
+				'description' => sprintf( __( 'You can find your Company-Id in your %s account. Login to the Acquired Hub -> Go to SETTINGS -> Go to REFERENCES IDS -> Retrieve your Company-Id.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->get_hub_url( 'staging' ) ) . '" target="_blank">Acquired.com</a>' ),
 				'desc_tip'    => __( 'Enter your Acquired.com staging Company-Id.', 'acquired-com-for-woocommerce' ),
 			],
 			'api_credentials'         => [
