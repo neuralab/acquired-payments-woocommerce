@@ -202,19 +202,25 @@ class Response {
 	}
 
 	/**
+	 * Check if response body has field.
+	 *
+	 * @param string $field
+	 * @return bool
+	 */
+	protected function has_body_field( string $field ): bool {
+		$body = $this->get_body();
+
+		return $body && property_exists( $body, $field );
+	}
+
+	/**
 	 * Get response body field.
 	 *
 	 * @param string $field
 	 * @return mixed
 	 */
 	public function get_body_field( string $field ): mixed {
-		$body = $this->get_body();
-
-		if ( ! $body ) {
-			return null;
-		}
-
-		return property_exists( $body, $field ) ? $body->{$field} : null;
+		return $this->has_body_field( $field ) ? $this->get_body()->{$field} : null;
 	}
 
 	/**

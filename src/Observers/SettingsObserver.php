@@ -41,5 +41,6 @@ class SettingsObserver implements ObserverInterface {
 	public function options_updated(): void {
 		$this->settings_service->reload_options();
 		$this->settings_service->set_api_credentials_validation_status( $this->api_client->validate_credentials() );
+		$this->settings_service->clear_signing_key_issue();
 	}
 }

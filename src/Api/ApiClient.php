@@ -19,6 +19,7 @@ use AcquiredComForWooCommerce\Api\Response\Transaction;
 use AcquiredComForWooCommerce\Api\Response\TransactionCapture;
 use AcquiredComForWooCommerce\Api\Response\TransactionRefund;
 use AcquiredComForWooCommerce\Api\Response\TransactionCancel;
+use AcquiredComForWooCommerce\Api\Response\TransactionList;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Exception;
@@ -71,9 +72,10 @@ class ApiClient {
 	 * @param string $id
 	 * @param string $endpoint
 	 * @param array $fields
+	 * @param array $query
 	 * @return string
 	 */
-	private function get_api_url( string $slug, string $id = '', string $endpoint = '', array $fields = [] ): string {
+	private function get_api_url( string $slug, string $id = '', string $endpoint = '', array $fields = [], array $query = [] ): string {
 		$url_parts = [
 			'slug'     => $slug,
 			'id'       => $id,
@@ -83,6 +85,10 @@ class ApiClient {
 		$url_parts = array_filter( $url_parts );
 
 		$url = trailingslashit( join( '/', $url_parts ) );
+
+		if ( ! empty( $query ) ) {
+			$url = add_query_arg( $query, $url );
+		}
 
 		if ( ! empty( $fields ) ) {
 			$url = add_query_arg( 'filter', join( ',', $fields ), $url );
@@ -279,6 +285,21 @@ class ApiClient {
 			'GET',
 			$this->get_api_url( 'transactions', $transaction_id, '', $fields ),
 			'Transaction'
+		);
+	}
+
+	/**
+	 * Get transactions.
+	 *
+	 * @param array $query
+	 * @param array $fields
+	 * @return TransactionList
+	 */
+	public function get_transactions( array $query, array $fields = [] ): TransactionList {
+		return $this->make_request_with_auth(
+			'GET',
+			$this->get_api_url( 'transactions', '', '', $fields, $query ),
+			'TransactionList'
 		);
 	}
 

@@ -389,6 +389,116 @@ class OrderService {
 	}
 
 	/**
+	 * Process transaction for order.
+	 *
+	 * @param WC_Order $order
+	 * @param string $transaction_id
+	 * @param string $data_type
+	 * @return void
+	 * @throws Exception
+	 */
+	private function process_transaction( WC_Order $order, string $transaction_id, string $data_type ): void {
+		// Since this method can be triggered from a redirect and a scheduled webhook, we need to check if the order is already processed. We do this by checking if the transaction ID is already set in the order.
+		if ( $this->order_transaction_id_processed( $transaction_id, $order->get_transaction_id() ) ) {
+			$this->logger_service->log( sprintf( 'Order transaction already processed. Skipping the processing. Order ID: %s.', $order->get_id() ), 'debug' );
+			return;
+		}
+
+		$transaction = $this->get_transaction( $transaction_id );
+		$log_data    = $transaction->get_log_data();
+		$this->logger_service->log( sprintf( 'Transaction found successfully from incoming %s data. Order ID: %s.', $data_type, $order->get_id() ), 'debug', $log_data );
+
+		// We need to do the timestamp check also because we might have multiple webhooks scheduled for the same order and we need to make sure that we are processing the latest transaction.
+		if ( (int) $order->get_meta( '_acfw_order_time_updated' ) >= $transaction->get_created_timestamp() ) {
+			$this->logger_service->log( sprintf( 'Incoming %s time created is not newer than the order time updated. Skipping the processing. Order ID: %s.', $data_type, $order->get_id() ), 'debug', $log_data );
+			return;
+		}
+
+		if ( ! $order->has_status( [ 'pending', 'failed', 'on-hold' ] ) ) {
+			$error = sprintf( 'Received incoming %s data for an order that can\'t be processed again. Order ID: %s, order status: %s.', $data_type, $order->get_id(), $order->get_status() );
+			throw new Exception( $error );
+		}
+
+		$order->set_transaction_id( $transaction->get_transaction_id() );
+		$order->update_meta_data( '_acfw_transaction_status', $transaction->get_status() );
+		$order->update_meta_data( '_acfw_order_time_updated', $transaction->get_created_timestamp() );
+		$order->update_meta_data( '_acfw_version', $this->settings_service->config['version'] );
+		$order->save();
+
+		switch ( $order->get_meta( '_acfw_transaction_status' ) ) {
+			case 'success':
+			case 'settled':
+				if ( 'authorisation' === $order->get_meta( '_acfw_transaction_type' ) ) {
+					$order->update_meta_data( '_acfw_order_state', 'authorised' );
+					$order->update_status( 'on-hold', );
+					$order->add_order_note(
+						sprintf(
+							/* translators: %s is transaction ID. */
+							__( 'Payment authorised. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
+							$order->get_transaction_id()
+						)
+					);
+
+					$this->logger_service->log( sprintf( 'Payment authorised for order. Order ID: %s.', $order->get_id() ), 'debug', $log_data );
+				} else {
+					$order->payment_complete();
+					$order->update_meta_data( '_acfw_order_state', 'completed' );
+					$order->update_meta_data( '_acfw_order_time_completed', $transaction->get_created_timestamp() );
+					$order->add_order_note(
+						sprintf(
+							/* translators: %s is transaction ID. */
+							__( 'Payment successful. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
+							$order->get_transaction_id()
+						)
+					);
+
+					$this->logger_service->log( sprintf( 'Payment complete for order. Order ID: %s.', $order->get_id() ), 'debug', $log_data );
+				}
+				break;
+			case 'executed':
+				$order->update_meta_data( '_acfw_order_state', 'executed' );
+				$order->update_status( 'on-hold' );
+				$order->add_order_note(
+					sprintf(
+						/* translators: %s is transaction ID. */
+						__( 'Bank payment executed. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
+						$order->get_transaction_id()
+					)
+				);
+
+				$this->logger_service->log( sprintf( 'Bank payment executed for order. Order ID: %s.', $order->get_id() ), 'debug', $log_data );
+				break;
+			default:
+				$order->update_meta_data( '_acfw_order_state', 'failed' );
+				$order->update_status( 'failed' );
+				$order->add_order_note(
+					sprintf(
+						/* translators: %1$s is order status, %2$s is transaction ID. */
+						__( 'Payment failed with status "%1$s". Transaction ID: %2$s.', 'acquired-com-for-woocommerce' ),
+						$order->get_meta( '_acfw_transaction_status' ),
+						$order->get_transaction_id()
+					)
+				);
+
+				$this->logger_service->log( sprintf( 'Payment failed for order. Order ID: %s.', $order->get_id() ), 'debug', $log_data );
+				break;
+		}
+
+		$order->save();
+		$this->logger_service->log( sprintf( 'Order processed successfully from incoming %s data. Order ID: %s.', $data_type, $order->get_id() ), 'debug', $log_data );
+
+		$this->set_additional_order_data( $order, $transaction );
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: %s is data type. */
+				__( 'Order processed successfully from incoming %s data.', 'acquired-com-for-woocommerce' ),
+				$data_type
+			)
+		);
+	}
+
+	/**
 	 * Process order.
 	 *
 	 * @param RedirectData|WebhookData $data
@@ -404,103 +514,7 @@ class OrderService {
 			$order = $this->get_wc_order_from_incoming_data( $data->get_order_id() );
 			$this->logger_service->log( sprintf( 'Order found successfully from incoming %s data. Order ID: %s.', $data->get_type(), $order->get_id() ), 'debug', $data->get_log_data() );
 
-			// Since this method can be triggered from a redirect and a scheduled webhook, we need to check if the order is already processed. We do this by checking if the transaction ID is already set in the order.
-			if ( $this->order_transaction_id_processed( $data->get_transaction_id(), $order->get_transaction_id() ) ) {
-				$this->logger_service->log( sprintf( 'Order transaction already processed. Skipping the processing. Order ID: %s.', $order->get_id() ), 'debug', $data->get_log_data() );
-				return;
-			}
-
-			$transaction = $this->get_transaction( $data->get_transaction_id() );
-			$this->logger_service->log( sprintf( 'Transaction found successfully from incoming %s data. Order ID: %s.', $data->get_type(), $order->get_id() ), 'debug', $transaction->get_log_data() );
-
-			// We need to do the timestamp check also because we might have multiple webhooks scheduled for the same order and we need to make sure that we are processing the latest transaction.
-			if ( (int) $order->get_meta( '_acfw_order_time_updated' ) >= $transaction->get_created_timestamp() ) {
-				$this->logger_service->log( sprintf( 'Incoming %s time created is not newer than the order time updated. Skipping the processing. Order ID: %s.', $data->get_type(), $order->get_id() ), 'debug', $data->get_log_data() );
-				return;
-			}
-
-			if ( ! $order->has_status( [ 'pending', 'failed', 'on-hold' ] ) ) {
-				$error = sprintf( 'Received incoming %s data for an order that can\'t be processed again. Order ID: %s, order status: %s.', $data->get_type(), $order->get_id(), $order->get_status() );
-				throw new Exception( $error );
-			}
-
-			$order->set_transaction_id( $transaction->get_transaction_id() );
-			$order->update_meta_data( '_acfw_transaction_status', $transaction->get_status() );
-			$order->update_meta_data( '_acfw_order_time_updated', $transaction->get_created_timestamp() );
-			$order->update_meta_data( '_acfw_version', $this->settings_service->config['version'] );
-			$order->save();
-
-			switch ( $order->get_meta( '_acfw_transaction_status' ) ) {
-				case 'success':
-				case 'settled':
-					if ( 'authorisation' === $order->get_meta( '_acfw_transaction_type' ) ) {
-						$order->update_meta_data( '_acfw_order_state', 'authorised' );
-						$order->update_status( 'on-hold', );
-						$order->add_order_note(
-							sprintf(
-								/* translators: %s is transaction ID. */
-								__( 'Payment authorised. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
-								$order->get_transaction_id()
-							)
-						);
-
-						$this->logger_service->log( sprintf( 'Payment authorised for order. Order ID: %s.', $order->get_id() ), 'debug', $data->get_log_data() );
-					} else {
-						$order->payment_complete();
-						$order->update_meta_data( '_acfw_order_state', 'completed' );
-						$order->update_meta_data( '_acfw_order_time_completed', $transaction->get_created_timestamp() );
-						$order->add_order_note(
-							sprintf(
-								/* translators: %s is transaction ID. */
-								__( 'Payment successful. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
-								$order->get_transaction_id()
-							)
-						);
-
-						$this->logger_service->log( sprintf( 'Payment complete for order. Order ID: %s.', $order->get_id() ), 'debug', $data->get_log_data() );
-					}
-					break;
-				case 'executed':
-					$order->update_meta_data( '_acfw_order_state', 'executed' );
-					$order->update_status( 'on-hold' );
-					$order->add_order_note(
-						sprintf(
-							/* translators: %s is transaction ID. */
-							__( 'Bank payment executed. Transaction ID: %s.', 'acquired-com-for-woocommerce' ),
-							$order->get_transaction_id()
-						)
-					);
-
-					$this->logger_service->log( sprintf( 'Bank payment executed for order. Order ID: %s.', $order->get_id() ), 'debug', $data->get_log_data() );
-					break;
-				default:
-					$order->update_meta_data( '_acfw_order_state', 'failed' );
-					$order->update_status( 'failed' );
-					$order->add_order_note(
-						sprintf(
-							/* translators: %1$s is order status, %2$s is transaction ID. */
-							__( 'Payment failed with status "%1$s". Transaction ID: %2$s.', 'acquired-com-for-woocommerce' ),
-							$order->get_meta( '_acfw_transaction_status' ),
-							$order->get_transaction_id()
-						)
-					);
-
-					$this->logger_service->log( sprintf( 'Payment failed for order. Order ID: %s.', $order->get_id() ), 'debug', $data->get_log_data() );
-					break;
-			}
-
-			$order->save();
-			$this->logger_service->log( sprintf( 'Order processed successfully from incoming %s data. Order ID: %s.', $data->get_type(), $order->get_id() ), 'debug', $data->get_log_data() );
-
-			$this->set_additional_order_data( $order, $transaction );
-
-			$order->add_order_note(
-				sprintf(
-					/* translators: %s is data type. */
-					__( 'Order processed successfully from incoming %s data.', 'acquired-com-for-woocommerce' ),
-					$data->get_type()
-				)
-			);
+			$this->process_transaction( $order, $data->get_transaction_id(), $data->get_type() );
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
 			$this->logger_service->log( sprintf( 'Error processing order from incoming %s data. %s', $data->get_type(), $error ), 'error', $data->get_log_data() );
@@ -536,10 +550,94 @@ class OrderService {
 		try {
 			$order = $this->get_wc_order_from_incoming_data( $data->get_order_id() );
 			$this->process_order( $data );
+			$this->settings_service->clear_signing_key_issue();
 			return $order;
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
 			$this->logger_service->log( sprintf( 'Error processing order from incoming redirect data. %s', $error ), 'error', $data->get_log_data() );
+			throw new Exception( $error );
+		}
+	}
+
+	/**
+	 * Check if order can be synced.
+	 *
+	 * @param WC_Order $order
+	 * @return bool
+	 */
+	private function can_be_synced( WC_Order $order ): bool {
+		return $this->is_acfw_payment_method( $order ) && $order->has_status( [ 'pending', 'failed' ] );
+	}
+
+	/**
+	 * Sync order with the successful transaction for it on Acquired.
+	 *
+	 * @param WC_Order $order
+	 * @return bool
+	 * @throws Exception
+	 */
+	private function sync_order( WC_Order $order ): bool {
+		$response = $this->api_client->get_transactions(
+			[
+				'order_id' => $this->format_order_id_for_payment_link( $order ),
+				'status'   => 'success',
+				'limit'    => 1,
+			],
+			[ 'transaction_id' ]
+		);
+
+		if ( $response->request_is_error() ) {
+			$this->logger_service->log( sprintf( 'Failed to get transactions. Order ID: %s.', $order->get_id() ), 'error', $response->get_log_data() );
+			throw new Exception( 'Failed to get transactions.' );
+		}
+
+		$transaction_id = $response->get_first_transaction_id();
+
+		if ( ! $transaction_id ) {
+			$this->logger_service->log( sprintf( 'No successful transaction found on Acquired.com. Order ID: %s.', $order->get_id() ), 'debug', $response->get_log_data() );
+			return false;
+		}
+
+		$this->process_transaction( $order, $transaction_id, 'API' );
+
+		return true;
+	}
+
+	/**
+	 * Confirm order from redirect data with an unverified hash, by checking the payment status with Acquired.
+	 *
+	 * @param RedirectData $data
+	 * @return WC_Order
+	 * @throws Exception
+	 */
+	public function confirm_unverified_order( RedirectData $data ): WC_Order {
+		try {
+			$order = $this->get_wc_order_from_incoming_data( $data->get_order_id() );
+
+			if ( ! $this->can_be_synced( $order ) ) {
+				$this->logger_service->log( sprintf( 'Unverified redirect for an order that doesn\'t need a payment status check. Order ID: %s.', $order->get_id() ), 'debug' );
+				return $order;
+			}
+
+			$this->settings_service->set_signing_key_issue( $data->get_hash_status() );
+
+			$order->add_order_note(
+				__( 'Redirect data from Acquired.com couldn\'t be verified with the signing key. Payment status checked with the Acquired.com API.', 'acquired-com-for-woocommerce' )
+			);
+
+			if ( ! $this->sync_order( $order ) ) {
+				$order->update_meta_data( '_acfw_order_state', 'failed' );
+				$order->update_status( 'failed' );
+				$order->add_order_note( __( 'Payment status checked with Acquired.com. No successful payment found.', 'acquired-com-for-woocommerce' ) );
+				$order->save();
+
+				$this->logger_service->log( sprintf( 'Payment failed for order. Order ID: %s.', $order->get_id() ), 'debug' );
+			}
+
+			return $order;
+		} catch ( Exception $exception ) {
+			$error = $exception->getMessage();
+			$this->logger_service->log( sprintf( 'Error processing order from unverified redirect data. %s', $error ), 'error' );
 			throw new Exception( $error );
 		}
 	}

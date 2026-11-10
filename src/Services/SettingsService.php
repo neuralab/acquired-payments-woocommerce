@@ -42,12 +42,20 @@ class SettingsService {
 	private string $api_credentials_validation_option = '';
 
 	/**
+	 * Signing key issue option key.
+	 *
+	 * @var string
+	 */
+	private string $signing_key_issue_option = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array<string, mixed> $config
 	 */
 	public function __construct( public array $config ) {
 		$this->api_credentials_validation_option = $this->config['plugin_id'] . '_api_credentials_valid';
+		$this->signing_key_issue_option          = $this->config['plugin_id'] . '_signing_key_issue';
 		$this->option_id                         = 'woocommerce_' . $this->config['plugin_id'] . '_settings';
 	}
 
@@ -264,6 +272,34 @@ class SettingsService {
 	 */
 	public function get_signing_key(): string {
 		return $this->get_signing_key_for_environment( $this->is_environment_production() ? 'production' : 'staging' );
+	}
+
+	/**
+	 * Set signing key issue.
+	 *
+	 * @param string $issue
+	 * @return void
+	 */
+	public function set_signing_key_issue( string $issue ): void {
+		update_option( $this->signing_key_issue_option, $issue, false );
+	}
+
+	/**
+	 * Get signing key issue.
+	 *
+	 * @return string
+	 */
+	public function get_signing_key_issue(): string {
+		return (string) get_option( $this->signing_key_issue_option, '' );
+	}
+
+	/**
+	 * Clear signing key issue.
+	 *
+	 * @return void
+	 */
+	public function clear_signing_key_issue(): void {
+		delete_option( $this->signing_key_issue_option );
 	}
 
 	/**

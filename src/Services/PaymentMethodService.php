@@ -506,6 +506,11 @@ class PaymentMethodService {
 	 * @throws Exception
 	 */
 	public function confirm_payment_method( RedirectData $data ): WC_Customer {
+		// Since redirect data with an unverified hash is accepted for orders, we need to make sure it's never used to save a payment method.
+		if ( ! $data->is_hash_valid() ) {
+			throw new Exception( sprintf( 'Redirect data hash is not valid. Hash status: %s.', $data->get_hash_status() ) );
+		}
+
 		try {
 			$customer = $this->get_wc_customer_from_incoming_data( $data->get_order_id() );
 			$card_id  = $this->get_card_id_from_transaction( $data->get_transaction_id() );

@@ -205,6 +205,22 @@ class AdminService {
 		if ( ! empty( $message ) ) {
 			$this->add_notice( $message, 'error' );
 		}
+
+		$signing_key_message = match ( $this->settings_service->get_signing_key_issue() ) {
+			/* translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag. */
+			'empty'                     => sprintf( __( 'Acquired.com sent a redirect without a hash, so it couldn\'t be verified. Activate a signing key in the Acquired Hub and enter it %1$sin the settings page%2$s. Until then, payment status is checked with the Acquired.com API.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' ),
+			/* translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag. */
+			'using_app_key_for_signing' => sprintf( __( 'Acquired.com is signing redirects with a different key than the signing key %1$sin the settings page%2$s. Check that the signing key is activated in the Acquired Hub. Until then, payment status is checked with the Acquired.com API.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' ),
+			/* translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag. */
+			'no_signing_key'            => sprintf( __( 'Acquired.com is signing redirects with a signing key that isn\'t added to the plugin. Add your signing key from the Acquired Hub %1$sin the settings page%2$s. Until then, payment status is checked with the Acquired.com API.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' ),
+			/* translators: %1$s is the opening <a> tag, %2$s is the closing </a> tag. */
+			'invalid'                   => sprintf( __( 'Redirects from Acquired.com don\'t match the signing key %1$sin the settings page%2$s. Check the key for typos and that it belongs to the selected environment. Until then, payment status is checked with the Acquired.com API.', 'acquired-com-for-woocommerce' ), '<a href="' . esc_url( $this->settings_service->get_admin_settings_url() ) . '">', '</a>' ),
+			default                     => null,
+		};
+
+		if ( $signing_key_message ) {
+			$this->add_notice( $signing_key_message, 'error' );
+		}
 	}
 
 	/**

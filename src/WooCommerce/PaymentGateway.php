@@ -370,8 +370,14 @@ class PaymentGateway extends WC_Payment_Gateway {
 	 */
 	public function redirect_new_order(): void {
 		try {
-			$data         = $this->incoming_data_handler->get_redirect_data( $_POST );  // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$order        = $this->order_service->confirm_order( $data );
+			$data = $this->incoming_data_handler->get_redirect_data( $_POST );  // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+			if ( $data->is_hash_valid() ) {
+				$order = $this->order_service->confirm_order( $data );
+			} else {
+				$order = $this->order_service->confirm_unverified_order( $data );
+			}
+
 			$redirect_url = $this->get_return_url( $order );
 		} catch ( Exception $exception ) {
 			$redirect_url = wc_get_checkout_url();

@@ -83,15 +83,13 @@ class IncomingDataHandler {
 	}
 
 	/**
-	 * Validate redirect hash.
+	 * Check if the redirect hash matches a key.
 	 *
 	 * @param array $data
+	 * @param string $key
 	 * @return bool
 	 */
-	private function validate_redirect_hash( array $data ): bool {
-		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility.
-		$key = ( ! empty( $this->signing_key ) ) ? $this->signing_key : $this->app_key;
-
+	private function redirect_hash_matches_key( array $data, string $key ): bool {
 		if ( ! $key ) {
 			return false;
 		}
@@ -108,6 +106,19 @@ class IncomingDataHandler {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Validate redirect hash.
+	 *
+	 * @param array $data
+	 * @return bool
+	 */
+	private function validate_redirect_hash( array $data ): bool {
+		// Determine which key to use: signing_key takes precedence, fallback to app_key for backward compatibility.
+		$key = ( ! empty( $this->signing_key ) ) ? $this->signing_key : $this->app_key;
+
+		return $this->redirect_hash_matches_key( $data, $key );
 	}
 
 	/**
@@ -140,6 +151,22 @@ class IncomingDataHandler {
 	}
 
 	/**
+	 * Get redirect hash status.
+	 *
+	 * @param array $data
+	 * @return string
+	 */
+	private function get_redirect_hash_status( array $data ): string {
+		return match ( true ) {
+			empty( $data['hash'] )                                    => 'empty',
+			$this->validate_redirect_hash( $data )                    => 'valid',
+			! $this->signing_key                                      => 'no_signing_key',
+			$this->redirect_hash_matches_key( $data, $this->app_key ) => 'using_app_key_for_signing',
+			default                                                   => 'invalid',
+		};
+	}
+
+	/**
 	 * Format redirect data.
 	 *
 	 * @param array $data
@@ -149,13 +176,9 @@ class IncomingDataHandler {
 	private function format_redirect_data( array $data ): RedirectData {
 		$data = $this->sanitize_data( array_map( 'wp_unslash', $data ) );
 
-		$this->validate_required_fields( $data, [ 'status', 'transaction_id', 'order_id', 'timestamp', 'hash' ], 'redirect_data' );
+		$this->validate_required_fields( $data, [ 'status', 'transaction_id', 'order_id', 'timestamp' ], 'redirect_data' );
 
-		if ( ! $this->validate_redirect_hash( $data ) ) {
-			throw new Exception( 'Redirect data hash is invalid.' );
-		}
-
-		return new RedirectData( $data );
+		return new RedirectData( $data, $this->get_redirect_hash_status( $data ) );
 	}
 
 	/**
@@ -249,7 +272,13 @@ class IncomingDataHandler {
 	public function get_redirect_data( array $data ): RedirectData {
 		try {
 			$data = $this->format_redirect_data( $data );
-			$this->logger_service->log( 'Incoming redirect data received successfully.', 'debug', $data->get_log_data() );
+
+			if ( $data->is_hash_valid() ) {
+				$this->logger_service->log( 'Incoming redirect data received successfully.', 'debug', $data->get_log_data() );
+			} else {
+				$this->logger_service->log( sprintf( 'Incoming redirect data received with an unverified hash. Hash status: %s.', $data->get_hash_status() ), 'error' );
+			}
+
 			return $data;
 		} catch ( Exception $exception ) {
 			$error = $exception->getMessage();
