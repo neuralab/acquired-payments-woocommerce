@@ -418,7 +418,7 @@ class SettingsService {
 				'title'       => __( 'Description', 'acquired-com-for-woocommerce' ),
 				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your checkout.', 'acquired-com-for-woocommerce' ),
-				'default'     => __( 'Checkout with Apple Pay, Google Pay, Card and Pay by Bank.', 'acquired-com-for-woocommerce' ),
+				'default'     => __( 'Checkout with Apple Pay, Google Pay and Card.', 'acquired-com-for-woocommerce' ),
 				'desc_tip'    => true,
 			],
 			'environment'             => [
