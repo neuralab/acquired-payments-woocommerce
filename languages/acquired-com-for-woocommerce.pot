@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-10T14:58:18+00:00\n"
+"POT-Creation-Date: 2026-11-11T14:51:41+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: acquired-com-for-woocommerce\n"
@@ -118,185 +118,185 @@ msgstr ""
 msgid "Redirects from Acquired.com don't match the signing key %1$sin the settings page%2$s. Check the key for typos and that it belongs to the selected environment. Until then, payment status is checked with the Acquired.com API."
 msgstr ""
 
-#: src/Services/OrderService.php:271
+#: src/Services/OrderService.php:272
 msgid "Failed to find order."
 msgstr ""
 
-#: src/Services/OrderService.php:276
+#: src/Services/OrderService.php:277
 msgid "Payment link creation failed. Order has already been processed and can't be processed again."
 msgstr ""
 
-#: src/Services/OrderService.php:284
+#: src/Services/OrderService.php:285
 msgid "This order has already been processed and can't be processed again."
 msgstr ""
 
-#: src/Services/OrderService.php:302
-#: src/Services/OrderService.php:313
+#: src/Services/OrderService.php:303
+#: src/Services/OrderService.php:314
 msgid "Payment link creation failed."
 msgstr ""
 
 #. translators: %1$s is transaction ID, %2$s is payment method ID.
-#: src/Services/OrderService.php:329
+#: src/Services/OrderService.php:330
 msgid "Transaction (ID: %1$s) payment method: \"%2$s\"."
 msgstr ""
 
 #. translators: %1$s is transaction ID, %2$s is transaction decline reason.
-#: src/Services/OrderService.php:342
+#: src/Services/OrderService.php:343
 msgid "Transaction (ID: %1$s) decline reason: \"%2$s\"."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:437
+#: src/Services/OrderService.php:438
 msgid "Payment authorised. Transaction ID: %s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:450
+#: src/Services/OrderService.php:451
 msgid "Payment successful. Transaction ID: %s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:464
+#: src/Services/OrderService.php:465
 msgid "Bank payment executed. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is order status, %2$s is transaction ID.
-#: src/Services/OrderService.php:477
+#: src/Services/OrderService.php:478
 msgid "Payment failed with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is data type.
-#: src/Services/OrderService.php:495
+#: src/Services/OrderService.php:496
 msgid "Order processed successfully from incoming %s data."
 msgstr ""
 
-#: src/Services/OrderService.php:625
+#: src/Services/OrderService.php:626
 msgid "Redirect data from Acquired.com couldn't be verified with the signing key. Payment status checked with the Acquired.com API."
 msgstr ""
 
-#: src/Services/OrderService.php:631
+#: src/Services/OrderService.php:632
 msgid "Payment status checked with Acquired.com. No successful payment found."
 msgstr ""
 
-#: src/Services/OrderService.php:663
+#: src/Services/OrderService.php:664
 msgid "Payment capture failed. Capture initiated for an order that can't be captured."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:686
+#: src/Services/OrderService.php:687
 msgid "Payment captured successfully. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is capture status, %2$s is transaction ID.
-#: src/Services/OrderService.php:698
+#: src/Services/OrderService.php:699
 msgid "Payment capture declined with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:707
+#: src/Services/OrderService.php:708
 msgid "Payment capture failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:751
+#: src/Services/OrderService.php:752
 msgid "Order cancellation failed. Cancellation initiated for an order that can't be cancelled."
 msgstr ""
 
-#: src/Services/OrderService.php:758
+#: src/Services/OrderService.php:759
 msgid "Order cancellation failed. Captured orders can be cancelled the next day."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:783
+#: src/Services/OrderService.php:784
 msgid "Order cancelled successfully. Transaction ID: %s."
 msgstr ""
 
 #. translators: %1$s is cancellation status, %2$s is transaction ID.
-#: src/Services/OrderService.php:793
+#: src/Services/OrderService.php:794
 msgid "Order cancellation declined with status \"%1$s\". Transaction ID: %2$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:802
+#: src/Services/OrderService.php:803
 msgid "Order cancellation failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:839
+#: src/Services/OrderService.php:840
 msgid "Transaction is not in \"success\" or \"settled\" status."
 msgstr ""
 
-#: src/Services/OrderService.php:843
+#: src/Services/OrderService.php:844
 msgid "Transaction has already been fully refunded."
 msgstr ""
 
-#: src/Services/OrderService.php:847
+#: src/Services/OrderService.php:848
 msgid "Order has already been cancelled."
 msgstr ""
 
-#: src/Services/OrderService.php:851
+#: src/Services/OrderService.php:852
 msgid "Captured orders can be refunded the next day."
 msgstr ""
 
-#: src/Services/OrderService.php:871
+#: src/Services/OrderService.php:872
 msgid "Partial refunds are only available on the next day."
 msgstr ""
 
-#: src/Services/OrderService.php:898
+#: src/Services/OrderService.php:899
 msgid "Payment refund failed."
 msgstr ""
 
 #. translators: %1$s is refund amount, %2$s is order total.
-#: src/Services/OrderService.php:912
+#: src/Services/OrderService.php:913
 msgid "Payment refund failed. Refund amount \"%1$s\" is greater than order total \"%2$s\"."
 msgstr ""
 
 #. translators: %1$s is the refund amount, %2$s is transaction ID, %3$s is refund transaction ID.
-#: src/Services/OrderService.php:942
+#: src/Services/OrderService.php:943
 msgid "Payment refunded successfully. Refund amount: %1$s. Transaction ID: %2$s. Refund transaction ID: %3$s."
 msgstr ""
 
 #. translators: %1$s is refund status, %2$s is the refund amount, %3$s is transaction ID.
-#: src/Services/OrderService.php:953
+#: src/Services/OrderService.php:954
 msgid "Payment refund declined with status \"%1$s\". Refund amount: %2$s. Transaction ID: %3$s."
 msgstr ""
 
 #. translators: %s is transaction ID.
-#: src/Services/OrderService.php:963
+#: src/Services/OrderService.php:964
 msgid "Payment refund failed. Transaction ID: %s."
 msgstr ""
 
-#: src/Services/OrderService.php:993
+#: src/Services/OrderService.php:994
 msgid "Payment refund failed. Check order notes for more details."
 msgstr ""
 
-#: src/Services/OrderService.php:1012
+#: src/Services/OrderService.php:1013
 msgid "Your payment was blocked."
 msgstr ""
 
-#: src/Services/OrderService.php:1016
+#: src/Services/OrderService.php:1017
 msgid "Your payment has been declined due to failed authentication with your bank."
 msgstr ""
 
-#: src/Services/OrderService.php:1018
+#: src/Services/OrderService.php:1019
 msgid "Your payment was declined."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:544
+#: src/Services/PaymentMethodService.php:550
 msgid "Payment method successfully added."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:551
+#: src/Services/PaymentMethodService.php:557
 msgid "Unable to add payment method to your account."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:554
+#: src/Services/PaymentMethodService.php:560
 msgid "Your payment method was blocked."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:559
+#: src/Services/PaymentMethodService.php:565
 msgid "Your payment method has been declined due to failed authentication with your bank."
 msgstr ""
 
-#: src/Services/PaymentMethodService.php:562
+#: src/Services/PaymentMethodService.php:568
 msgid "Your payment method was declined."
 msgstr ""
 
@@ -334,7 +334,7 @@ msgid "Payment method description that the customer will see on your checkout."
 msgstr ""
 
 #: src/Services/SettingsService.php:421
-msgid "Checkout with Apple Pay, Google Pay, Card and Pay by Bank."
+msgid "Checkout with Apple Pay, Google Pay and Card."
 msgstr ""
 
 #: src/Services/SettingsService.php:425
