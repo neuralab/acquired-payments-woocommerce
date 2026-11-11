@@ -1449,7 +1449,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->andReturn(
 				[
 					'transaction' => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 					],
 					'payment'     => [
@@ -1492,7 +1492,7 @@ class PaymentMethodServiceTest extends TestCase {
 		// Set expected response.
 		$expected = [
 			'transaction'     => [
-				'currency' => 'gbp',
+				'currency' => 'GBP',
 				'custom1'  => '2.0.0',
 				'order_id' => '456-add_payment_method_random123abcdef',
 				'amount'   => 0,
@@ -1533,7 +1533,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->andReturn(
 				[
 					'transaction' => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 					],
 					'payment'     => [
@@ -1577,7 +1577,7 @@ class PaymentMethodServiceTest extends TestCase {
 		// Set expected response.
 		$expected = [
 			'transaction'     => [
-				'currency' => 'gbp',
+				'currency' => 'GBP',
 				'custom1'  => '2.0.0',
 				'order_id' => '456-add_payment_method_random123abcdef',
 				'amount'   => 0,
@@ -1661,7 +1661,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->andReturn(
 				[
 					'transaction' => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 					],
 					'payment'     => [
@@ -1681,7 +1681,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->with(
 				[
 					'transaction'     => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 						'order_id' => '456-add_payment_method_random123abcdef',
 						'amount'   => 0,
@@ -1815,7 +1815,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->andReturn(
 				[
 					'transaction' => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 					],
 					'payment'     => [
@@ -1835,7 +1835,7 @@ class PaymentMethodServiceTest extends TestCase {
 			->with(
 				[
 					'transaction'     => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 						'order_id' => '456-add_payment_method_random123abcdef',
 						'amount'   => 0,

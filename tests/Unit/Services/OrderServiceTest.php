@@ -69,7 +69,7 @@ class OrderServiceTest extends TestCase {
 			->andReturn(
 				[
 					'transaction' => [
-						'currency' => 'gbp',
+						'currency' => 'GBP',
 						'custom1'  => '2.0.0',
 					],
 					'payment'     => [
@@ -736,7 +736,7 @@ class OrderServiceTest extends TestCase {
 		// Set expected response.
 		$expected = [
 			'transaction'  => [
-				'currency' => 'gbp',
+				'currency' => 'GBP',
 				'custom1'  => '2.0.0',
 				'order_id' => '123-wc_order_key',
 				'amount'   => 100.00,
@@ -789,7 +789,7 @@ class OrderServiceTest extends TestCase {
 		// Set expected response.
 		$expected = [
 			'transaction'  => [
-				'currency' => 'gbp',
+				'currency' => 'GBP',
 				'custom1'  => '2.0.0',
 				'order_id' => '123-wc_order_key',
 				'amount'   => 100.00,
@@ -843,7 +843,7 @@ class OrderServiceTest extends TestCase {
 		// Set expected response.
 		$expected = [
 			'transaction'  => [
-				'currency' => 'gbp',
+				'currency' => 'GBP',
 				'custom1'  => '2.0.0',
 				'order_id' => '123-wc_order_key',
 				'amount'   => 100.00,

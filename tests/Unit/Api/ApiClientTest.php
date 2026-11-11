@@ -510,7 +510,7 @@ class ApiClientTest extends TestCase {
 		$this->assertArrayHasKey( 'payment', $result );
 		$this->assertArrayHasKey( 'count_retry', $result );
 		$this->assertArrayNotHasKey( 'tds', $result );
-		$this->assertEquals( 'gbp', $result['transaction']['currency'] );
+		$this->assertEquals( 'GBP', $result['transaction']['currency'] );
 		$this->assertEquals( '2.0.0', $result['transaction']['custom1'] );
 		$this->assertEquals( 'Test Store', $result['payment']['reference'] );
 		$this->assertEquals( 1, $result['count_retry'] );
@@ -1429,7 +1429,7 @@ class ApiClientTest extends TestCase {
 			],
 			[
 				'transaction'  => [
-					'currency' => 'gbp',
+					'currency' => 'GBP',
 					'custom1'  => '2.0.0',
 					'order_id' => 1234567890,
 					'amount'   => 0,
@@ -1510,7 +1510,7 @@ class ApiClientTest extends TestCase {
 			],
 			[
 				'transaction'  => [
-					'currency' => 'gbp',
+					'currency' => 'GBP',
 					'custom1'  => '2.0.0',
 					'order_id' => 1234567890,
 					'amount'   => 0,

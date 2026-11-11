@@ -230,7 +230,7 @@ class OrderService {
 			[
 				'order_id' => $this->format_order_id_for_payment_link( $order ),
 				'amount'   => floatval( $order->get_total() ),
-				'currency' => strtolower( $order->get_currency() ),
+				'currency' => $order->get_currency(),
 				'capture'  => $this->is_capture(),
 			]
 		);

@@ -129,7 +129,7 @@ class ApiClient {
 	public function get_payment_link_default_body(): array {
 		$body = [
 			'transaction' => [
-				'currency' => strtolower( $this->settings_service->get_shop_currency() ),
+				'currency' => $this->settings_service->get_shop_currency(),
 				'custom1'  => $this->settings_service->config['version'],
 			],
 			'payment'     => [
