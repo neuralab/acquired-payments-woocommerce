@@ -175,7 +175,6 @@ class OrderService {
 	 *         custom1: string,
 	 *         order_id: string,
 	 *         amount: float,
-	 *         currency: string,
 	 *         capture: bool
 	 *     },
 	 *     payment: array{
@@ -183,6 +182,8 @@ class OrderService {
 	 *         card_id?: string
 	 *     },
 	 *     customer?: array{
+	 *         customer_id: string
+	 *     }|array{
 	 *         first_name: string,
 	 *         last_name: string,
 	 *         email: string,

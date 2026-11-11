@@ -431,7 +431,36 @@ class CustomerService {
 	 * Get customer data for checkout.
 	 *
 	 * @param WC_Order $order
-	 * @return array
+	 * @return array{
+	 *     customer_id: string
+	 * }|array{
+	 *     first_name: string,
+	 *     last_name: string,
+	 *     email: string,
+	 *     billing: array{
+	 *         address: array{
+	 *             line_1: string,
+	 *             line_2: string,
+	 *             city: string,
+	 *             postcode: string,
+	 *             country_code: string,
+	 *             state?: string
+	 *         },
+	 *         email?: string
+	 *     },
+	 *     shipping?: array{
+	 *         address_match: bool,
+	 *         address?: array{
+	 *             line_1: string,
+	 *             line_2: string,
+	 *             city: string,
+	 *             postcode: string,
+	 *             country_code: string,
+	 *             state?: string
+	 *         },
+	 *         email?: string
+	 *     }
+	 * }|array{}
 	 */
 	public function get_customer_data_for_checkout( WC_Order $order ): array {
 		if ( ! $order->get_customer_id() ) {

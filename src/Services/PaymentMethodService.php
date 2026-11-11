@@ -417,6 +417,12 @@ class PaymentMethodService {
 	 *     payment: array{
 	 *         reference: string
 	 *     },
+	 *     count_retry: int,
+	 *     tds?: array{
+	 *         is_active: bool,
+	 *         challenge_preference: string,
+	 *         contact_url: string
+	 *     },
 	 *     redirect_url: string,
 	 *     webhook_url: string,
 	 *     submit_type: string,
