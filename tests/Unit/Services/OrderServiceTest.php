@@ -263,21 +263,27 @@ class OrderServiceTest extends TestCase {
 	 * Mock get_transactions API call for an order.
 	 *
 	 * @param string $transaction_order_id
-	 * @param string|null $transaction_id
+	 * @param array $transaction_ids
 	 * @param bool $is_error
 	 * @return void
 	 */
-	private function mock_get_transactions( string $transaction_order_id, ?string $transaction_id, bool $is_error = false ): void {
-		// Mock TransactionList.
-		$transaction_list = Mockery::mock( TransactionList::class );
-		$transaction_list->shouldReceive( 'request_is_error' )->once()->andReturn( $is_error );
-		$transaction_list->shouldReceive( 'get_first_transaction_id' )->andReturn( $transaction_id );
-		$transaction_list->shouldReceive( 'get_log_data' )->andReturn( [] );
+	private function mock_get_transactions( string $transaction_order_id, array $transaction_ids, bool $is_error = false ): void {
+		// Mock one TransactionList per attempt.
+		$transaction_lists = [];
+
+		foreach ( $transaction_ids as $transaction_id ) :
+			$transaction_list = Mockery::mock( TransactionList::class );
+			$transaction_list->shouldReceive( 'request_is_error' )->once()->andReturn( $is_error );
+			$transaction_list->shouldReceive( 'get_first_transaction_id' )->andReturn( $transaction_id );
+			$transaction_list->shouldReceive( 'get_log_data' )->andReturn( [] );
+
+			$transaction_lists[] = $transaction_list;
+		endforeach;
 
 		// Mock ApiClient.
 		$this->get_api_client()
 			->shouldReceive( 'get_transactions' )
-			->once()
+			->times( count( $transaction_ids ) )
 			->with(
 				[
 					'order_id' => $transaction_order_id,
@@ -286,7 +292,27 @@ class OrderServiceTest extends TestCase {
 				],
 				[ 'transaction_id' ]
 			)
-			->andReturn( $transaction_list );
+			->andReturnValues( $transaction_lists );
+	}
+
+	/**
+	 * Mock the sleep and log calls between sync_order attempts.
+	 *
+	 * @param int $order_id
+	 * @param array $delays
+	 * @return void
+	 */
+	private function mock_sync_order_retries( int $order_id, array $delays ): void {
+		foreach ( $delays as $delay ) :
+			Functions\expect( 'sleep' )
+				->once()
+				->with( $delay );
+
+			$this->get_logger_service()
+				->shouldReceive( 'log' )
+				->once()
+				->with( sprintf( 'No successful transaction found on Acquired.com yet. Retrying in %ds. Order ID: %d.', $delay, $order_id ), 'debug' );
+		endforeach;
 	}
 
 	/**
@@ -3429,13 +3455,16 @@ class OrderServiceTest extends TestCase {
 
 		// Mock ApiClient.
 
-		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+		$this->mock_get_transactions( $transaction_order_id, [ $transaction_id ] );
 
 		$this->get_api_client()
 			->shouldReceive( 'get_transaction' )
 			->once()
 			->with( $transaction_id )
 			->andReturn( $transaction );
+
+		// Mock sleep.
+		Functions\expect( 'sleep' )->never();
 
 		// Mock LoggerService.
 
@@ -3470,7 +3499,10 @@ class OrderServiceTest extends TestCase {
 		$transaction_order_id = '123-wc_order_key';
 
 		// Mock ApiClient.
-		$this->mock_get_transactions( $transaction_order_id, null );
+		$this->mock_get_transactions( $transaction_order_id, [ null, null, null, null ] );
+
+		// Mock retries.
+		$this->mock_sync_order_retries( $order_id, [ 1, 2, 3 ] );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
@@ -3480,6 +3512,38 @@ class OrderServiceTest extends TestCase {
 
 		// Test the method.
 		$this->assertFalse( $this->get_private_method_value( 'sync_order', $this->mock_order_for_status_check( $order_id ) ) );
+	}
+
+	/**
+	 * Test sync_order when the transaction is found after retrying.
+	 *
+	 * @covers \AcquiredComForWooCommerce\Services\OrderService::sync_order
+	 * @return void
+	 */
+	public function test_sync_order_found_after_retry(): void {
+		// Set test data.
+		$order_id             = 123;
+		$transaction_order_id = '123-wc_order_key';
+		$transaction_id       = 'transaction_123';
+
+		// Mock WC_Order.
+		$order = $this->mock_order_for_status_check( $order_id );
+		$order->shouldReceive( 'get_transaction_id' )->once()->andReturn( $transaction_id );
+
+		// Mock ApiClient.
+		$this->mock_get_transactions( $transaction_order_id, [ null, null, $transaction_id ] );
+
+		// Mock retries.
+		$this->mock_sync_order_retries( $order_id, [ 1, 2 ] );
+
+		// Mock LoggerService.
+		$this->get_logger_service()
+			->shouldReceive( 'log' )
+			->once()
+			->with( sprintf( 'Order transaction already processed. Skipping the processing. Order ID: %d.', $order_id ), 'debug' );
+
+		// Test the method.
+		$this->assertTrue( $this->get_private_method_value( 'sync_order', $order ) );
 	}
 
 	/**
@@ -3500,7 +3564,7 @@ class OrderServiceTest extends TestCase {
 
 		// Mock ApiClient.
 
-		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+		$this->mock_get_transactions( $transaction_order_id, [ $transaction_id ] );
 
 		$this->get_api_client()
 			->shouldReceive( 'get_transaction' )
@@ -3528,7 +3592,7 @@ class OrderServiceTest extends TestCase {
 		$transaction_order_id = '123-wc_order_key';
 
 		// Mock ApiClient.
-		$this->mock_get_transactions( $transaction_order_id, null, true );
+		$this->mock_get_transactions( $transaction_order_id, [ null ], true );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
@@ -3579,7 +3643,10 @@ class OrderServiceTest extends TestCase {
 			->with( 'invalid' );
 
 		// Mock ApiClient.
-		$this->mock_get_transactions( $transaction_order_id, null );
+		$this->mock_get_transactions( $transaction_order_id, [ null, null, null, null ] );
+
+		// Mock retries.
+		$this->mock_sync_order_retries( $order_id, [ 1, 2, 3 ] );
 
 		// Mock LoggerService.
 
@@ -3633,7 +3700,7 @@ class OrderServiceTest extends TestCase {
 			->with( 'invalid' );
 
 		// Mock ApiClient.
-		$this->mock_get_transactions( $transaction_order_id, $transaction_id );
+		$this->mock_get_transactions( $transaction_order_id, [ $transaction_id ] );
 
 		// Mock LoggerService.
 		$this->get_logger_service()
