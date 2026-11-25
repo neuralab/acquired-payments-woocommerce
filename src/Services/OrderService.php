@@ -578,30 +578,37 @@ class OrderService {
 	 * @throws Exception
 	 */
 	private function sync_order( WC_Order $order ): bool {
-		$response = $this->api_client->get_transactions(
-			[
-				'order_id' => $this->format_order_id_for_payment_link( $order ),
-				'status'   => 'success',
-				'limit'    => 1,
-			],
-			[ 'transaction_id' ]
-		);
+		// A new payment can take a few seconds to show up in the transactions list, so retry with a growing delay before treating it as missing.
+		foreach ( [ 0, 1, 2, 3 ] as $delay ) :
+			if ( $delay > 0 ) {
+				$this->logger_service->log( sprintf( 'No successful transaction found on Acquired.com yet. Retrying in %ds. Order ID: %s.', $delay, $order->get_id() ), 'debug' );
+				sleep( $delay );
+			}
 
-		if ( $response->request_is_error() ) {
-			$this->logger_service->log( sprintf( 'Failed to get transactions. Order ID: %s.', $order->get_id() ), 'error', $response->get_log_data() );
-			throw new Exception( 'Failed to get transactions.' );
-		}
+			$response = $this->api_client->get_transactions(
+				[
+					'order_id' => $this->format_order_id_for_payment_link( $order ),
+					'status'   => 'success',
+					'limit'    => 1,
+				],
+				[ 'transaction_id' ]
+			);
 
-		$transaction_id = $response->get_first_transaction_id();
+			if ( $response->request_is_error() ) {
+				$this->logger_service->log( sprintf( 'Failed to get transactions. Order ID: %s.', $order->get_id() ), 'error', $response->get_log_data() );
+				throw new Exception( 'Failed to get transactions.' );
+			}
 
-		if ( ! $transaction_id ) {
-			$this->logger_service->log( sprintf( 'No successful transaction found on Acquired.com. Order ID: %s.', $order->get_id() ), 'debug', $response->get_log_data() );
-			return false;
-		}
+			$transaction_id = $response->get_first_transaction_id();
 
-		$this->process_transaction( $order, $transaction_id, 'API' );
+			if ( $transaction_id ) {
+				$this->process_transaction( $order, $transaction_id, 'API' );
+				return true;
+			}
+		endforeach;
 
-		return true;
+		$this->logger_service->log( sprintf( 'No successful transaction found on Acquired.com. Order ID: %s.', $order->get_id() ), 'debug', $response->get_log_data() );
+		return false;
 	}
 
 	/**
