@@ -489,7 +489,7 @@ class AdminServiceTest extends TestCase {
 			->andReturn( '' );
 
 		$this->mock_admin_notice(
-			'Your API credentials and configuration are incorrect or incomplete. You are receiving a 401 response. Please check that your API credentials are correct <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a> and that you have whitelisted your IP address within the Acquired Hub. To get your IP address contact your hosting provider.',
+			'Your API credentials and configuration are incorrect or incomplete. Please check that your API credentials are correct <a href="https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=acfw">in the settings page</a> and that you have whitelisted your IP address within the Acquired Hub. To get your IP address contact your hosting provider.',
 			'error'
 		);
 
